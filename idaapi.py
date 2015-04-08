@@ -248,8 +248,8 @@ class AddressSpace:
         for i in range(sz - 1):
             area_byte_flags[off + 1 + i] |= self.DATA_CONT
 
-    def make_label(self, ea):
-        self.labels[ea] = "loc_%08x" % ea
+    def make_label(self, prefix, ea):
+        self.labels[ea] = "%s%08x" % (prefix, ea)
 
     def get_label(self, ea):
         return self.labels.get(ea)
@@ -300,13 +300,14 @@ def ua_add_cref(opoff, ea, flags):
     else:
         assert fl == AddressSpace.CODE
     if flags != fl_F:
-        ADDRESS_SPACE.make_label(ea)
+        ADDRESS_SPACE.make_label("loc_", ea)
 
 
 def ua_dodata2(opoff, ea, dtype):
 #    print(opoff, hex(ea), dtype)
 #    address_map[ea] = {"type": type, "access": set()}
     ADDRESS_SPACE.note_data(ea, DATA_SIZE[dtype])
+    ADDRESS_SPACE.make_label("dat_", ea)
 
 def ua_add_dref(opoff, ea, access):
     #address_map[ea]["access"].add(access)
