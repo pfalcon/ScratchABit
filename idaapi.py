@@ -46,11 +46,12 @@ class op_t:
 
 class insn_t:
 
-    def __init__(self):
-        self.ea = 0
+    def __init__(self, ea=0):
+        self.ea = ea
         self.size = 0
         self.itype = 0
         self._operands = [op_t() for i in range(MAX_OPERANDS)]
+        self.disasm = None
 
     def get_canon_feature(self):
         return _processor.instruc[self.itype]["feature"]
@@ -60,6 +61,15 @@ class insn_t:
 
     def __repr__(self):
         return str(self.__dict__)
+
+    def __len__(self):
+        return len(self.disasm)
+
+    def get_operand_addr(self):
+        # Assumes RISC design with one address operand!
+        for o in self._operands:
+            if o.type in (o_near, o_mem):
+                return o
 
 
 cmd = insn_t()
@@ -116,9 +126,9 @@ def term_output_buffer():
     pass
 
 def OutMnem(width):
-    global _processor, cmd, u_line
+    global _processor, u_line
 #    print(_processor.instruc[cmd.itype])
-    s = _processor.instruc[cmd.itype]["name"]
+    s = _processor.instruc[_processor.cmd.itype]["name"]
     if len(s) < width:
         s += " " * (width - len(s))
     u_line.write(s)
@@ -139,8 +149,8 @@ def OutLine(s):
     u_line.write(s)
 
 def out_one_operand(op_no):
-    global _processor, cmd, u_line
-    _processor.outop(cmd[op_no])
+    global _processor, u_line
+    _processor.outop(_processor.cmd[op_no])
 
 def OutValue(op, flags):
     global u_line
@@ -165,8 +175,9 @@ def out_register(reg):
     OutLine(reg)
 
 def MakeLine(sb):
-    global cmd
-    cmd.disasm = sb.getvalue()
+#    global cmd
+    global _processor
+    _processor.cmd.disasm = sb.getvalue()
 
 
 START = 0
@@ -348,10 +359,11 @@ def render():
                 out += "%s 0x%x" % ({1:"db",2:"dw",4:"dd"}[sz], ADDRESS_SPACE.get_data(addr, sz))
                 i += sz
             elif f == AddressSpace.CODE:
-                init_cmd(addr)
+                insn = insn_t(addr)
+                _processor.cmd = insn
                 insn_sz = _processor.ana()
                 _processor.out()
-                out += _processor.cmd.disasm
+                out = insn
                 i += insn_sz
             else:
                 assert 0

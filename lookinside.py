@@ -44,6 +44,15 @@ class Editor(editor.Editor):
         self.model = model
         self.set_lines(model.lines())
 
+    def show_line(self, l):
+        if isinstance(l, str):
+            self.wr(l)
+        else:
+            p.cmd = l
+            p.out()
+            l.disasm = ("%08x " % l.ea) + l.disasm
+            self.wr(l.disasm)
+
     def goto_addr(self, to_addr, from_addr=None):
         no = self.model.addr2line_no(to_addr)
         if no is not None:
@@ -62,10 +71,10 @@ class Editor(editor.Editor):
         if key == editor.KEY_ENTER:
             line = self.get_cur_line()
             self.show_status("Enter pressed: %s" % line)
-            parts = line.split()
-            if parts[-1].startswith("0x"):
-                addr = int(parts[-1], 0)
-                self.goto_addr(addr, from_addr=int(parts[0], 16))
+            if isinstance(line, idaapi.insn_t):
+                o = line.get_operand_addr()
+                if o:
+                    self.goto_addr(o.addr, from_addr=line.ea)
         elif key == editor.KEY_ESC:
             if self.addr_stack:
                 self.show_status("Returning")
