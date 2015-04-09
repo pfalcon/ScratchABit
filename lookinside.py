@@ -19,7 +19,7 @@ idaapi.set_processor(p)
 
 entry = 0x40000080
 
-#idaapi.add_entrypoint(0x40000080)
+idaapi.add_entrypoint(0x40000080)
 idaapi.add_entrypoint(0x40000010)
 #idaapi.add_entrypoint(0x40000020)
 #idaapi.add_entrypoint(0x40000030)
@@ -31,9 +31,9 @@ idaapi.analyze()
 
 _model = idaapi.render()
 
-import editor
+import editor_api as editor
 
-class Editor(editor.Editor):
+class Editor(editor.EditorExt):
 
     def __init__(self):
         super().__init__()
@@ -45,13 +45,9 @@ class Editor(editor.Editor):
         self.set_lines(model.lines())
 
     def show_line(self, l):
-        if isinstance(l, str):
-            self.wr(l)
-        else:
-            p.cmd = l
-            p.out()
-            l.disasm = ("%08x " % l.ea) + l.disasm
-            self.wr(l.disasm)
+        if not isinstance(l, str):
+            l = "%08x " % l.ea +  l.render()
+        super().show_line(l)
 
     def goto_addr(self, to_addr, from_addr=None):
         no = self.model.addr2line_no(to_addr)
@@ -64,8 +60,13 @@ class Editor(editor.Editor):
 
     def cur_addr(self):
         line = self.get_cur_line()
-        parts = line.split(None, 1)
-        return int(parts[0], 16)
+        if isinstance(line, str):
+            parts = line.split(None, 1)
+            return int(parts[0], 16)
+        return line.ea
+
+    def analyze_status(self, cnt):
+        self.show_status("Analyzing (%d insts so far)" % cnt)
 
     def handle_key(self, key):
         if key == editor.KEY_ENTER:
@@ -85,12 +86,27 @@ class Editor(editor.Editor):
             addr = self.cur_addr()
             self.show_status("Analyzing at %x" % addr)
             idaapi.add_entrypoint(addr)
-            def analyze_status(cnt):
-                self.show_status("Analyzing at %x (%d insts so far)" % (addr, cnt))
-            idaapi.analyze(analyze_status)
+            idaapi.analyze(self.analyze_status)
             model = idaapi.render()
             self.set_model(model)
             self.goto_addr(addr)
+        elif key == b"u":
+            addr = self.cur_addr()
+            self.model.undefine(addr)
+            model = idaapi.render()
+            self.set_model(model)
+            self.goto_addr(addr)
+        elif key == b"n":
+            addr = self.cur_addr()
+            label = self.model.AS.get_label(addr)
+            s = label or ""
+            res = self.dialog_edit_line(line=s)
+            if res:
+                self.model.AS.set_label(addr, res)
+                if not label:
+                    # If it's new label, we need to add it to model
+                    self.model.insert_vline(self.cur_line, addr, idaapi.Label(addr))
+            self.update_screen()
 
 
 if 1:

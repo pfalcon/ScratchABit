@@ -62,9 +62,6 @@ class insn_t:
     def __repr__(self):
         return str(self.__dict__)
 
-    def __len__(self):
-        return len(self.disasm)
-
     def get_operand_addr(self):
         # Assumes RISC design with one address operand!
         for o in self._operands:
@@ -125,13 +122,18 @@ def init_output_buffer(n):
 def term_output_buffer():
     pass
 
+def fillstr(s, width):
+    if len(s) < width:
+        s += " " * (width - len(s))
+    return s
+
+DEFAULT_WIDTH = 16
+
 def OutMnem(width):
     global _processor, u_line
 #    print(_processor.instruc[cmd.itype])
     s = _processor.instruc[_processor.cmd.itype]["name"]
-    if len(s) < width:
-        s += " " * (width - len(s))
-    u_line.write(s)
+    u_line.write(fillstr(s, width))
 
 def OutChar(c):
     global u_line
@@ -234,6 +236,28 @@ class AddressSpace:
         off, area = self.addr2area(addr)
         return area[FLAGS][off]
 
+    def get_unit_size(self, addr):
+        off, area = self.addr2area(addr)
+        flags = area[FLAGS]
+        sz = 1
+        if flags[off] == self.CODE:
+            f = self.CODE_CONT
+        elif flags[off] == self.DATA:
+            f = self.DATA_CONT
+        else:
+            return 1
+        off += 1
+        while flags[off] == f:
+            off += 1
+            sz += 1
+        return sz
+
+    def undefine(self, addr, sz):
+        off, area = self.addr2area(addr)
+        area_byte_flags = area[FLAGS]
+        for i in range(sz):
+            area_byte_flags[off + i] = self.UNK
+
     def note_code(self, addr, sz):
         off, area = self.addr2area(addr)
         area_byte_flags = area[FLAGS]
@@ -253,6 +277,9 @@ class AddressSpace:
 
     def get_label(self, ea):
         return self.labels.get(ea)
+
+    def set_label(self, ea, label):
+        self.labels[ea] = label
 
 
 ADDRESS_SPACE = AddressSpace()
@@ -320,6 +347,7 @@ class Model:
         self._lines = []
         self._cnt = 0
         self._addr2line = {}
+        self.AS = None
 
     def lines(self):
         return self._lines
@@ -329,12 +357,83 @@ class Model:
         self._addr2line[addr] = self._cnt
         self._cnt += 1
 
+    # Insert virtual line, i.e. line whose byte size == 0
+    # In other words, lien which doesn't cause shift in addresses
+    # of lines following it.
+    def insert_vline(self, pos, addr, line):
+        self._lines[pos:pos] = [line]
+        self._cnt += 1
+        end = self._cnt
+        pos += 1
+        while pos < end:
+            line = self._lines[pos]
+            if isinstance(line, Instruction):
+                self._addr2line[line.ea] += 1
+            pos += 1
+
     def addr2line_no(self, addr):
         return self._addr2line.get(addr)
+
+    def undefine(self, addr):
+        sz = self.AS.get_unit_size(addr)
+        self.AS.undefine(addr, sz)
+
+
+def data_sz2mnem(sz):
+    s = {1: "db", 2: "dw", 4: "dd"}[sz]
+    return fillstr(s, DEFAULT_WIDTH)
+
+# Size of address field in disasm window
+ADDR_FIELD_SIZE = 9
+
+class DisasmObj:
+
+    # ea =
+
+    def render(self):
+        # Render object as a string, set as .cache, and return
+        pass
+
+    def __len__(self):
+        try:
+            return ADDR_FIELD_SIZE + len(self.cache)
+        except AttributeError:
+            return ADDR_FIELD_SIZE + len(self.render())
+
+
+class Instruction(insn_t, DisasmObj):
+
+    def render(self):
+        _processor.cmd = self
+        _processor.out()
+        s = self.disasm
+        self.cache = s
+        return s
+
+class Label(DisasmObj):
+
+    def __init__(self, ea):
+        self.ea = ea
+
+    def render(self):
+        label = ADDRESS_SPACE.get_label(self.ea)
+        s = "%s:" % label
+        self.cache = s
+        return s
+
+class Literal(DisasmObj):
+
+    def __init__(self, ea, str):
+        self.ea = ea
+        self.cache = str
+
+    def render(self):
+        return self.cache
 
 
 def render():
     model = Model()
+    model.AS = ADDRESS_SPACE
     for a in ADDRESS_SPACE.area_list:
         bytes = a[BYTES]
         flags = a[FLAGS]
@@ -344,12 +443,11 @@ def render():
 
             label = ADDRESS_SPACE.get_label(addr)
             if label:
-                model.add_line(addr, "%08x %s:" % (addr, label))
+                model.add_line(addr, Label(addr))
 
-            out = "%08x " % addr
             f = flags[i]
             if f == AddressSpace.UNK:
-                out += "unk 0x%02x" % bytes[i]
+                out = Literal(addr, "%s0x%02x" % (fillstr("unk", DEFAULT_WIDTH), bytes[i]))
                 i += 1
             elif f == AddressSpace.DATA:
                 sz = 1
@@ -357,17 +455,16 @@ def render():
                 while flags[j] == AddressSpace.DATA_CONT:
                     sz += 1
                     j += 1
-                out += "%s 0x%x" % ({1:"db",2:"dw",4:"dd"}[sz], ADDRESS_SPACE.get_data(addr, sz))
+                out = Literal(addr, "%s0x%x" % (data_sz2mnem(sz), ADDRESS_SPACE.get_data(addr, sz)))
                 i += sz
             elif f == AddressSpace.CODE:
-                insn = insn_t(addr)
-                _processor.cmd = insn
+                out = Instruction(addr)
+                _processor.cmd = out
                 insn_sz = _processor.ana()
                 _processor.out()
-                out = insn
                 i += insn_sz
             else:
-                assert 0
+                assert 0, "flags=%x" % f
 
             model.add_line(addr, out)
 #            sys.stdout.write(out + "\n")
