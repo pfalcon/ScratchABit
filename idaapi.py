@@ -204,6 +204,7 @@ class AddressSpace:
         # Map from referenced addresses to their properties
         self.addr_map = {}
         self.labels = {}
+        self.last_area = None
 
     def add_area(self, start, end, flags):
         sz = end - start + 1
@@ -213,8 +214,13 @@ class AddressSpace:
         self.area_list.append(a)
 
     def addr2area(self, addr):
+        if self.last_area:
+            a = self.last_area
+            if a[0] <= addr <= a[1]:
+                return (addr - a[0], a)
         for a in self.area_list:
             if a[0] <= addr <= a[1]:
+                self.last_area = a
                 return (addr - a[0], a)
 
     def load_content(self, addr, file):
