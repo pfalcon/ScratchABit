@@ -62,8 +62,8 @@ import editor_api as editor
 
 class Editor(editor.EditorExt):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args):
+        super().__init__(*args)
         self.model = None
         self.addr_stack = []
 
@@ -161,9 +161,11 @@ class Editor(editor.EditorExt):
 
 
 if 1:
-    e = Editor()
+    e = Editor(1, 1, 78, 23)
     e.init_tty()
+    e.cls()
     e.enable_mouse()
+    e.draw_box(0, 0, 80, 25)
     e.set_model(_model)
     e.goto_addr(entry)
     e.loop()
