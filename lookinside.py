@@ -1,5 +1,9 @@
+import sys
+import time
+
 import idaapi
 import xtensa
+
 
 def disasm_one(p):
     insnsz = p.ana()
@@ -29,7 +33,12 @@ idaapi.analyze()
 
 #idaapi.print_address_map()
 
-_model = idaapi.render()
+t = time.time()
+#_model = idaapi.render()
+_model = idaapi.render_partial_around(entry)
+print("Rendering time: %fs" % (time.time() - t))
+#print(_model.lines())
+#sys.exit()
 
 import editor_api as editor
 
@@ -50,6 +59,9 @@ class Editor(editor.EditorExt):
         super().show_line(l)
 
     def goto_addr(self, to_addr, from_addr=None):
+        model = idaapi.render_partial_around(to_addr)
+        self.set_model(model)
+
         no = self.model.addr2line_no(to_addr)
         if no is not None:
             if from_addr is not None:
@@ -57,6 +69,20 @@ class Editor(editor.EditorExt):
             self.goto_line(no)
         else:
             self.show_status("Unknown address: %x" % to_addr)
+
+    def handle_cursor_keys(self, key):
+        if super().handle_cursor_keys(key):
+            if self.cur_line < 5 or self.total_lines - self.cur_line < 5:
+                addr = self.cur_addr()
+                model = idaapi.render_partial_around(addr)
+                self.set_model(model)
+                self.cur_line = model.target_addr_lineno
+                self.top_line = self.cur_line - self.row
+
+                self.show_status("Triggered model update")
+            return True
+        else:
+            return False
 
     def cur_addr(self):
         line = self.get_cur_line()
@@ -87,13 +113,17 @@ class Editor(editor.EditorExt):
             self.show_status("Analyzing at %x" % addr)
             idaapi.add_entrypoint(addr)
             idaapi.analyze(self.analyze_status)
+            t = time.time()
             model = idaapi.render()
+            self.show_status("Rendering time: %fs" % (time.time() - t))
             self.set_model(model)
             self.goto_addr(addr)
         elif key == b"u":
             addr = self.cur_addr()
             self.model.undefine(addr)
+            t = time.time()
             model = idaapi.render()
+            self.show_status("Rendering time: %fs" % (time.time() - t))
             self.set_model(model)
             self.goto_addr(addr)
         elif key == b"n":
