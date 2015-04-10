@@ -506,7 +506,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             # If we didn't yet reach target address, compensate for
             # the following decrement of num_lines. The logic is:
             # render all lines up to target_addr, and then num_lines past it.
-            if target_addr > 0 and addr < target_addr:
+            if target_addr >= 0 and addr < target_addr:
                 num_lines += 1
 
             label = ADDRESS_SPACE.get_label(addr)
@@ -538,7 +538,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             #sys.stdout.write(out + "\n")
             num_lines -= 1
             if not num_lines:
-                break
+                return
 
 
 def flag2char(f):
