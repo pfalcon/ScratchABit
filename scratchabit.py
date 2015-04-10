@@ -20,6 +20,8 @@ import time
 import idaapi
 import xtensa
 
+import help
+
 
 def disasm_one(p):
     insnsz = p.ana()
@@ -152,6 +154,9 @@ class Editor(editor.EditorExt):
                 if not label:
                     # If it's new label, we need to add it to model
                     self.model.insert_vline(self.cur_line, addr, idaapi.Label(addr))
+            self.update_screen()
+        elif key == editor.KEY_F1:
+            help.help(self)
             self.update_screen()
 
 
