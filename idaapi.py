@@ -213,6 +213,9 @@ class AddressSpace:
         a = (start, end, flags, bytes, flags)
         self.area_list.append(a)
 
+    def area_no(self, area):
+        return self.area_list.index(area)
+
     def addr2area(self, addr):
         if self.last_area:
             a = self.last_area
@@ -465,6 +468,18 @@ def render_partial_around(addr):
     off, area = ADDRESS_SPACE.addr2area(addr)
     back = CONTEXT_LINES * MAX_UNIT_SIZE
     off -= back
+    if off < 0:
+        area_no = ADDRESS_SPACE.area_no(area) - 1
+        while area_no >= 0:
+            area = ADDRESS_SPACE.area_list[area_no]
+            sz = area[1] - area[0] + 1
+            off += sz
+            if off >= 0:
+                break
+            area_no -= 1
+        if off < 0:
+            # Reached beginning of address space, just set as such
+            off = 0
     assert off >= 0
     off = ADDRESS_SPACE.adjust_offset_reverse(off, area)
     model = Model(addr)
