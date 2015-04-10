@@ -436,14 +436,23 @@ class Literal(DisasmObj):
     def render(self):
         return self.cache
 
-
 def render():
+    return render_partial(0, 0, 1000000)
+
+def render_partial(area_no, offset, num_lines):
     model = Model()
     model.AS = ADDRESS_SPACE
-    for a in ADDRESS_SPACE.area_list:
+    start = True
+    #for a in ADDRESS_SPACE.area_list:
+    while area_no < len(ADDRESS_SPACE.area_list):
+        a = ADDRESS_SPACE.area_list[area_no]
+        area_no += 1
+        i = 0
+        if start:
+            i = offset
+            start = False
         bytes = a[BYTES]
         flags = a[FLAGS]
-        i = 0
         while i < len(flags):
             addr = a[START] + i
 
@@ -473,7 +482,11 @@ def render():
                 assert 0, "flags=%x" % f
 
             model.add_line(addr, out)
-#            sys.stdout.write(out + "\n")
+            #sys.stdout.write(out + "\n")
+            num_lines -= 1
+            if not num_lines:
+                break
+
     return model
 
 
