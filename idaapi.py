@@ -366,7 +366,7 @@ class Model:
         self._cnt = 0
         self._addr2line = {}
         self.AS = None
-        self.target_addr = 0
+        self.target_addr = target_addr
         self.target_addr_lineno = -1
 
     def lines(self):
@@ -468,11 +468,12 @@ def render_partial_around(addr):
     assert off >= 0
     off = ADDRESS_SPACE.adjust_offset_reverse(off, area)
     model = Model(addr)
-    render_partial(model, ADDRESS_SPACE.area_list.index(area), off, CONTEXT_LINES * 2)
+    render_partial(model, ADDRESS_SPACE.area_list.index(area), off, CONTEXT_LINES, addr)
+    assert model.target_addr_lineno >= 0
     return model
 
 
-def render_partial(model, area_no, offset, num_lines, target_addr=0):
+def render_partial(model, area_no, offset, num_lines, target_addr=-1):
     model.AS = ADDRESS_SPACE
     start = True
     #for a in ADDRESS_SPACE.area_list:
@@ -487,6 +488,11 @@ def render_partial(model, area_no, offset, num_lines, target_addr=0):
         flags = a[FLAGS]
         while i < len(flags):
             addr = a[START] + i
+            # If we didn't yet reach target address, compensate for
+            # the following decrement of num_lines. The logic is:
+            # render all lines up to target_addr, and then num_lines past it.
+            if target_addr > 0 and addr < target_addr:
+                num_lines += 1
 
             label = ADDRESS_SPACE.get_label(addr)
             if label:
