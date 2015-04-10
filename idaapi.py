@@ -258,6 +258,18 @@ class AddressSpace:
             sz += 1
         return sz
 
+    # Taking an offset inside unit, return offset to the beginning of unit
+    @classmethod
+    def adjust_offset_reverse(cls, off, area):
+        flags = area[FLAGS]
+        while off > 0:
+            if flags[off] in (cls.CODE_CONT, cls.DATA_CONT):
+                off -= 1
+            else:
+                break
+        return off
+
+
     def undefine(self, addr, sz):
         off, area = self.addr2area(addr)
         area_byte_flags = area[FLAGS]
@@ -349,16 +361,20 @@ def ua_add_dref(opoff, ea, access):
 
 class Model:
 
-    def __init__(self):
+    def __init__(self, target_addr=0):
         self._lines = []
         self._cnt = 0
         self._addr2line = {}
         self.AS = None
+        self.target_addr = 0
+        self.target_addr_lineno = -1
 
     def lines(self):
         return self._lines
 
     def add_line(self, addr, line):
+        if addr == self.target_addr:
+            self.target_addr_lineno = self._cnt
         self._lines.append(line)
         self._addr2line[addr] = self._cnt
         self._cnt += 1
@@ -437,10 +453,26 @@ class Literal(DisasmObj):
         return self.cache
 
 def render():
-    return render_partial(0, 0, 1000000)
-
-def render_partial(area_no, offset, num_lines):
     model = Model()
+    render_partial(model, 0, 0, 1000000)
+    return model
+
+CONTEXT_LINES = 25
+# How much bytes may a single disasm object (i.e. a line) occupy
+MAX_UNIT_SIZE = 4
+
+def render_partial_around(addr):
+    off, area = ADDRESS_SPACE.addr2area(addr)
+    back = CONTEXT_LINES * MAX_UNIT_SIZE
+    off -= back
+    assert off >= 0
+    off = ADDRESS_SPACE.adjust_offset_reverse(off, area)
+    model = Model(addr)
+    render_partial(model, ADDRESS_SPACE.area_list.index(area), off, CONTEXT_LINES * 2)
+    return model
+
+
+def render_partial(model, area_no, offset, num_lines, target_addr=0):
     model.AS = ADDRESS_SPACE
     start = True
     #for a in ADDRESS_SPACE.area_list:
@@ -486,8 +518,6 @@ def render_partial(area_no, offset, num_lines):
             num_lines -= 1
             if not num_lines:
                 break
-
-    return model
 
 
 def flag2char(f):
