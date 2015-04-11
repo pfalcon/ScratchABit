@@ -30,7 +30,7 @@ Current argument commands (work on current command
 if only 1 suitable arg):
 
 h - Decimal/hex number
-o - Offset
+o - Make an offset/address
 """
 
 from editor_api import Viewer
