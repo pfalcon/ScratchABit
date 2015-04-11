@@ -97,8 +97,9 @@ class Editor(editor.EditorExt):
     def handle_key(self, key):
         if key == editor.KEY_ENTER:
             line = self.get_cur_line()
+            log.info("Enter pressed: %s" % line)
             self.show_status("Enter pressed: %s" % line)
-            if isinstance(line, idaapi.insn_t):
+            if isinstance(line, idaapi.DisasmObj):
                 o = line.get_operand_addr()
                 if o:
                     self.goto_addr(o.addr, from_addr=line.ea)

@@ -423,6 +423,9 @@ class DisasmObj:
         # Render object as a string, set as .cache, and return
         pass
 
+    def get_operand_addr(self):
+        return None
+
     def __len__(self):
         try:
             return ADDR_FIELD_SIZE + len(self.cache)
@@ -450,6 +453,23 @@ class Label(DisasmObj):
         self.cache = s
         return s
 
+class Data(DisasmObj):
+
+    def __init__(self, ea, sz, val):
+        self.ea = ea
+        self.sz = sz
+        self.val = val
+
+    def render(self):
+        s = "%s0x%x" % (data_sz2mnem(self.sz), self.val)
+        self.cache = s
+        return s
+
+    def get_operand_addr(self):
+        o = op_t()
+        o.addr = self.val
+        return o
+
 class Literal(DisasmObj):
 
     def __init__(self, ea, str):
@@ -458,6 +478,7 @@ class Literal(DisasmObj):
 
     def render(self):
         return self.cache
+
 
 def render():
     model = Model()
@@ -530,7 +551,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
                 while flags[j] == AddressSpace.DATA_CONT:
                     sz += 1
                     j += 1
-                out = Literal(addr, "%s0x%x" % (data_sz2mnem(sz), ADDRESS_SPACE.get_data(addr, sz)))
+                out = Data(addr, sz, ADDRESS_SPACE.get_data(addr, sz))
                 i += sz
             elif f == AddressSpace.CODE:
                 out = Instruction(addr)
