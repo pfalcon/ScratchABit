@@ -66,19 +66,22 @@ class Editor(editor.EditorExt):
         else:
             self.show_status("Unknown address: %x" % to_addr)
 
+    def update_model(self):
+        addr = self.cur_addr()
+        t = time.time()
+        model = idaapi.render_partial_around(addr, HEIGHT * 2)
+        self.show_status("Rendering time: %fs" % (time.time() - t))
+        self.set_model(model)
+        self.cur_line = model.target_addr_lineno
+        self.top_line = self.cur_line - self.row
+        self.update_screen()
+
     def handle_cursor_keys(self, key):
         if super().handle_cursor_keys(key):
             #log.debug("handle_cursor_keys: cur: %d, total: %d", self.cur_line, self.total_lines)
             if self.cur_line <= HEIGHT or self.total_lines - self.cur_line <= HEIGHT:
                 log.debug("handle_cursor_keys: triggering update")
-                addr = self.cur_addr()
-                t = time.time()
-                model = idaapi.render_partial_around(addr, HEIGHT * 2)
-                self.show_status("Rendering time: %fs" % (time.time() - t))
-                self.set_model(model)
-                self.cur_line = model.target_addr_lineno
-                self.top_line = self.cur_line - self.row
-                self.update_screen()
+                self.update_model()
 
             return True
         else:
@@ -127,6 +130,15 @@ class Editor(editor.EditorExt):
             self.show_status("Rendering time: %fs" % (time.time() - t))
             #self.set_model(model)
             self.goto_addr(addr)
+        elif key == b"o":
+            addr = self.cur_addr()
+            line = self.get_cur_line()
+            o = line.get_operand_addr()
+            self.model.AS.set_arg_prop(addr, o.n, "type", idaapi.o_mem)
+            label = self.model.AS.get_label(o.addr)
+            if not label:
+                self.model.AS.make_label("off_", o.addr)
+            self.update_model()
         elif key == b"n":
             addr = self.cur_addr()
             label = self.model.AS.get_label(addr)

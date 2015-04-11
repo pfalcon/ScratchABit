@@ -39,7 +39,8 @@ class cvar:
 
 class op_t:
 
-    def __init__(self):
+    def __init__(self, no):
+        self.n = no
         self.type = None
 
     def __repr__(self):
@@ -51,7 +52,7 @@ class insn_t:
         self.ea = ea
         self.size = 0
         self.itype = 0
-        self._operands = [op_t() for i in range(MAX_OPERANDS)]
+        self._operands = [op_t(i) for i in range(MAX_OPERANDS)]
         self.disasm = None
 
     def get_canon_feature(self):
@@ -207,7 +208,13 @@ class AddressSpace:
         self.area_byte_flags = {}
         # Map from referenced addresses to their properties
         self.addr_map = {}
+        # Map from address to its label
         self.labels = {}
+        # Map from code/data unit to properties of its args
+        # at the very least, this should differentiate between literal
+        # numeric values and addresses/offsets/pointers to other objects
+        self.arg_props = {}
+        # Cached last accessed area
         self.last_area = None
 
     def add_area(self, start, end, flags):
@@ -305,6 +312,18 @@ class AddressSpace:
 
     def set_label(self, ea, label):
         self.labels[ea] = label
+
+    def set_arg_prop(self, ea, arg_no, prop, prop_val):
+        if ea not in self.arg_props:
+            self.arg_props[ea] = {}
+        arg_props = self.arg_props[ea]
+        if arg_no not in arg_props:
+            arg_props[arg_no] = {}
+        props = arg_props[arg_no]
+        props[prop] = prop_val
+
+    def get_arg_prop(self, ea, arg_no, prop):
+        return self.arg_props.get(ea, {}).get(arg_no, {}).get(prop)
 
 
 ADDRESS_SPACE = AddressSpace()
@@ -461,12 +480,16 @@ class Data(DisasmObj):
         self.val = val
 
     def render(self):
-        s = "%s0x%x" % (data_sz2mnem(self.sz), self.val)
+        # o_mem is teh closest thing, possibly have o_offset?
+        if ADDRESS_SPACE.get_arg_prop(self.ea, 0, "type") == o_mem:
+            s = "%s%s" % (data_sz2mnem(self.sz), ADDRESS_SPACE.get_label(self.val))
+        else:
+            s = "%s0x%x" % (data_sz2mnem(self.sz), self.val)
         self.cache = s
         return s
 
     def get_operand_addr(self):
-        o = op_t()
+        o = op_t(0)
         o.addr = self.val
         return o
 
