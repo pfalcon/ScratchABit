@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 import time
+import logging
 
 import idaapi
 import xtensa
@@ -31,32 +32,6 @@ def disasm_one(p):
     p.cmd.size = 0
 
 
-idaapi.ADDRESS_SPACE.add_area(0x3FFE8000, 0x3FFFBFFF, "RW")
-idaapi.ADDRESS_SPACE.add_area(0x3FFFC000, 0x3fffffff, "RW")
-idaapi.ADDRESS_SPACE.add_area(0x40000000, 0x4000ffff, "RO")
-idaapi.ADDRESS_SPACE.load_content(0x40000000, open("bootrom.bin", "rb"))
-
-p = xtensa.PROCESSOR_ENTRY()
-idaapi.set_processor(p)
-
-entry = 0x40000080
-
-idaapi.add_entrypoint(0x40000080)
-idaapi.add_entrypoint(0x40000010)
-#idaapi.add_entrypoint(0x40000020)
-#idaapi.add_entrypoint(0x40000030)
-#idaapi.add_entrypoint(0x40000050)
-#idaapi.add_entrypoint(0x40000070)
-idaapi.analyze()
-
-#idaapi.print_address_map()
-
-t = time.time()
-#_model = idaapi.render()
-_model = idaapi.render_partial_around(entry)
-print("Rendering time: %fs" % (time.time() - t))
-#print(_model.lines())
-#sys.exit()
 
 import editor_api as editor
 
@@ -160,7 +135,37 @@ class Editor(editor.EditorExt):
             self.update_screen()
 
 
-if 1:
+if __name__ == "__main__":
+    logging.basicConfig(filename="scratchabit.log", format='%(asctime)s %(message)s', level=logging.DEBUG)
+    logging.info("Started")
+
+    idaapi.ADDRESS_SPACE.add_area(0x3FFE8000, 0x3FFFBFFF, "RW")
+    idaapi.ADDRESS_SPACE.add_area(0x3FFFC000, 0x3fffffff, "RW")
+    idaapi.ADDRESS_SPACE.add_area(0x40000000, 0x4000ffff, "RO")
+    idaapi.ADDRESS_SPACE.load_content(0x40000000, open("bootrom.bin", "rb"))
+
+    p = xtensa.PROCESSOR_ENTRY()
+    idaapi.set_processor(p)
+
+    entry = 0x40000080
+
+    idaapi.add_entrypoint(entry)
+    idaapi.add_entrypoint(0x40000010)
+    #idaapi.add_entrypoint(0x40000020)
+    #idaapi.add_entrypoint(0x40000030)
+    #idaapi.add_entrypoint(0x40000050)
+    #idaapi.add_entrypoint(0x40000070)
+    idaapi.analyze()
+
+    #idaapi.print_address_map()
+
+    t = time.time()
+    #_model = idaapi.render()
+    _model = idaapi.render_partial_around(entry)
+    print("Rendering time: %fs" % (time.time() - t))
+    #print(_model.lines())
+    #sys.exit()
+
     e = Editor(1, 1, 78, 23)
     e.init_tty()
     e.cls()
