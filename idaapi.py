@@ -17,6 +17,7 @@
 #from cStringIO import StringIO
 import sys
 from io import StringIO
+import logging as log
 
 # IDA standard 6
 MAX_OPERANDS = 6
@@ -187,6 +188,9 @@ END = 1
 PROPS = 2
 BYTES = 3
 FLAGS = 4
+
+def str_area(area):
+    return "Area(0x%x-0x%x)" % (area[START], area[END])
 
 class AddressSpace:
     UNK = 0
@@ -460,13 +464,13 @@ def render():
     render_partial(model, 0, 0, 1000000)
     return model
 
-CONTEXT_LINES = 25
 # How much bytes may a single disasm object (i.e. a line) occupy
 MAX_UNIT_SIZE = 4
 
-def render_partial_around(addr):
+def render_partial_around(addr, context_lines):
+    log.debug("render_partial_around(%x)", addr)
     off, area = ADDRESS_SPACE.addr2area(addr)
-    back = CONTEXT_LINES * MAX_UNIT_SIZE
+    back = context_lines * MAX_UNIT_SIZE
     off -= back
     if off < 0:
         area_no = ADDRESS_SPACE.area_no(area) - 1
@@ -481,9 +485,12 @@ def render_partial_around(addr):
             # Reached beginning of address space, just set as such
             off = 0
     assert off >= 0
+    log.debug("render_partial_around: %x, %s", off, str_area(area))
     off = ADDRESS_SPACE.adjust_offset_reverse(off, area)
+    log.debug("render_partial_around adjusted: %x, %s", off, str_area(area))
     model = Model(addr)
-    render_partial(model, ADDRESS_SPACE.area_list.index(area), off, CONTEXT_LINES, addr)
+    render_partial(model, ADDRESS_SPACE.area_list.index(area), off, context_lines, addr)
+    log.debug("render_partial_around model done, lines: %d", len(model.lines()))
     assert model.target_addr_lineno >= 0
     return model
 

@@ -32,8 +32,9 @@ def disasm_one(p):
     p.cmd.size = 0
 
 
-
 import editor_api as editor
+
+HEIGHT = 25
 
 class Editor(editor.EditorExt):
 
@@ -52,7 +53,9 @@ class Editor(editor.EditorExt):
         super().show_line(l)
 
     def goto_addr(self, to_addr, from_addr=None):
-        model = idaapi.render_partial_around(to_addr)
+        t = time.time()
+        model = idaapi.render_partial_around(to_addr, HEIGHT * 2)
+        self.show_status("Rendering time: %fs" % (time.time() - t))
         self.set_model(model)
 
         no = self.model.addr2line_no(to_addr)
@@ -67,12 +70,13 @@ class Editor(editor.EditorExt):
         if super().handle_cursor_keys(key):
             if self.cur_line < 5 or self.total_lines - self.cur_line < 5:
                 addr = self.cur_addr()
-                model = idaapi.render_partial_around(addr)
+                t = time.time()
+                model = idaapi.render_partial_around(addr, HEIGHT * 2)
+                self.show_status("Rendering time: %fs" % (time.time() - t))
                 self.set_model(model)
                 self.cur_line = model.target_addr_lineno
                 self.top_line = self.cur_line - self.row
 
-                self.show_status("Triggered model update")
             return True
         else:
             return False
@@ -161,7 +165,7 @@ if __name__ == "__main__":
 
     t = time.time()
     #_model = idaapi.render()
-    _model = idaapi.render_partial_around(entry)
+    _model = idaapi.render_partial_around(entry, HEIGHT * 2)
     print("Rendering time: %fs" % (time.time() - t))
     #print(_model.lines())
     #sys.exit()
