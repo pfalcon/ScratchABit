@@ -68,7 +68,9 @@ class Editor(editor.EditorExt):
 
     def handle_cursor_keys(self, key):
         if super().handle_cursor_keys(key):
-            if self.cur_line < 5 or self.total_lines - self.cur_line < 5:
+            #logging.debug("handle_cursor_keys: cur: %d, total: %d", self.cur_line, self.total_lines)
+            if self.cur_line <= HEIGHT or self.total_lines - self.cur_line <= HEIGHT:
+                logging.debug("handle_cursor_keys: triggering update")
                 addr = self.cur_addr()
                 t = time.time()
                 model = idaapi.render_partial_around(addr, HEIGHT * 2)
@@ -76,6 +78,7 @@ class Editor(editor.EditorExt):
                 self.set_model(model)
                 self.cur_line = model.target_addr_lineno
                 self.top_line = self.cur_line - self.row
+                self.update_screen()
 
             return True
         else:
