@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 import time
-import logging
+import logging as log
 
 import idaapi
 import xtensa
@@ -68,9 +68,9 @@ class Editor(editor.EditorExt):
 
     def handle_cursor_keys(self, key):
         if super().handle_cursor_keys(key):
-            #logging.debug("handle_cursor_keys: cur: %d, total: %d", self.cur_line, self.total_lines)
+            #log.debug("handle_cursor_keys: cur: %d, total: %d", self.cur_line, self.total_lines)
             if self.cur_line <= HEIGHT or self.total_lines - self.cur_line <= HEIGHT:
-                logging.debug("handle_cursor_keys: triggering update")
+                log.debug("handle_cursor_keys: triggering update")
                 addr = self.cur_addr()
                 t = time.time()
                 model = idaapi.render_partial_around(addr, HEIGHT * 2)
@@ -143,8 +143,8 @@ class Editor(editor.EditorExt):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename="scratchabit.log", format='%(asctime)s %(message)s', level=logging.DEBUG)
-    logging.info("Started")
+    log.basicConfig(filename="scratchabit.log", format='%(asctime)s %(message)s', level=log.DEBUG)
+    log.info("Started")
 
     idaapi.ADDRESS_SPACE.add_area(0x3FFE8000, 0x3FFFBFFF, "RW")
     idaapi.ADDRESS_SPACE.add_area(0x3FFFC000, 0x3fffffff, "RW")
