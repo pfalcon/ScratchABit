@@ -23,7 +23,6 @@ import logging as log
 
 import engine
 import idaapi
-import xtensa
 
 from pyedit import editorext as editor
 import help
@@ -211,7 +210,10 @@ class Editor(editor.EditorExt):
             self.show_status("Saved.")
 
 
+CPU_PLUGIN = None
+
 def parse_disasm_def(fname):
+    global CPU_PLUGIN
     with open(fname) as f:
         for l in f:
             l = re.sub(r"#.*$", "", l)
@@ -224,6 +226,10 @@ def parse_disasm_def(fname):
                 addr = int(args[2], 0)
                 engine.ADDRESS_SPACE.load_content(addr, open(args[1], "rb"))
                 print("Loading %s @0x%x" % (args[1], addr))
+            elif l.startswith("cpu "):
+                args = l.split()
+                CPU_PLUGIN = __import__(args[1])
+                print("Loading CPU plugin %s" % (args[1]))
             else:
                 if "(" in l:
                     m = re.match(r"(.+?)\s*\(\s*(.+?)\s*\)\s+(.+)", l)
@@ -278,7 +284,7 @@ if __name__ == "__main__":
     log.basicConfig(filename="scratchabit.log", format='%(asctime)s %(message)s', level=log.DEBUG)
     log.info("Started")
 
-    p = xtensa.PROCESSOR_ENTRY()
+    p = CPU_PLUGIN.PROCESSOR_ENTRY()
     engine.set_processor(p)
 
     entry = 0x40000080
