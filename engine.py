@@ -33,6 +33,8 @@ BYTES = 3
 FLAGS = 4
 
 def str_area(area):
+    if not area:
+        return "Area(None)"
     return "Area(0x%x-0x%x, %s)" % (area[START], area[END], area[PROPS])
 
 def area_props(area):
