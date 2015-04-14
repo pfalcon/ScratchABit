@@ -209,6 +209,8 @@ def parse_disasm_def(fname):
 def save_state():
     with open("project.labels", "w") as f:
         engine.ADDRESS_SPACE.save_labels(f)
+    with open("project.args", "w") as f:
+        engine.ADDRESS_SPACE.save_arg_props(f)
 
 
 if __name__ == "__main__":

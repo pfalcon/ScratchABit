@@ -191,6 +191,10 @@ class AddressSpace:
         for addr in sorted(self.labels.keys()):
             stream.write("%08x %s\n" % (addr, self.labels[addr]))
 
+    def save_arg_props(self, stream):
+        for addr in sorted(self.arg_props.keys()):
+            stream.write("%08x %s\n" % (addr, self.arg_props[addr]))
+
     # Hack for idaapi interfacing
     # TODO: should go to "Analysis" object
     @staticmethod
