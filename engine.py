@@ -181,6 +181,8 @@ class AddressSpace:
         return "%s%08x" % (prefix, ea)
 
     def make_label(self, prefix, ea):
+        if ea in self.labels:
+            return
         if not prefix:
             prefix = self.get_default_label_prefix(ea)
         self.labels[ea] = "%s%08x" % (prefix, ea)
@@ -188,6 +190,8 @@ class AddressSpace:
     # auto_label will change its prefix automatically based on
     # type of data it points.
     def make_auto_label(self, ea):
+        if ea in self.labels:
+            return
         self.labels[ea] = ea
 
     def get_label(self, ea):
