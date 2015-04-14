@@ -53,6 +53,8 @@ class AddressSpace:
         self.labels = {}
         # Map from address to its comment
         self.comments = {}
+        # Map from address to its cross-reference records
+        self.xrefs = {}
         # Map from code/data unit to properties of its args
         # at the very least, this should differentiate between literal
         # numeric values and addresses/offsets/pointers to other objects
@@ -196,6 +198,9 @@ class AddressSpace:
     def get_arg_prop(self, ea, arg_no, prop):
         return self.arg_props.get(ea, {}).get(arg_no, {}).get(prop)
 
+    def add_xref(self, from_ea, to_ea, type):
+        self.xrefs.setdefault(to_ea, []).append((from_ea, type))
+
     # Persistance API
     def save_labels(self, stream):
         for addr in sorted(self.labels.keys()):
@@ -229,6 +234,26 @@ class AddressSpace:
             # Stupud json can't have numeric keys
             props = {int(k): v for k, v in props.items()}
             self.arg_props[addr] = props
+
+    def save_xrefs(self, stream):
+        for addr in sorted(self.xrefs.keys()):
+            stream.write("%08x\n" % addr)
+            for from_addr, type in self.xrefs[addr]:
+                stream.write("%08x %s\n" % (from_addr, type))
+            stream.write("\n")
+
+    def load_xrefs(self, stream):
+        while True:
+            l = stream.readline().rstrip()
+            if not l:
+                break
+            addr = int(l, 16)
+            while True:
+                l = stream.readline().rstrip()
+                if not l:
+                    break
+                from_addr, type = l.split()
+                self.xrefs.setdefault(addr, []).append((int(from_addr, 16), type))
 
     def save_areas(self, stream):
         for a in self.area_list:

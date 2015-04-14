@@ -221,6 +221,8 @@ def save_state():
         engine.ADDRESS_SPACE.save_comments(f)
     with open("project.args", "w") as f:
         engine.ADDRESS_SPACE.save_arg_props(f)
+    with open("project.xrefs", "w") as f:
+        engine.ADDRESS_SPACE.save_xrefs(f)
     with open("project.aspace", "w") as f:
         engine.ADDRESS_SPACE.save_areas(f)
 
@@ -232,6 +234,8 @@ def load_state():
         engine.ADDRESS_SPACE.load_comments(f)
     with open("project.args", "r") as f:
         engine.ADDRESS_SPACE.load_arg_props(f)
+    with open("project.xrefs", "r") as f:
+        engine.ADDRESS_SPACE.load_xrefs(f)
     with open("project.aspace", "r") as f:
         engine.ADDRESS_SPACE.load_areas(f)
 

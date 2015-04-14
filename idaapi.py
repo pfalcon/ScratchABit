@@ -211,8 +211,10 @@ def ua_add_cref(opoff, ea, flags):
         assert fl == ADDRESS_SPACE.CODE
     if flags == fl_JN:
         ADDRESS_SPACE.make_label("loc_", ea)
+        ADDRESS_SPACE.add_xref(_processor.cmd.ea, ea, "j")
     elif flags == fl_CN:
         ADDRESS_SPACE.make_label("fun_", ea)
+        ADDRESS_SPACE.add_xref(_processor.cmd.ea, ea, "c")
 
 
 def ua_dodata2(opoff, ea, dtype):
