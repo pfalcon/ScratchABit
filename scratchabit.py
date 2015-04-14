@@ -137,7 +137,7 @@ class Editor(editor.EditorExt):
             self.model.AS.set_arg_prop(addr, o.n, "type", idaapi.o_mem)
             label = self.model.AS.get_label(o.addr)
             if not label:
-                self.model.AS.make_label("off_", o.addr)
+                self.model.AS.make_label(None, o.addr)
             self.update_model()
         elif key == b"n":
             addr = self.cur_addr()

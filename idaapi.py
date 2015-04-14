@@ -305,6 +305,14 @@ class AddressSpace:
             area_byte_flags[off + 1 + i] |= self.DATA_CONT
 
     def make_label(self, prefix, ea):
+        if not prefix:
+            f = self.get_flags(ea)
+            if f == self.CODE:
+                prefix = "loc_"
+            elif f & self.DATA:
+                prefix = "dat_"
+            else:
+                prefix = "unk_"
         self.labels[ea] = "%s%08x" % (prefix, ea)
 
     def get_label(self, ea):
