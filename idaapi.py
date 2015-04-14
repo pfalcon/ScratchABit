@@ -183,7 +183,7 @@ def out_one_operand(op_no):
 
     if not hasattr(cmd, "arg_pos") or not cmd.arg_pos:
         cmd.arg_pos = [[0, 0] for i in range(UA_MAXOP)]
-    cmd.arg_pos[op_no][0] = u_line.tell()
+    cmd.arg_pos[op_no][0] = len(u_line.getvalue())
 
     op = cmd[op_no]
     patched = False
@@ -198,7 +198,7 @@ def out_one_operand(op_no):
     _processor.outop(op)
     if patched:
         op.type = o_imm
-    cmd.arg_pos[op_no][1] = u_line.tell()
+    cmd.arg_pos[op_no][1] = len(u_line.getvalue())
 
 
 def OutValue(op, flags):
