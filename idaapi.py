@@ -112,20 +112,10 @@ class insn_t:
         return str(self.__dict__)
 
 
-
-cmd = insn_t()
-
 class processor_t:
     def __init__(self):
         self.cmd = cmd
 
-
-
-_processor = None
-
-def set_processor(p):
-    global _processor
-    _processor = p
 
 #
 # Instruction rendition API ("out()" in IDA-speak)
@@ -236,6 +226,20 @@ def ua_add_dref(opoff, ea, access):
 #
 # End of Address space access API
 #
+
+# Interfacing
+
+# "cmd is a global variable of type insn_t. It is contains information
+# about the last decoded instruction. This variable is also filled by
+# processor modules when they decode instructions."
+cmd = insn_t()
+
+_processor = None
+
+def set_processor(p):
+    global _processor
+    _processor = p
+
 
 
 #
