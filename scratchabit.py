@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 import os
+import os.path
 import time
 import re
 import logging as log
@@ -242,6 +243,12 @@ def parse_disasm_def(fname):
 
 
 def save_state():
+    if not os.path.isdir("bak"):
+        os.mkdir("bak")
+    files = ["project.labels", "project.comments", "project.args", "project.xrefs", "project.aspace"]
+    for fname in files:
+        if os.path.exists(fname):
+            os.rename(fname, "bak/%s.bak" % fname)
     with open("project.labels", "w") as f:
         engine.ADDRESS_SPACE.save_labels(f)
     with open("project.comments", "w") as f:
