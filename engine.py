@@ -434,6 +434,13 @@ class Instruction(idaapi.insn_t, DisasmObj):
                 if o.type in (idaapi.o_near, idaapi.o_mem, idaapi.o_imm):
                     return o
 
+    def num_operands(self):
+        for i, op in self._operands:
+            if op.type == o_void:
+                return i + 1
+        return UA_MAXOP
+
+
 class Label(DisasmObj):
 
     indent = ""
@@ -448,6 +455,8 @@ class Label(DisasmObj):
         return s
 
 class Data(DisasmObj):
+
+    arg_pos = ()
 
     def __init__(self, ea, sz, val):
         self.ea = ea
