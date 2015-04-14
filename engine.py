@@ -454,6 +454,7 @@ class Instruction(idaapi.insn_t, DisasmObj):
 class Label(DisasmObj):
 
     indent = ""
+    arg_pos = ()
 
     def __init__(self, ea):
         self.ea = ea
@@ -493,6 +494,7 @@ class Data(DisasmObj):
 class Xref(DisasmObj):
 
     indent = ""
+    arg_pos = ()
 
     def __init__(self, ea, from_addr, type):
         self.ea = ea
@@ -511,6 +513,8 @@ class Xref(DisasmObj):
 
 
 class Literal(DisasmObj):
+
+    arg_pos = ()
 
     def __init__(self, ea, str):
         self.ea = ea
