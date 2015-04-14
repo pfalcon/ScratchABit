@@ -68,8 +68,8 @@ OOF_ADDR = 0x40
 
 # Basic instruction semantics ("features" is IDA-speak)
 CF_CALL = 1
-CF_STOP = 2
-CF_JUMP = 3
+CF_STOP = 2  # Control flow stops here, e.g. jump, ret
+CF_JUMP = 4  # Not just a jump, indirect jump (or call)!
 
 # Code references (i.e. control flow flags)
 fl_CN = 1  # "call near"
