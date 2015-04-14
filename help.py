@@ -26,7 +26,7 @@ c - Make code
 d - Make/Cycle data
 a - Make ASCII string
 
-Current argument commands (work on current command
+Current selected argument commands (ok to work on current command
 if only 1 suitable arg):
 
 h - Decimal/hex number
