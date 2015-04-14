@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 import binascii
+import json
 import logging as log
 
 import idaapi
@@ -192,9 +193,24 @@ class AddressSpace:
         for addr in sorted(self.labels.keys()):
             stream.write("%08x %s\n" % (addr, self.labels[addr]))
 
+    def load_labels(self, stream):
+        for l in stream:
+            addr, label = l.split()
+            addr = int(addr, 16)
+            self.labels[addr] = label
+
     def save_arg_props(self, stream):
         for addr in sorted(self.arg_props.keys()):
-            stream.write("%08x %s\n" % (addr, self.arg_props[addr]))
+            stream.write("%08x %s\n" % (addr, json.dumps(self.arg_props[addr])))
+
+    def load_arg_props(self, stream):
+        for l in stream:
+            addr, props = l.split(None, 1)
+            addr = int(addr, 16)
+            props = json.loads(props)
+            # Stupud json can't have numeric keys
+            props = {int(k): v for k, v in props.items()}
+            self.arg_props[addr] = props
 
     def save_areas(self, stream):
         for a in self.area_list:
@@ -208,6 +224,22 @@ class AddressSpace:
                 stream.write(str(binascii.hexlify(chunk), 'utf-8') + "\n")
                 i += 32
             stream.write("\n")
+
+    def load_areas(self, stream):
+        for a in self.area_list:
+            l = stream.readline()
+            vals = [int(v, 16) for v in l.split()]
+            assert a[START] == vals[0] and a[END] == vals[1]
+            flags = a[FLAGS]
+            i = 0
+            while True:
+                l = stream.readline().rstrip()
+                if not l:
+                    break
+                l = binascii.unhexlify(l)
+                flags[i:i + len(l)] = l
+                i += len(l)
+
 
     # Hack for idaapi interfacing
     # TODO: should go to "Analysis" object

@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
+import os
 import time
 import re
 import logging as log
@@ -214,6 +215,15 @@ def save_state():
     with open("project.aspace", "w") as f:
         engine.ADDRESS_SPACE.save_areas(f)
 
+def load_state():
+    print("Loading state...")
+    with open("project.labels", "r") as f:
+        engine.ADDRESS_SPACE.load_labels(f)
+    with open("project.args", "r") as f:
+        engine.ADDRESS_SPACE.load_arg_props(f)
+    with open("project.aspace", "r") as f:
+        engine.ADDRESS_SPACE.load_areas(f)
+
 
 if __name__ == "__main__":
     parse_disasm_def(sys.argv[1])
@@ -225,13 +235,16 @@ if __name__ == "__main__":
 
     entry = 0x40000080
 
-    engine.add_entrypoint(entry)
-    engine.add_entrypoint(0x40000010)
-    #engine.add_entrypoint(0x40000020)
-    #engine.add_entrypoint(0x40000030)
-    #engine.add_entrypoint(0x40000050)
-    #engine.add_entrypoint(0x40000070)
-    engine.analyze()
+    if os.path.exists("project.labels"):
+        load_state()
+    else:
+        engine.add_entrypoint(entry)
+        engine.add_entrypoint(0x40000010)
+        #engine.add_entrypoint(0x40000020)
+        #engine.add_entrypoint(0x40000030)
+        #engine.add_entrypoint(0x40000050)
+        #engine.add_entrypoint(0x40000070)
+        engine.analyze()
 
     #engine.print_address_map()
 
