@@ -14,10 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#from cStringIO import StringIO
 import sys
 from io import StringIO
 import logging as log
+
 
 # IDA standard 6
 MAX_OPERANDS = 6
@@ -105,11 +105,16 @@ dr_W = 2
 COLOR_ERROR = "*"
 
 _processor = None
-u_line = None
 
 def set_processor(p):
     global _processor
     _processor = p
+
+#
+# Instruction rendition API ("out()" in IDA-speak)
+#
+
+u_line = None
 
 def init_output_buffer(n):
     global u_line
@@ -173,10 +178,50 @@ def out_tagon(tag):
 def out_register(reg):
     OutLine(reg)
 
-def MakeLine(sb):
+def MakeLine(output_buffer):
 #    global cmd
     global _processor
-    _processor.cmd.disasm = sb.getvalue()
+    _processor.cmd.disasm = output_buffer.getvalue()
+
+#
+# End of instruction rendition API
+#
+
+#
+# Address space access API
+#
+
+def get_full_byte(ea):
+    return ADDRESS_SPACE.get_byte(ea)
+
+def ua_add_cref(opoff, ea, flags):
+    fl = ADDRESS_SPACE.get_flags(ea)
+    if fl == AddressSpace.UNK:
+        analisys_stack.append(ea)
+    else:
+        assert fl == AddressSpace.CODE
+    if flags != fl_F:
+        ADDRESS_SPACE.make_label("loc_", ea)
+
+
+def ua_dodata2(opoff, ea, dtype):
+#    print(opoff, hex(ea), dtype)
+#    address_map[ea] = {"type": type, "access": set()}
+    ADDRESS_SPACE.note_data(ea, DATA_SIZE[dtype])
+    ADDRESS_SPACE.make_label("dat_", ea)
+
+def ua_add_dref(opoff, ea, access):
+    #address_map[ea]["access"].add(access)
+    pass
+
+#
+# End of Address space access API
+#
+
+
+#
+# ScratchABit API and code
+#
 
 
 START = 0
@@ -336,9 +381,6 @@ class AddressSpace:
 
 ADDRESS_SPACE = AddressSpace()
 
-def get_full_byte(ea):
-    return ADDRESS_SPACE.get_byte(ea)
-
 
 analisys_stack = []
 
@@ -372,25 +414,6 @@ def analyze(callback=lambda cnt:None):
 #    if not analisys_stack:
 #        print("Analisys finished")
 
-def ua_add_cref(opoff, ea, flags):
-    fl = ADDRESS_SPACE.get_flags(ea)
-    if fl == AddressSpace.UNK:
-        analisys_stack.append(ea)
-    else:
-        assert fl == AddressSpace.CODE
-    if flags != fl_F:
-        ADDRESS_SPACE.make_label("loc_", ea)
-
-
-def ua_dodata2(opoff, ea, dtype):
-#    print(opoff, hex(ea), dtype)
-#    address_map[ea] = {"type": type, "access": set()}
-    ADDRESS_SPACE.note_data(ea, DATA_SIZE[dtype])
-    ADDRESS_SPACE.make_label("dat_", ea)
-
-def ua_add_dref(opoff, ea, access):
-    #address_map[ea]["access"].add(access)
-    pass
 
 
 class Model:
@@ -620,7 +643,6 @@ def flag2char(f):
     else:
         return "X"
 
-import sys
 def print_address_map():
     for a in ADDRESS_SPACE.area_list:
         for i in range(len(a[FLAGS])):
