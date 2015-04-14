@@ -64,11 +64,6 @@ class insn_t:
     def __repr__(self):
         return str(self.__dict__)
 
-    def get_operand_addr(self):
-        # Assumes RISC design with one address operand!
-        for o in self._operands:
-            if o.type in (o_near, o_mem):
-                return o
 
 
 cmd = insn_t()
@@ -473,6 +468,12 @@ class Instruction(insn_t, DisasmObj):
         s = self.disasm
         self.cache = s
         return s
+
+    def get_operand_addr(self):
+        # Assumes RISC design with one address operand!
+        for o in self._operands:
+            if o.type in (o_near, o_mem):
+                return o
 
 class Label(DisasmObj):
 
