@@ -52,7 +52,7 @@ class Editor(editor.EditorExt):
 
     def show_line(self, l):
         if not isinstance(l, str):
-            l = "%08x " % l.ea +  l.render()
+            l = "%08x " % l.ea + l.indent + l.render()
         super().show_line(l)
 
     def goto_addr(self, to_addr, from_addr=None):

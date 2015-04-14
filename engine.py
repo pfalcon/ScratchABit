@@ -352,6 +352,8 @@ class DisasmObj:
 
     # ea =
 
+    indent = "  "
+
     def render(self):
         # Render object as a string, set as .cache, and return
         pass
@@ -367,9 +369,9 @@ class DisasmObj:
 
     def __len__(self):
         try:
-            return ADDR_FIELD_SIZE + len(self.cache)
+            return ADDR_FIELD_SIZE + len(self.indent) + len(self.cache)
         except AttributeError:
-            return ADDR_FIELD_SIZE + len(self.render())
+            return ADDR_FIELD_SIZE + len(self.indent) + len(self.render())
 
 
 class Instruction(idaapi.insn_t, DisasmObj):
@@ -388,6 +390,8 @@ class Instruction(idaapi.insn_t, DisasmObj):
                 return o
 
 class Label(DisasmObj):
+
+    indent = ""
 
     def __init__(self, ea):
         self.ea = ea
