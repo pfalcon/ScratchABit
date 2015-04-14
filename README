@@ -1,0 +1,26 @@
+ScratchABit
+===========
+
+ScratchABit is an interactive incremental disassembler with data/control
+flow analysis capabilities. ScratchABit is dedicated to the efforts of
+the OpenSource reverse engineering community (reverse engineering to
+produce OpenSource drivers/firmware for the hardware not properly
+supported by the vendors).
+
+ScratchABit supports well-known in the community IDAPython API to write
+disassembly/extension modules.
+
+ScratchABit is a work in progress, features are added on as needed basis,
+contributions are welcome.
+
+ScratchABit is released under the terms of GNU General Public License v3
+(GPLv3).
+
+
+FAQ
+---
+
+Q: What processors/architectures are supported?
+A: ScratchABit doesn't support any processor architectures on its own,
+it is fully retargettable using IDAPython API plugins. Many plugins are
+available, writing a new plugin is easy.
