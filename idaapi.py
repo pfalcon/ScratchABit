@@ -209,8 +209,10 @@ def ua_add_cref(opoff, ea, flags):
         ADDRESS_SPACE.analisys_stack_push(ea)
     else:
         assert fl == ADDRESS_SPACE.CODE
-    if flags != fl_F:
+    if flags == fl_JN:
         ADDRESS_SPACE.make_label("loc_", ea)
+    elif flags == fl_CN:
+        ADDRESS_SPACE.make_label("fun_", ea)
 
 
 def ua_dodata2(opoff, ea, dtype):
