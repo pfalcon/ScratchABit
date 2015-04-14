@@ -463,6 +463,25 @@ class Data(DisasmObj):
         o.addr = self.val
         return o
 
+
+class Xref(DisasmObj):
+
+    def __init__(self, ea, from_addr, type):
+        self.ea = ea
+        self.from_addr = from_addr
+        self.type = type
+
+    def render(self):
+        s = "; xref: 0x%x %s" % (self.from_addr, self.type)
+        self.cache = s
+        return s
+
+    def get_operand_addr(self):
+        o = idaapi.op_t(0)
+        o.addr = self.from_addr
+        return o
+
+
 class Literal(DisasmObj):
 
     def __init__(self, ea, str):
@@ -535,7 +554,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             xrefs = ADDRESS_SPACE.get_xrefs(addr)
             if xrefs:
                 for from_addr in sorted(xrefs.keys()):
-                    model.add_line(addr, Literal(addr, "; xref: 0x%x %s" % (from_addr, xrefs[from_addr])))
+                    model.add_line(addr, Xref(addr, from_addr, xrefs[from_addr]))
 
             label = ADDRESS_SPACE.get_label(addr)
             if label:
