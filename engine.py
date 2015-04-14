@@ -428,10 +428,11 @@ class Instruction(idaapi.insn_t, DisasmObj):
         return s
 
     def get_operand_addr(self):
-        # Assumes RISC design with one address operand!
+        # Assumes RISC design where only one operand can be address
         for o in self._operands:
-            if o.type in (idaapi.o_near, idaapi.o_mem):
-                return o
+            if o.flags & idaapi.OF_SHOW:
+                if o.type in (idaapi.o_near, idaapi.o_mem, idaapi.o_imm):
+                    return o
 
 class Label(DisasmObj):
 
@@ -454,7 +455,6 @@ class Data(DisasmObj):
         self.val = val
 
     def render(self):
-        # o_mem is the closest thing, possibly have o_offset?
         if ADDRESS_SPACE.get_arg_prop(self.ea, 0, "type") == idaapi.o_mem:
             s = "%s%s" % (data_sz2mnem(self.sz), ADDRESS_SPACE.get_label(self.val))
         else:
@@ -465,7 +465,9 @@ class Data(DisasmObj):
 
     def get_operand_addr(self):
         o = idaapi.op_t(0)
+        o.value = self.val
         o.addr = self.val
+        o.type = idaapi.o_imm
         return o
 
 

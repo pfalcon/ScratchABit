@@ -144,13 +144,16 @@ class Editor(editor.EditorExt):
             addr = self.cur_addr()
             line = self.get_cur_line()
             o = line.get_operand_addr()
+            if not o or o.type not in idaapi.o_imm:
+                self.show_status("Cannot convert operand to offset: #d: %s" % (o.n, o.type))
+                return
             if self.model.AS.get_arg_prop(addr, o.n, "type") == idaapi.o_mem:
                 self.model.AS.set_arg_prop(addr, o.n, "type", idaapi.o_imm)
             else:
                 self.model.AS.set_arg_prop(addr, o.n, "type", idaapi.o_mem)
-                label = self.model.AS.get_label(o.addr)
+                label = self.model.AS.get_label(o.get_addr())
                 if not label:
-                    self.model.AS.make_label(None, o.addr)
+                    self.model.AS.make_label(None, o.get_addr())
             self.update_model()
         elif key == b";":
             addr = self.cur_addr()
