@@ -19,20 +19,67 @@ from io import StringIO
 import logging as log
 
 
-# IDA standard 6
-MAX_OPERANDS = 6
-
+# Data types
 dt_byte = "dt_byte"
 dt_word = "dt_word"
 dt_dword = "dt_dword"
 DATA_SIZE = {dt_byte: 1, dt_word: 2, dt_dword: 4}
 
+# IDA standard 6
+MAX_OPERANDS = 6
+
+# Operand types
 o_void = "-"
 o_imm = "o_imm"
 o_reg = "o_reg"
 o_mem = "o_mem"
 o_near = "o_near"
+
 class BADADDR: pass
+
+# Processor flags
+PR_SEGS = 1
+PR_DEFSEG32 = 2
+PR_RNAMESOK = 4
+PR_ADJSEGS = 8
+PRN_HEX = 16
+PR_USE32 = 32
+
+# Assembler syntax flags
+ASH_HEXF3 = 1
+ASD_DECF0 = 2
+ASO_OCTF1 = 4
+ASB_BINF3 = 8
+AS_NOTAB = 16
+AS_ASCIIC = 32
+AS_ASCIIZ = 64
+
+# Operand/value output flags (OutValue, etc.)
+OOFS_IFSIGN = 0
+OOFS_NOSIGN = 1
+OOFS_NEEDSIGN = 2
+OOF_SIGNED = 4
+OOF_NUMBER = 8
+OOFW_IMM = 0
+OOFW_16 = 0x10
+OOFW_32 = 0x20
+OOFW_8  = 0x30
+OOF_ADDR = 0x40
+
+# Basic instruction semantics ("features" is IDA-speak)
+CF_CALL = 1
+CF_STOP = 2
+CF_JUMP = 3
+
+# Code references (i.e. control flow flags)
+fl_CN = 1  # "call near"
+fl_JN = 2  # "jump near"
+fl_F = 3   # "ordinary flow"
+
+# Data references
+dr_R = 1
+dr_W = 2
+
 
 class cvar:
     pass
@@ -72,37 +119,7 @@ class processor_t:
     def __init__(self):
         self.cmd = cmd
 
-PR_SEGS = 1
-PR_DEFSEG32 = 2
-PR_RNAMESOK = 4
-PR_ADJSEGS = 8
-PRN_HEX = 16
-PR_USE32 = 32
 
-ASH_HEXF3 = 1
-ASD_DECF0 = 2
-ASO_OCTF1 = 4
-ASB_BINF3 = 8
-AS_NOTAB = 16
-AS_ASCIIC = 32
-AS_ASCIIZ = 64
-
-OOFW_IMM = 1
-
-# Basic instruction semantics
-CF_CALL = 1
-CF_STOP = 2
-
-fl_CN = 1  # "call near"
-fl_JN = 2  # "jump near"
-fl_F = 3   # "ordinary flow"
-
-# Data references
-dr_R = 1
-dr_W = 2
-
-
-COLOR_ERROR = "*"
 
 _processor = None
 
@@ -113,6 +130,8 @@ def set_processor(p):
 #
 # Instruction rendition API ("out()" in IDA-speak)
 #
+
+COLOR_ERROR = "*"
 
 u_line = None
 
