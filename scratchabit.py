@@ -211,16 +211,45 @@ class Editor(editor.EditorExt):
 
 
 CPU_PLUGIN = None
+ENTRYPOINTS = []
+
+def filter_config_line(l):
+    l = re.sub(r"#.*$", "", l)
+    l = l.strip()
+    return l
+
+def parse_entrypoints(f):
+    for l in f:
+        l = filter_config_line(l)
+        if not l:
+            continue
+        if l[0] == "[":
+            return l
+        label, addr = [v.strip() for v in l.split("=")]
+        ENTRYPOINTS.append((label, int(addr, 0)))
+    return ""
 
 def parse_disasm_def(fname):
     global CPU_PLUGIN
     with open(fname) as f:
         for l in f:
-            l = re.sub(r"#.*$", "", l)
-            l = l.strip()
+            l = filter_config_line(l)
             if not l:
                 continue
             #print(l)
+            while True:
+                if not l:
+                    return
+                if l[0] == "[":
+                    section = l[1:-1]
+                    print("Processing section: %s" % section)
+                    if section == "entrypoints":
+                        l = parse_entrypoints(f)
+                    else:
+                        assert 0, "Unknown section: " + section
+                else:
+                    break
+
             if l.startswith("load"):
                 args = l.split()
                 addr = int(args[2], 0)
@@ -287,24 +316,23 @@ if __name__ == "__main__":
     p = CPU_PLUGIN.PROCESSOR_ENTRY()
     engine.set_processor(p)
 
-    entry = 0x40000080
-
     if os.path.exists("project.labels"):
         load_state()
     else:
-        engine.add_entrypoint(entry)
-        engine.add_entrypoint(0x40000010)
-        #engine.add_entrypoint(0x40000020)
-        #engine.add_entrypoint(0x40000030)
-        #engine.add_entrypoint(0x40000050)
-        #engine.add_entrypoint(0x40000070)
+        for label, addr in ENTRYPOINTS:
+            engine.add_entrypoint(addr)
         engine.analyze()
 
     #engine.print_address_map()
 
+    if ENTRYPOINTS:
+        show_addr = ENTRYPOINTS[0][1]
+    else:
+        show_addr = engine.ADDRESS_SPACE.min_addr()
+
     t = time.time()
     #_model = engine.render()
-    _model = engine.render_partial_around(entry, HEIGHT * 2)
+    _model = engine.render_partial_around(show_addr, HEIGHT * 2)
     print("Rendering time: %fs" % (time.time() - t))
     #print(_model.lines())
     #sys.exit()
@@ -315,6 +343,6 @@ if __name__ == "__main__":
     e.enable_mouse()
     e.draw_box(0, 0, 80, 25)
     e.set_model(_model)
-    e.goto_addr(entry)
+    e.goto_addr(show_addr)
     e.loop()
     e.deinit_tty()

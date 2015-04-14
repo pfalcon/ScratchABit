@@ -91,6 +91,9 @@ class AddressSpace:
                 return (addr - a[0], a)
         return (None, None)
 
+    def min_addr(self):
+        return self.area_list[0][START]
+
     def load_content(self, addr, file):
         off, area = self.addr2area(addr)
         file.readinto(memoryview(area[BYTES])[off:])
