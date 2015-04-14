@@ -33,7 +33,7 @@ h - Decimal/hex number
 o - Make an offset/address
 """
 
-from editor_api import Viewer
+from editorext import Viewer
 
 L = 5
 T = 2

@@ -33,7 +33,7 @@ def disasm_one(p):
     p.cmd.size = 0
 
 
-import editor_api as editor
+import editorext as editor
 
 HEIGHT = 25
 
