@@ -429,10 +429,19 @@ class Instruction(idaapi.insn_t, DisasmObj):
 
     def get_operand_addr(self):
         # Assumes RISC design where only one operand can be address
+        mem = imm = None
         for o in self._operands:
             if o.flags & idaapi.OF_SHOW:
-                if o.type in (idaapi.o_near, idaapi.o_mem, idaapi.o_imm):
+                if o.type == idaapi.o_near:
+                    # Jumps have priority
                     return o
+                if o.type == idaapi.o_mem:
+                    mem = o
+                elif o.type == idaapi.o_imm:
+                    imm = o
+        if mem:
+            return mem
+        return imm
 
     def num_operands(self):
         for i, op in self._operands:
