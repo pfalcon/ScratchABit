@@ -87,6 +87,7 @@ class AddressSpace:
             if a[0] <= addr <= a[1]:
                 self.last_area = a
                 return (addr - a[0], a)
+        return (None, None)
 
     def load_content(self, addr, file):
         off, area = self.addr2area(addr)
@@ -530,6 +531,8 @@ MAX_UNIT_SIZE = 4
 def render_partial_around(addr, context_lines):
     log.debug("render_partial_around(%x)", addr)
     off, area = ADDRESS_SPACE.addr2area(addr)
+    if area is None:
+        return None
     back = context_lines * MAX_UNIT_SIZE
     off -= back
     if off < 0:

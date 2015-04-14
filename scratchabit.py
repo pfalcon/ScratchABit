@@ -62,6 +62,9 @@ class Editor(editor.EditorExt):
         t = time.time()
         model = engine.render_partial_around(to_addr, HEIGHT * 2)
         self.show_status("Rendering time: %fs" % (time.time() - t))
+        if not model:
+            self.show_status("Invalid address: 0x%x" % to_addr)
+            return
         self.set_model(model)
 
         no = self.model.addr2line_no(to_addr)
