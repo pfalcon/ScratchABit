@@ -161,6 +161,12 @@ class Editor(editor.EditorExt):
                     # If it's new label, we need to add it to model
                     self.model.insert_vline(self.cur_line, addr, engine.Label(addr))
             self.update_screen()
+        elif key == b"g":
+            res = self.dialog_edit_line(line="")
+            if res:
+                self.goto_addr(int(res, 0), from_addr=self.cur_addr())
+            else:
+                self.update_screen()
         elif key == editor.KEY_F1:
             help.help(self)
             self.update_screen()
