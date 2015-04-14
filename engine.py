@@ -221,12 +221,21 @@ class AddressSpace:
     # Persistance API
     def save_labels(self, stream):
         for addr in sorted(self.labels.keys()):
-            stream.write("%08x %s\n" % (addr, self.labels[addr]))
+            l = self.labels[addr]
+            if l == addr:
+                # auto label
+                stream.write("%08x\n" % addr)
+            else:
+                stream.write("%08x %s\n" % (addr, l))
 
     def load_labels(self, stream):
         for l in stream:
-            addr, label = l.split()
-            addr = int(addr, 16)
+            vals = l.split()
+            addr = int(vals[0], 16)
+            if len(vals) > 1:
+                label = vals[1]
+            else:
+                label = addr
             self.labels[addr] = label
 
     def save_comments(self, stream):
