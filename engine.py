@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
+import binascii
 import logging as log
 
 import idaapi
@@ -34,10 +35,10 @@ def str_area(area):
 
 class AddressSpace:
     UNK = 0
-    CODE = 0x80
-    CODE_CONT = 0x40
-    DATA = 0x20
-    DATA_CONT = 0x10
+    CODE = 0x01
+    CODE_CONT = 0x02
+    DATA = 0x04
+    DATA_CONT = 0x08
 
     def __init__(self):
         self.area_list = []
@@ -194,6 +195,19 @@ class AddressSpace:
     def save_arg_props(self, stream):
         for addr in sorted(self.arg_props.keys()):
             stream.write("%08x %s\n" % (addr, self.arg_props[addr]))
+
+    def save_areas(self, stream):
+        for a in self.area_list:
+            stream.write("%08x %08x\n" % (a[START], a[END]))
+            flags = a[FLAGS]
+            i = 0
+            while True:
+                chunk = flags[i:i + 32]
+                if not chunk:
+                    break
+                stream.write(str(binascii.hexlify(chunk), 'utf-8') + "\n")
+                i += 32
+            stream.write("\n")
 
     # Hack for idaapi interfacing
     # TODO: should go to "Analysis" object

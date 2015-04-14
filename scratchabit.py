@@ -211,6 +211,8 @@ def save_state():
         engine.ADDRESS_SPACE.save_labels(f)
     with open("project.args", "w") as f:
         engine.ADDRESS_SPACE.save_arg_props(f)
+    with open("project.aspace", "w") as f:
+        engine.ADDRESS_SPACE.save_areas(f)
 
 
 if __name__ == "__main__":
