@@ -30,7 +30,7 @@ BYTES = 3
 FLAGS = 4
 
 def str_area(area):
-    return "Area(0x%x-0x%x)" % (area[START], area[END])
+    return "Area(0x%x-0x%x, %s)" % (area[START], area[END], area[PROPS])
 
 class AddressSpace:
     UNK = 0
@@ -56,12 +56,13 @@ class AddressSpace:
         # Cached last accessed area
         self.last_area = None
 
-    def add_area(self, start, end, flags):
+    def add_area(self, start, end, props):
         sz = end - start + 1
         bytes = bytearray(sz)
         flags = bytearray(sz)
-        a = (start, end, flags, bytes, flags)
+        a = (start, end, props, bytes, flags)
         self.area_list.append(a)
+        return a
 
     def area_no(self, area):
         return self.area_list.index(area)

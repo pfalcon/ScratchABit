@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 import time
+import re
 import logging as log
 
 import engine
@@ -172,14 +173,40 @@ class Editor(editor.EditorExt):
             self.update_screen()
 
 
+def parse_disasm_def(fname):
+    with open(fname) as f:
+        for l in f:
+            l = re.sub(r"#.*$", "", l)
+            l = l.strip()
+            if not l:
+                continue
+            #print(l)
+            if l.startswith("load"):
+                args = l.split()
+                addr = int(args[2], 0)
+                engine.ADDRESS_SPACE.load_content(addr, open(args[1], "rb"))
+                print("Loading %s @0x%x" % (args[1], addr))
+            else:
+                if "(" in l:
+                    m = re.match(r"(.+?)\s*\(\s*(.+?)\s*\)\s+(.+)", l)
+                    #print(m.groups())
+                    start = int(m.group(1), 0)
+                    end = start + int(m.group(2), 0) - 1
+                    props = m.group(3)
+                else:
+                    m = re.match(r"(.+?)\s*-\s*(.+?)\s+(.+)", l)
+                    #print(m.groups())
+                    start = int(m.group(1), 0)
+                    end = int(m.group(2), 0)
+                    props = m.group(3)
+                a = engine.ADDRESS_SPACE.add_area(start, end, props.upper())
+                print("Adding area: %s" % engine.str_area(a))
+
+
 if __name__ == "__main__":
+    parse_disasm_def(sys.argv[1])
     log.basicConfig(filename="scratchabit.log", format='%(asctime)s %(message)s', level=log.DEBUG)
     log.info("Started")
-
-    engine.ADDRESS_SPACE.add_area(0x3FFE8000, 0x3FFFBFFF, "RW")
-    engine.ADDRESS_SPACE.add_area(0x3FFFC000, 0x3fffffff, "RW")
-    engine.ADDRESS_SPACE.add_area(0x40000000, 0x4000ffff, "RO")
-    engine.ADDRESS_SPACE.load_content(0x40000000, open("bootrom.bin", "rb"))
 
     p = xtensa.PROCESSOR_ENTRY()
     engine.set_processor(p)
