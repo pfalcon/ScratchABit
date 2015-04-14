@@ -51,6 +51,8 @@ class AddressSpace:
         self.addr_map = {}
         # Map from address to its label
         self.labels = {}
+        # Map from address to its comment
+        self.comments = {}
         # Map from code/data unit to properties of its args
         # at the very least, this should differentiate between literal
         # numeric values and addresses/offsets/pointers to other objects
@@ -175,6 +177,12 @@ class AddressSpace:
 
     def set_label(self, ea, label):
         self.labels[ea] = label
+
+    def get_comment(self, ea):
+        return self.comments.get(ea)
+
+    def set_comment(self, ea, comm):
+        self.comments[ea] = comm
 
     def set_arg_prop(self, ea, arg_no, prop, prop_val):
         if ea not in self.arg_props:
@@ -351,6 +359,12 @@ class DisasmObj:
     def get_operand_addr(self):
         return None
 
+    def get_comment(self):
+        comm = ADDRESS_SPACE.get_comment(self.ea) or ""
+        if comm:
+            comm = "  ; " + comm
+        return comm
+
     def __len__(self):
         try:
             return ADDR_FIELD_SIZE + len(self.cache)
@@ -363,7 +377,7 @@ class Instruction(idaapi.insn_t, DisasmObj):
     def render(self):
         _processor.cmd = self
         _processor.out()
-        s = self.disasm
+        s = self.disasm + self.get_comment()
         self.cache = s
         return s
 
@@ -397,6 +411,7 @@ class Data(DisasmObj):
             s = "%s%s" % (data_sz2mnem(self.sz), ADDRESS_SPACE.get_label(self.val))
         else:
             s = "%s0x%x" % (data_sz2mnem(self.sz), self.val)
+        s += self.get_comment()
         self.cache = s
         return s
 
