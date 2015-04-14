@@ -171,6 +171,9 @@ class Editor(editor.EditorExt):
         elif key == editor.KEY_F1:
             help.help(self)
             self.update_screen()
+        elif key == b"S":
+            save_state()
+            self.show_status("Saved.")
 
 
 def parse_disasm_def(fname):
@@ -201,6 +204,11 @@ def parse_disasm_def(fname):
                     props = m.group(3)
                 a = engine.ADDRESS_SPACE.add_area(start, end, props.upper())
                 print("Adding area: %s" % engine.str_area(a))
+
+
+def save_state():
+    with open("project.labels", "w") as f:
+        engine.ADDRESS_SPACE.save_labels(f)
 
 
 if __name__ == "__main__":

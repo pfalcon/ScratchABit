@@ -186,12 +186,18 @@ class AddressSpace:
     def get_arg_prop(self, ea, arg_no, prop):
         return self.arg_props.get(ea, {}).get(arg_no, {}).get(prop)
 
+    # Persistance API
+    def save_labels(self, stream):
+        for addr in sorted(self.labels.keys()):
+            stream.write("%08x %s\n" % (addr, self.labels[addr]))
+
     # Hack for idaapi interfacing
     # TODO: should go to "Analysis" object
     @staticmethod
     def analisys_stack_push(ea):
         global analisys_stack
         analisys_stack.append(ea)
+
 
 ADDRESS_SPACE = AddressSpace()
 _processor = None
