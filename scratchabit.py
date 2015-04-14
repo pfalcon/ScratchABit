@@ -117,11 +117,7 @@ class Editor(editor.EditorExt):
             self.show_status("Analyzing at %x" % addr)
             idaapi.add_entrypoint(addr)
             idaapi.analyze(self.analyze_status)
-            t = time.time()
-            #model = idaapi.render()
-            self.show_status("Rendering time: %fs" % (time.time() - t))
-            #self.set_model(model)
-            self.goto_addr(addr)
+            self.update_model()
         elif key == b"d":
             addr = self.cur_addr()
             fl = self.model.AS.get_flags(addr)
@@ -140,11 +136,7 @@ class Editor(editor.EditorExt):
         elif key == b"u":
             addr = self.cur_addr()
             self.model.undefine(addr)
-            t = time.time()
-            #model = idaapi.render()
-            self.show_status("Rendering time: %fs" % (time.time() - t))
-            #self.set_model(model)
-            self.goto_addr(addr)
+            self.update_model()
         elif key == b"o":
             addr = self.cur_addr()
             line = self.get_cur_line()
