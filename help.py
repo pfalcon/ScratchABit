@@ -18,6 +18,7 @@ HELP = """\
 Global commands:
 
 g - Goto address
+Esc - Return to address jumped from (works in stack manner)
 
 Current address commands:
 
@@ -29,6 +30,7 @@ a - Make ASCII string
 Current selected argument commands (ok to work on current command
 if only 1 suitable arg):
 
+Enter - Goto address in operand
 h - Decimal/hex number
 o - Make an offset/address
 """
