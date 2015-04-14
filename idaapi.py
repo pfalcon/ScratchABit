@@ -102,7 +102,9 @@ class op_t:
     def get_addr(self):
         if hasattr(self, "addr"):
             return self.addr
-        return self.value
+        if hasattr(self, "value"):
+            return self.value
+        return None
 
     def __repr__(self):
         return str(self.__dict__)
@@ -176,11 +178,17 @@ def OutLine(s):
     u_line.write(s)
 
 def out_one_operand(op_no):
-    global _processor
-    op = _processor.cmd[op_no]
+    global _processor, u_line
+    cmd = _processor.cmd
+
+    if not hasattr(cmd, "arg_pos"):
+        cmd.arg_pos = [[0, 0] for i in range(UA_MAXOP)]
+    cmd.arg_pos[op_no][0] = u_line.tell()
+
+    op = cmd[op_no]
     patched = False
     if op.type == o_imm:
-        if ADDRESS_SPACE.get_arg_prop(_processor.cmd.ea, op_no, "type") == o_mem:
+        if ADDRESS_SPACE.get_arg_prop(cmd.ea, op_no, "type") == o_mem:
             # if native operand type is immediate value, but it was overriden to be
             # address/offset, it should be output as such
             op.addr = op.value
@@ -190,6 +198,8 @@ def out_one_operand(op_no):
     _processor.outop(op)
     if patched:
         op.type = o_imm
+    cmd.arg_pos[op_no][1] = u_line.tell()
+
 
 def OutValue(op, flags):
     global u_line

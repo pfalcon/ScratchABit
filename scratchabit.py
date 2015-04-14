@@ -56,6 +56,9 @@ class Editor(editor.EditorExt):
         super().show_line(l)
 
     def goto_addr(self, to_addr, from_addr=None):
+        if to_addr is None:
+            self.show_status("Cannot jump")
+            return
         t = time.time()
         model = engine.render_partial_around(to_addr, HEIGHT * 2)
         self.show_status("Rendering time: %fs" % (time.time() - t))
@@ -97,6 +100,14 @@ class Editor(editor.EditorExt):
             return int(parts[0], 16)
         return line.ea
 
+    def cur_operand_no(self, line):
+        col = self.col - engine.ADDR_FIELD_SIZE - len(line.indent)
+        #self.show_status("Enter pressed: %s, %s" % (col, line))
+        for i, pos in enumerate(line.arg_pos):
+            if pos[0] <= col <= pos[1]:
+                return i
+        return -1
+
     def analyze_status(self, cnt):
         self.show_status("Analyzing (%d insts so far)" % cnt)
 
@@ -104,11 +115,18 @@ class Editor(editor.EditorExt):
         if key == editor.KEY_ENTER:
             line = self.get_cur_line()
             log.info("Enter pressed: %s" % line)
-            self.show_status("Enter pressed: %s" % line)
+            op_no = self.cur_operand_no(line)
+            self.show_status("Enter pressed: %s, %s" % (self.col, op_no))
             if isinstance(line, engine.DisasmObj):
-                o = line.get_operand_addr()
-                if o:
-                    self.goto_addr(o.addr, from_addr=line.ea)
+                to_addr = None
+                if op_no >= 0:
+                    o = line[op_no]
+                    to_addr = o.get_addr()
+                if to_addr is None:
+                    o = line.get_operand_addr()
+                    if o:
+                        to_addr = o.get_addr()
+                self.goto_addr(to_addr, from_addr=line.ea)
         elif key == editor.KEY_ESC:
             if self.addr_stack:
                 self.show_status("Returning")
