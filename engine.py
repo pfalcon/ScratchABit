@@ -199,7 +199,10 @@ class AddressSpace:
         return self.arg_props.get(ea, {}).get(arg_no, {}).get(prop)
 
     def add_xref(self, from_ea, to_ea, type):
-        self.xrefs.setdefault(to_ea, []).append((from_ea, type))
+        self.xrefs.setdefault(to_ea, {})[from_ea] = type
+
+    def get_xrefs(self, ea):
+        return self.xrefs.get(ea)
 
     # Persistance API
     def save_labels(self, stream):
@@ -238,8 +241,9 @@ class AddressSpace:
     def save_xrefs(self, stream):
         for addr in sorted(self.xrefs.keys()):
             stream.write("%08x\n" % addr)
-            for from_addr, type in self.xrefs[addr]:
-                stream.write("%08x %s\n" % (from_addr, type))
+            xrefs = self.xrefs[addr]
+            for from_addr in sorted(xrefs.keys()):
+                stream.write("%08x %s\n" % (from_addr, xrefs[from_addr]))
             stream.write("\n")
 
     def load_xrefs(self, stream):
@@ -253,7 +257,7 @@ class AddressSpace:
                 if not l:
                     break
                 from_addr, type = l.split()
-                self.xrefs.setdefault(addr, []).append((int(from_addr, 16), type))
+                self.xrefs.setdefault(addr, {})[int(from_addr, 16)] = type
 
     def save_areas(self, stream):
         for a in self.area_list:
@@ -527,6 +531,11 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             # render all lines up to target_addr, and then num_lines past it.
             if target_addr >= 0 and addr < target_addr:
                 num_lines += 1
+
+            xrefs = ADDRESS_SPACE.get_xrefs(addr)
+            if xrefs:
+                for from_addr in sorted(xrefs.keys()):
+                    model.add_line(addr, Literal(addr, "; xref: 0x%x %s" % (from_addr, xrefs[from_addr])))
 
             label = ADDRESS_SPACE.get_label(addr)
             if label:
