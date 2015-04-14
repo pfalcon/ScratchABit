@@ -80,6 +80,11 @@ fl_F = 3   # "ordinary flow"
 dr_R = "r"
 dr_W = "w"
 
+# Segment permissions
+SEGPERM_EXEC  = 1
+SEGPERM_WRITE = 2
+SEGPERM_READ  = 4
+
 
 class cvar:
     pass

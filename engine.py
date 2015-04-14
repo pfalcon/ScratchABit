@@ -20,6 +20,7 @@ import json
 import logging as log
 
 import idaapi
+import idc
 
 #
 # ScratchABit API and code
@@ -33,6 +34,10 @@ FLAGS = 4
 
 def str_area(area):
     return "Area(0x%x-0x%x, %s)" % (area[START], area[END], area[PROPS])
+
+def area_props(area):
+    return area[PROPS]
+
 
 class AddressSpace:
     UNK = 0
@@ -619,3 +624,4 @@ def print_address_map():
 
 
 idaapi.set_address_space(ADDRESS_SPACE)
+idc.set_address_space(ADDRESS_SPACE)
