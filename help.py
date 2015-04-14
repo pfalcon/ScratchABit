@@ -15,23 +15,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 HELP = """\
-Global commands:
+Global commands (for letter commands, case matters):
 
 g - Goto address
-Esc - Return to address jumped from (works in stack manner)
+Esc - Return to address from previous Enter cmd (as stack)
+S - Save database
+q - Quit
 
 Current address commands:
 
 u - Undefine
 c - Make code
 d - Make/Cycle data
-a - Make ASCII string
+a - Make ASCII string (TODO)
+n - (Re)name address (make label)
 
 Current selected argument commands (ok to work on current command
 if only 1 suitable arg):
 
 Enter - Goto address in operand
-h - Decimal/hex number
+h - Decimal/hex number (TODO)
 o - Make an offset/address
 """
 
