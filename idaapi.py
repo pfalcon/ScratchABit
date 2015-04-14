@@ -284,11 +284,16 @@ class AddressSpace:
         return off
 
 
-    def undefine(self, addr, sz):
+    def set_flags(self, addr, sz, head_fl, rest_fl=0):
         off, area = self.addr2area(addr)
-        area_byte_flags = area[FLAGS]
-        for i in range(sz):
-            area_byte_flags[off + i] = self.UNK
+        flags = area[FLAGS]
+        flags[off] = head_fl
+        off += 1
+        for i in range(sz - 1):
+            flags[off + i] = rest_fl
+
+    def undefine(self, addr, sz):
+        self.set_flags(addr, sz, self.UNK, self.UNK)
 
     def note_code(self, addr, sz):
         off, area = self.addr2area(addr)
