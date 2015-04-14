@@ -148,15 +148,19 @@ class AddressSpace:
         for i in range(sz - 1):
             area_byte_flags[off + 1 + i] |= self.DATA_CONT
 
+    def get_default_label_prefix(self, ea):
+        fl = self.get_flags(ea)
+        if fl == self.CODE:
+            prefix = "loc_"
+        elif fl & self.DATA:
+            prefix = "dat_"
+        else:
+            prefix = "unk_"
+        return prefix
+
     def make_label(self, prefix, ea):
         if not prefix:
-            f = self.get_flags(ea)
-            if f == self.CODE:
-                prefix = "loc_"
-            elif f & self.DATA:
-                prefix = "dat_"
-            else:
-                prefix = "unk_"
+            prefix = self.get_default_label_prefix(ea)
         self.labels[ea] = "%s%08x" % (prefix, ea)
 
     def get_label(self, ea):
