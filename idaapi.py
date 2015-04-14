@@ -77,8 +77,8 @@ fl_JN = 2  # "jump near"
 fl_F = 3   # "ordinary flow"
 
 # Data references
-dr_R = 1
-dr_W = 2
+dr_R = "r"
+dr_W = "w"
 
 
 class cvar:
@@ -224,7 +224,7 @@ def ua_dodata2(opoff, ea, dtype):
     ADDRESS_SPACE.make_label("dat_", ea)
 
 def ua_add_dref(opoff, ea, access):
-    #address_map[ea]["access"].add(access)
+    ADDRESS_SPACE.add_xref(_processor.cmd.ea, ea, access)
     pass
 
 #
