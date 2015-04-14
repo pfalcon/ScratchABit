@@ -207,6 +207,16 @@ class AddressSpace:
             addr = int(addr, 16)
             self.labels[addr] = label
 
+    def save_comments(self, stream):
+        for addr in sorted(self.comments.keys()):
+            stream.write("%08x %s\n" % (addr, json.dumps(self.comments[addr])))
+
+    def load_comments(self, stream):
+        for l in stream:
+            addr, comment = l.split()
+            addr = int(addr, 16)
+            self.comments[addr] = json.loads(comment)
+
     def save_arg_props(self, stream):
         for addr in sorted(self.arg_props.keys()):
             stream.write("%08x %s\n" % (addr, json.dumps(self.arg_props[addr])))

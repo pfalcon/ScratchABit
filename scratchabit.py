@@ -217,6 +217,8 @@ def parse_disasm_def(fname):
 def save_state():
     with open("project.labels", "w") as f:
         engine.ADDRESS_SPACE.save_labels(f)
+    with open("project.comments", "w") as f:
+        engine.ADDRESS_SPACE.save_comments(f)
     with open("project.args", "w") as f:
         engine.ADDRESS_SPACE.save_arg_props(f)
     with open("project.aspace", "w") as f:
@@ -226,6 +228,8 @@ def load_state():
     print("Loading state...")
     with open("project.labels", "r") as f:
         engine.ADDRESS_SPACE.load_labels(f)
+    with open("project.comments", "r") as f:
+        engine.ADDRESS_SPACE.load_comments(f)
     with open("project.args", "r") as f:
         engine.ADDRESS_SPACE.load_arg_props(f)
     with open("project.aspace", "r") as f:
