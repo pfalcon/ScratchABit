@@ -471,6 +471,8 @@ class Data(DisasmObj):
 
 class Xref(DisasmObj):
 
+    indent = ""
+
     def __init__(self, ea, from_addr, type):
         self.ea = ea
         self.from_addr = from_addr
