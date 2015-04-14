@@ -169,11 +169,13 @@ class Editor(editor.EditorExt):
                 return
             if self.model.AS.get_arg_prop(addr, o.n, "type") == idaapi.o_mem:
                 self.model.AS.set_arg_prop(addr, o.n, "type", idaapi.o_imm)
+                self.model.AS.del_xref(addr, o.get_addr(), idaapi.dr_O)
             else:
                 self.model.AS.set_arg_prop(addr, o.n, "type", idaapi.o_mem)
                 label = self.model.AS.get_label(o.get_addr())
                 if not label:
                     self.model.AS.make_auto_label(o.get_addr())
+                self.model.AS.add_xref(addr, o.get_addr(), idaapi.dr_O)
             self.update_model()
         elif key == b";":
             addr = self.cur_addr()

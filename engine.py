@@ -224,6 +224,11 @@ class AddressSpace:
     def add_xref(self, from_ea, to_ea, type):
         self.xrefs.setdefault(to_ea, {})[from_ea] = type
 
+    def del_xref(self, from_ea, to_ea, type):
+        if to_ea in self.xrefs:
+            assert self.xrefs[to_ea][from_ea] == type
+            del self.xrefs[to_ea][from_ea]
+
     def get_xrefs(self, ea):
         return self.xrefs.get(ea)
 

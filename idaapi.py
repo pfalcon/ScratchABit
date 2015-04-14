@@ -82,6 +82,7 @@ fl_F = 3   # "ordinary flow"
 # Data references
 dr_R = "r"
 dr_W = "w"
+dr_O = "o"  # "Offset" reference, address of an item is taken
 
 # Segment permissions
 SEGPERM_EXEC  = 1
