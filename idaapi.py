@@ -26,7 +26,7 @@ dt_dword = "dt_dword"
 DATA_SIZE = {dt_byte: 1, dt_word: 2, dt_dword: 4}
 
 # IDA standard 6
-MAX_OPERANDS = 6
+UA_MAXOP = 6
 
 # Operand types
 o_void = "-"
@@ -99,7 +99,7 @@ class insn_t:
         self.ea = ea
         self.size = 0
         self.itype = 0
-        self._operands = [op_t(i) for i in range(MAX_OPERANDS)]
+        self._operands = [op_t(i) for i in range(UA_MAXOP)]
         self.disasm = None
 
     def get_canon_feature(self):
