@@ -18,6 +18,7 @@ import sys
 import time
 import logging as log
 
+import engine
 import idaapi
 import xtensa
 
@@ -54,7 +55,7 @@ class Editor(editor.EditorExt):
 
     def goto_addr(self, to_addr, from_addr=None):
         t = time.time()
-        model = idaapi.render_partial_around(to_addr, HEIGHT * 2)
+        model = engine.render_partial_around(to_addr, HEIGHT * 2)
         self.show_status("Rendering time: %fs" % (time.time() - t))
         self.set_model(model)
 
@@ -69,7 +70,7 @@ class Editor(editor.EditorExt):
     def update_model(self):
         addr = self.cur_addr()
         t = time.time()
-        model = idaapi.render_partial_around(addr, HEIGHT * 2)
+        model = engine.render_partial_around(addr, HEIGHT * 2)
         self.show_status("Rendering time: %fs" % (time.time() - t))
         self.set_model(model)
         self.cur_line = model.target_addr_lineno
@@ -102,7 +103,7 @@ class Editor(editor.EditorExt):
             line = self.get_cur_line()
             log.info("Enter pressed: %s" % line)
             self.show_status("Enter pressed: %s" % line)
-            if isinstance(line, idaapi.DisasmObj):
+            if isinstance(line, engine.DisasmObj):
                 o = line.get_operand_addr()
                 if o:
                     self.goto_addr(o.addr, from_addr=line.ea)
@@ -115,8 +116,8 @@ class Editor(editor.EditorExt):
         elif key == b"c":
             addr = self.cur_addr()
             self.show_status("Analyzing at %x" % addr)
-            idaapi.add_entrypoint(addr)
-            idaapi.analyze(self.analyze_status)
+            engine.add_entrypoint(addr)
+            engine.analyze(self.analyze_status)
             self.update_model()
         elif key == b"d":
             addr = self.cur_addr()
@@ -158,7 +159,7 @@ class Editor(editor.EditorExt):
                 self.model.AS.set_label(addr, res)
                 if not label:
                     # If it's new label, we need to add it to model
-                    self.model.insert_vline(self.cur_line, addr, idaapi.Label(addr))
+                    self.model.insert_vline(self.cur_line, addr, engine.Label(addr))
             self.update_screen()
         elif key == editor.KEY_F1:
             help.help(self)
@@ -169,29 +170,29 @@ if __name__ == "__main__":
     log.basicConfig(filename="scratchabit.log", format='%(asctime)s %(message)s', level=log.DEBUG)
     log.info("Started")
 
-    idaapi.ADDRESS_SPACE.add_area(0x3FFE8000, 0x3FFFBFFF, "RW")
-    idaapi.ADDRESS_SPACE.add_area(0x3FFFC000, 0x3fffffff, "RW")
-    idaapi.ADDRESS_SPACE.add_area(0x40000000, 0x4000ffff, "RO")
-    idaapi.ADDRESS_SPACE.load_content(0x40000000, open("bootrom.bin", "rb"))
+    engine.ADDRESS_SPACE.add_area(0x3FFE8000, 0x3FFFBFFF, "RW")
+    engine.ADDRESS_SPACE.add_area(0x3FFFC000, 0x3fffffff, "RW")
+    engine.ADDRESS_SPACE.add_area(0x40000000, 0x4000ffff, "RO")
+    engine.ADDRESS_SPACE.load_content(0x40000000, open("bootrom.bin", "rb"))
 
     p = xtensa.PROCESSOR_ENTRY()
-    idaapi.set_processor(p)
+    engine.set_processor(p)
 
     entry = 0x40000080
 
-    idaapi.add_entrypoint(entry)
-    idaapi.add_entrypoint(0x40000010)
-    #idaapi.add_entrypoint(0x40000020)
-    #idaapi.add_entrypoint(0x40000030)
-    #idaapi.add_entrypoint(0x40000050)
-    #idaapi.add_entrypoint(0x40000070)
-    idaapi.analyze()
+    engine.add_entrypoint(entry)
+    engine.add_entrypoint(0x40000010)
+    #engine.add_entrypoint(0x40000020)
+    #engine.add_entrypoint(0x40000030)
+    #engine.add_entrypoint(0x40000050)
+    #engine.add_entrypoint(0x40000070)
+    engine.analyze()
 
-    #idaapi.print_address_map()
+    #engine.print_address_map()
 
     t = time.time()
-    #_model = idaapi.render()
-    _model = idaapi.render_partial_around(entry, HEIGHT * 2)
+    #_model = engine.render()
+    _model = engine.render_partial_around(entry, HEIGHT * 2)
     print("Rendering time: %fs" % (time.time() - t))
     #print(_model.lines())
     #sys.exit()
