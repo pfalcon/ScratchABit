@@ -54,6 +54,9 @@ AS_NOTAB = 16
 AS_ASCIIC = 32
 AS_ASCIIZ = 64
 
+# Operand flags (op_t.flags)
+OF_SHOW = 0x08  # If not set, operand is not shown
+
 # Operand/value output flags (OutValue, etc.)
 OOFS_IFSIGN = 0
 OOFS_NOSIGN = 1
@@ -94,6 +97,7 @@ class op_t:
     def __init__(self, no):
         self.n = no
         self.type = None
+        self.flags = OF_SHOW
 
     def __repr__(self):
         return str(self.__dict__)
@@ -173,7 +177,7 @@ def out_one_operand(op_no):
 def OutValue(op, flags):
     global u_line
 #    print(op, flags)
-    u_line.write(str(op.value))
+    u_line.write(hex(op.value))
 
 def out_name_expr(op, ea, offset):
     global u_line
