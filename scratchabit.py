@@ -321,6 +321,7 @@ if __name__ == "__main__":
     else:
         for label, addr in ENTRYPOINTS:
             engine.add_entrypoint(addr)
+            engine.ADDRESS_SPACE.set_label(addr, label)
         engine.analyze()
 
     #engine.print_address_map()
