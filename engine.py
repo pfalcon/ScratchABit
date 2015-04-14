@@ -258,7 +258,7 @@ class AddressSpace:
 
     def load_comments(self, stream):
         for l in stream:
-            addr, comment = l.split()
+            addr, comment = l.split(None, 1)
             addr = int(addr, 16)
             self.comments[addr] = json.loads(comment)
 
