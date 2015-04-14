@@ -38,7 +38,7 @@ h - Decimal/hex number (TODO)
 o - Make an offset/address
 """
 
-from editorext import Viewer
+from pyedit.editorext import Viewer
 
 L = 5
 T = 2

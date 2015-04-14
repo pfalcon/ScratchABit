@@ -25,8 +25,11 @@ import engine
 import idaapi
 import xtensa
 
+from pyedit import editorext as editor
 import help
 
+
+HEIGHT = 25
 
 def disasm_one(p):
     insnsz = p.ana()
@@ -35,10 +38,6 @@ def disasm_one(p):
     p.cmd.ea += p.cmd.size
     p.cmd.size = 0
 
-
-import editorext as editor
-
-HEIGHT = 25
 
 class Editor(editor.EditorExt):
 
