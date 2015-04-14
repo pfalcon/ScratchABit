@@ -413,7 +413,11 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
 
             f = flags[i]
             if f == AddressSpace.UNK:
-                out = Literal(addr, "%s0x%02x" % (idaapi.fillstr("unk", idaapi.DEFAULT_WIDTH), bytes[i]))
+                v = bytes[i]
+                ch = ""
+                if 0x20 <= v <= 0x7e:
+                    ch = " ; '%s'" % chr(v)
+                out = Literal(addr, "%s0x%02x%s" % (idaapi.fillstr("unk", idaapi.DEFAULT_WIDTH), v, ch))
                 i += 1
             elif f == AddressSpace.DATA:
                 sz = 1
