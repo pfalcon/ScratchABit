@@ -181,7 +181,7 @@ def out_one_operand(op_no):
     global _processor, u_line
     cmd = _processor.cmd
 
-    if not hasattr(cmd, "arg_pos"):
+    if not hasattr(cmd, "arg_pos") or not cmd.arg_pos:
         cmd.arg_pos = [[0, 0] for i in range(UA_MAXOP)]
     cmd.arg_pos[op_no][0] = u_line.tell()
 
