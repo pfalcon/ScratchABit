@@ -218,6 +218,19 @@ def filter_config_line(l):
     l = l.strip()
     return l
 
+def load_symbols(fname):
+    with open(fname) as f:
+        for l in f:
+            l = filter_config_line(l)
+            if not l:
+                continue
+            m = re.search(r"\b([A-Za-z_$.][A-Za-z0-9_$.]*)\s*=\s*((0x)?[0-9A-Fa-f]+)", l)
+            if m:
+                #print(m.groups())
+                ENTRYPOINTS.append((m.group(1), int(m.group(2), 0)))
+            else:
+                print("Warning: cannot parse entrypoint info from: %r" % l)
+
 def parse_entrypoints(f):
     for l in f:
         l = filter_config_line(l)
@@ -225,8 +238,12 @@ def parse_entrypoints(f):
             continue
         if l[0] == "[":
             return l
-        label, addr = [v.strip() for v in l.split("=")]
-        ENTRYPOINTS.append((label, int(addr, 0)))
+        m = re.match(r'load "(.+?)"', l)
+        if m:
+            load_symbols(m.group(1))
+        else:
+            label, addr = [v.strip() for v in l.split("=")]
+            ENTRYPOINTS.append((label, int(addr, 0)))
     return ""
 
 def parse_disasm_def(fname):
