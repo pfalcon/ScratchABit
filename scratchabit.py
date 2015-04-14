@@ -122,6 +122,21 @@ class Editor(editor.EditorExt):
             self.show_status("Rendering time: %fs" % (time.time() - t))
             #self.set_model(model)
             self.goto_addr(addr)
+        elif key == b"d":
+            addr = self.cur_addr()
+            fl = self.model.AS.get_flags(addr)
+            if fl not in (self.model.AS.DATA, self.model.AS.UNK):
+                self.show_status("Undefine first")
+                return
+            if fl == self.model.AS.UNK:
+                self.model.AS.set_flags(addr, 1, self.model.AS.DATA, self.model.AS.DATA_CONT)
+            else:
+                sz = self.model.AS.get_unit_size(addr)
+                self.model.undefine(addr)
+                sz *= 2
+                if sz > 4: sz = 1
+                self.model.AS.set_flags(addr, sz, self.model.AS.DATA, self.model.AS.DATA_CONT)
+            self.update_model()
         elif key == b"u":
             addr = self.cur_addr()
             self.model.undefine(addr)
