@@ -174,7 +174,7 @@ class Editor(editor.EditorExt):
                 self.model.AS.set_arg_prop(addr, o.n, "type", idaapi.o_mem)
                 label = self.model.AS.get_label(o.get_addr())
                 if not label:
-                    self.model.AS.make_label(None, o.get_addr())
+                    self.model.AS.make_auto_label(o.get_addr())
             self.update_model()
         elif key == b";":
             addr = self.cur_addr()
@@ -186,9 +186,12 @@ class Editor(editor.EditorExt):
         elif key == b"n":
             addr = self.cur_addr()
             label = self.model.AS.get_label(addr)
-            s = label or self.model.AS.get_default_label(addr)
+            def_label = self.model.AS.get_default_label(addr)
+            s = label or def_label
             res = self.dialog_edit_line(line=s)
             if res:
+                if res == def_label:
+                    res = addr
                 self.model.AS.set_label(addr, res)
                 if not label:
                     # If it's new label, we need to add it to model

@@ -246,7 +246,7 @@ def ua_add_cref(opoff, ea, flags):
     else:
         assert fl == ADDRESS_SPACE.CODE
     if flags == fl_JN:
-        ADDRESS_SPACE.make_label("loc_", ea)
+        ADDRESS_SPACE.make_auto_label(ea)
         ADDRESS_SPACE.add_xref(_processor.cmd.ea, ea, "j")
     elif flags == fl_CN:
         ADDRESS_SPACE.make_label("fun_", ea)
@@ -257,7 +257,7 @@ def ua_dodata2(opoff, ea, dtype):
 #    print(opoff, hex(ea), dtype)
 #    address_map[ea] = {"type": type, "access": set()}
     ADDRESS_SPACE.note_data(ea, DATA_SIZE[dtype])
-    ADDRESS_SPACE.make_label("dat_", ea)
+    ADDRESS_SPACE.make_auto_label(ea)
 
 def ua_add_dref(opoff, ea, access):
     ADDRESS_SPACE.add_xref(_processor.cmd.ea, ea, access)
