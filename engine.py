@@ -158,6 +158,10 @@ class AddressSpace:
             prefix = "unk_"
         return prefix
 
+    def get_default_label(self, ea):
+        prefix = self.get_default_label_prefix(ea)
+        return "%s%08x" % (prefix, ea)
+
     def make_label(self, prefix, ea):
         if not prefix:
             prefix = self.get_default_label_prefix(ea)

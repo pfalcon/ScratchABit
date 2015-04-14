@@ -153,7 +153,7 @@ class Editor(editor.EditorExt):
         elif key == b"n":
             addr = self.cur_addr()
             label = self.model.AS.get_label(addr)
-            s = label or ""
+            s = label or self.model.AS.get_default_label(addr)
             res = self.dialog_edit_line(line=s)
             if res:
                 self.model.AS.set_label(addr, res)
