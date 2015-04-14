@@ -406,6 +406,8 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
         if start:
             i = offset
             start = False
+        else:
+            model.add_line(a[START], Literal(a[START], "; Start of 0x%x area" % a[START]))
         bytes = a[BYTES]
         flags = a[FLAGS]
         while i < len(flags):
@@ -450,6 +452,8 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             num_lines -= 1
             if not num_lines:
                 return
+
+        model.add_line(a[END], Literal(a[END], "; End of 0x%x area" % a[START]))
 
 
 def flag2char(f):
