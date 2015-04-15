@@ -108,7 +108,8 @@ class op_t:
         return None
 
     def __repr__(self):
-        return str(self.__dict__)
+        #return str(self.__dict__)
+        return "op_t(#%d, t=%s, addr/val=%s)" % (self.n, self.type, self.get_addr())
 
 class insn_t:
 
@@ -126,7 +127,8 @@ class insn_t:
         return self._operands[i]
 
     def __repr__(self):
-        return str(self.__dict__)
+        #return str(self.__dict__)
+        return "insn_t(ea=%x, sz=%d, id=%d, %s, %s)" % (self.ea, self.size, self.itype, self.disasm, self._operands)
 
 
 class processor_t:
