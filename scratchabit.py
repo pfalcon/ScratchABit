@@ -258,7 +258,8 @@ def parse_disasm_def(fname):
             #print(l)
             while True:
                 if not l:
-                    return
+                    #return
+                    break
                 if l[0] == "[":
                     section = l[1:-1]
                     print("Processing section: %s" % section)
@@ -268,6 +269,9 @@ def parse_disasm_def(fname):
                         assert 0, "Unknown section: " + section
                 else:
                     break
+
+            if not l:
+                break
 
             if l.startswith("load"):
                 args = l.split()
