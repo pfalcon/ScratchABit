@@ -180,7 +180,7 @@ class Editor(editor.EditorExt):
         elif key == b";":
             addr = self.cur_addr()
             comment = self.model.AS.get_comment(addr) or ""
-            res = self.dialog_edit_line(line=comment)
+            res = self.dialog_edit_line(line=comment, width=60)
             if res:
                 self.model.AS.set_comment(addr, res)
             self.update_screen()
