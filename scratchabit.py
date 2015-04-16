@@ -48,6 +48,9 @@ class Editor(editor.EditorExt):
     def set_model(self, model):
         self.model = model
         self.set_lines(model.lines())
+        # Invalidate top_line. Assuming goto_*() will be called
+        # after set_model().
+        self.top_line = sys.maxsize
 
     def show_line(self, l):
         if not isinstance(l, str):
@@ -58,6 +61,18 @@ class Editor(editor.EditorExt):
         if to_addr is None:
             self.show_status("Cannot jump")
             return
+
+        # If we can position cursor within current screen, do that,
+        # to avoid jumpy UI
+        no = self.model.addr2line_no(to_addr)
+        if no is not None:
+            if self.line_visible(no):
+                self.goto_line(no)
+                if from_addr is not None:
+                    self.addr_stack.append(from_addr)
+                return
+
+        # Otherwise, re-render model around needed address, and redraw screen
         t = time.time()
         model = engine.render_partial_around(to_addr, HEIGHT * 2)
         self.show_status("Rendering time: %fs" % (time.time() - t))
@@ -70,7 +85,9 @@ class Editor(editor.EditorExt):
         if no is not None:
             if from_addr is not None:
                 self.addr_stack.append(from_addr)
-            self.goto_line(no)
+            if not self.goto_line(no):
+                # Need to redraw always, because we changed underlying model
+                self.update_screen()
         else:
             self.show_status("Unknown address: %x" % to_addr)
 
