@@ -377,26 +377,41 @@ def analyze(callback=lambda cnt:None):
 
 class Model:
 
-    def __init__(self, target_addr=0):
+    def __init__(self, target_addr=0, target_subno=0):
         self._lines = []
         self._cnt = 0
+        self._subcnt = 0
+        self._last_addr = -1
         self._addr2line = {}
         self.AS = None
         self.target_addr = target_addr
+        self.target_subno = target_subno
+        self.target_addr_lineno_0 = -1
         self.target_addr_lineno = -1
 
     def lines(self):
         return self._lines
 
     def add_line(self, addr, line):
+        if addr != self._last_addr:
+            self._last_addr = addr
+            self._subcnt = 0
         if addr == self.target_addr:
-            self.target_addr_lineno = self._cnt
+            if self._subcnt == 0:
+                self.target_addr_lineno_0 = self._cnt
+            if self._subcnt == self.target_subno:
+                self.target_addr_lineno = self._cnt
         self._lines.append(line)
-        self._addr2line[addr] = self._cnt
+        self._addr2line[(addr, self._subcnt)] = self._cnt
+        line.subno = self._subcnt
+        if not line.virtual:
+            # Line of "real" disasm object
+            self._addr2line[(addr, -1)] = self._cnt
         self._cnt += 1
+        self._subcnt += 1
 
     def addr2line_no(self, addr):
-        return self._addr2line.get(addr)
+        return self._addr2line.get((addr, -1))
 
     def undefine(self, addr):
         sz = self.AS.get_unit_size(addr)
@@ -413,9 +428,11 @@ ADDR_FIELD_SIZE = 9
 class DisasmObj:
 
     # ea =
+    # subno =  # relative no. of several lines corresponding to the same ea
 
     indent = "  "
     arg_pos = ()
+    virtual = True  # Doesn't correspond to bytes in memory: labels, etc.
 
     def render(self):
         # Render object as a string, set as .cache, and return
@@ -438,6 +455,8 @@ class DisasmObj:
 
 
 class Instruction(idaapi.insn_t, DisasmObj):
+
+    virtual = False
 
     def render(self):
         _processor.cmd = self
@@ -483,6 +502,8 @@ class Label(DisasmObj):
         return s
 
 class Data(DisasmObj):
+
+    virtual = False
 
     def __init__(self, ea, sz, val):
         self.ea = ea
@@ -544,8 +565,8 @@ def render():
 # How much bytes may a single disasm object (i.e. a line) occupy
 MAX_UNIT_SIZE = 4
 
-def render_partial_around(addr, context_lines):
-    log.debug("render_partial_around(%x)", addr)
+def render_partial_around(addr, subno, context_lines):
+    log.debug("render_partial_around(%x, %d)", addr, subno)
     off, area = ADDRESS_SPACE.addr2area(addr)
     if area is None:
         return None
@@ -567,10 +588,16 @@ def render_partial_around(addr, context_lines):
     log.debug("render_partial_around: %x, %s", off, str_area(area))
     off = ADDRESS_SPACE.adjust_offset_reverse(off, area)
     log.debug("render_partial_around adjusted: %x, %s", off, str_area(area))
-    model = Model(addr)
+    model = Model(addr, subno)
     render_partial(model, ADDRESS_SPACE.area_list.index(area), off, context_lines, addr)
     log.debug("render_partial_around model done, lines: %d", len(model.lines()))
-    assert model.target_addr_lineno >= 0
+    assert model.target_addr_lineno_0 >= 0
+    if model.target_addr_lineno == -1:
+        # If we couldn't find exact subno, use 0th subno of that addr
+        # TODO: maybe should be last subno, because if we couldn't find
+        # exact one, it was ~ last and removed, so current last is "closer"
+        # to it.
+        model.target_addr_lineno = model.target_addr_lineno_0
     return model
 
 

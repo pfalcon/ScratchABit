@@ -74,7 +74,7 @@ class Editor(editor.EditorExt):
 
         # Otherwise, re-render model around needed address, and redraw screen
         t = time.time()
-        model = engine.render_partial_around(to_addr, HEIGHT * 2)
+        model = engine.render_partial_around(to_addr, 0, HEIGHT * 2)
         self.show_status("Rendering time: %fs" % (time.time() - t))
         if not model:
             self.show_status("Invalid address: 0x%x" % to_addr)
@@ -92,9 +92,9 @@ class Editor(editor.EditorExt):
             self.show_status("Unknown address: %x" % to_addr)
 
     def update_model(self):
-        addr = self.cur_addr()
+        addr, subno = self.cur_addr_subno()
         t = time.time()
-        model = engine.render_partial_around(addr, HEIGHT * 2)
+        model = engine.render_partial_around(addr, subno, HEIGHT * 2)
         self.show_status("Rendering time: %fs" % (time.time() - t))
         self.set_model(model)
         self.cur_line = model.target_addr_lineno
@@ -114,10 +114,11 @@ class Editor(editor.EditorExt):
 
     def cur_addr(self):
         line = self.get_cur_line()
-        if isinstance(line, str):
-            parts = line.split(None, 1)
-            return int(parts[0], 16)
         return line.ea
+
+    def cur_addr_subno(self):
+        line = self.get_cur_line()
+        return (line.ea, line.subno)
 
     def cur_operand_no(self, line):
         col = self.col - engine.ADDR_FIELD_SIZE - len(line.indent)
@@ -374,7 +375,7 @@ if __name__ == "__main__":
 
     t = time.time()
     #_model = engine.render()
-    _model = engine.render_partial_around(show_addr, HEIGHT * 2)
+    _model = engine.render_partial_around(show_addr, 0, HEIGHT * 2)
     print("Rendering time: %fs" % (time.time() - t))
     #print(_model.lines())
     #sys.exit()
