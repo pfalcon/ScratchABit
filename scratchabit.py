@@ -213,7 +213,8 @@ class Editor(editor.EditorExt):
                 self.model.AS.set_label(addr, res)
                 if not label:
                     # If it's new label, we need to add it to model
-                    self.model.insert_vline(self.cur_line, addr, engine.Label(addr))
+                    self.update_model()
+                    return
             self.update_screen()
         elif key == b"g":
             res = self.dialog_edit_line(line="")

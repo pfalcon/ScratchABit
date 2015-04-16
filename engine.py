@@ -395,20 +395,6 @@ class Model:
         self._addr2line[addr] = self._cnt
         self._cnt += 1
 
-    # Insert virtual line, i.e. line whose byte size == 0
-    # In other words, lien which doesn't cause shift in addresses
-    # of lines following it.
-    def insert_vline(self, pos, addr, line):
-        self._lines[pos:pos] = [line]
-        self._cnt += 1
-        end = self._cnt
-        pos += 1
-        while pos < end:
-            line = self._lines[pos]
-            if isinstance(line, Instruction):
-                self._addr2line[line.ea] += 1
-            pos += 1
-
     def addr2line_no(self, addr):
         return self._addr2line.get(addr)
 
