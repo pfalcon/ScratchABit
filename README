@@ -17,10 +17,51 @@ ScratchABit is released under the terms of GNU General Public License v3
 (GPLv3).
 
 
+Requirements/manifesto
+----------------------
+
+1. Should not be written in an obfuscated language. These includes languages
+which are too low-level, which allow to access non-initialized variables,
+which don't differentiate between variables and functions/procedures, which
+start array indexes from arbitrary numbers, etc., etc. ScratchABit is
+written in Python (modern version, Python3) for your pleasure and sanity.
+
+2. User interface framework should allow user interaction of the needed
+level, not add dependencies, bloat, issues, and incompatibilities between
+framework's versions. ScratchABit currently uses simple (no color even)
+full-screen text user interface, using ANSI/VT100 terminal escape sequences
+(yes, even curses library was deemed too bloat a dependency to force upon
+users).
+
+3. Should leverage easy to use text formats to store "database", to
+facilitate easy reuse and tool writing, and storage in version control
+systems.
+
+
+TODO/Things to decide
+---------------------
+
+* Currently works with flat binary files, add ELF support.
+* Currently uses multiple files for "database", each storing particular
+  type of information. Switch to a single YAML file instead?
+* Add color (low priority, (unbloated!) patches welcome).
+* Few important UI commands to implement yet for comfortable work (e.g.
+  list/search a label).
+* Offer to save DB on quit if modified.
+* Git integration for DB saving.
+* Improve robustness (add exception handler at the main loop level, don't
+  abort the application, show to user/log and continue).
+* Try to deal with code flow inconsistencies (e.g. within an instruction
+  - low priority for intended usage) and data access inconsistencies (e.g.
+  accessing individual bytes of previosly detected word - higher priority).
+
+
 FAQ
 ---
 
 Q: What processors/architectures are supported?
 A: ScratchABit doesn't support any processor architectures on its own,
 it is fully retargettable using IDAPython API plugins. Many plugins are
-available, writing a new plugin is easy.
+available, writing a new plugin is easy. To let users test-drive
+ScratchABit, a very simple (!) X86 processor plugin is included in the
+distribution, using Pymsasid disassembler under the hood.
