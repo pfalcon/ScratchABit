@@ -18,6 +18,8 @@ import sys
 from io import StringIO
 import logging as log
 
+import engine
+
 
 # Data types
 dt_byte = "dt_byte"
@@ -243,7 +245,11 @@ def get_full_byte(ea):
     return ADDRESS_SPACE.get_byte(ea)
 
 def ua_add_cref(opoff, ea, flags):
-    fl = ADDRESS_SPACE.get_flags(ea)
+    try:
+        fl = ADDRESS_SPACE.get_flags(ea)
+    except engine.InvalidAddrException:
+        log.warning("ua_add_cref: Cannot get flags for %x - not adding cref", ea)
+        return
     if fl == ADDRESS_SPACE.UNK:
         ADDRESS_SPACE.analisys_stack_push(ea)
     else:

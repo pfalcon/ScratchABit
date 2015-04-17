@@ -118,6 +118,8 @@ class AddressSpace:
 
     def get_flags(self, addr):
         off, area = self.addr2area(addr)
+        if area is None:
+            raise InvalidAddrException(addr)
         return area[FLAGS][off]
 
     def get_unit_size(self, addr):
