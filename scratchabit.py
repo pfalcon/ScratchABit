@@ -351,6 +351,8 @@ def load_state():
 
 
 if __name__ == "__main__":
+    sys.path.append("plugins")
+    sys.path.append("plugins/cpu")
     parse_disasm_def(sys.argv[1])
     log.basicConfig(filename="scratchabit.log", format='%(asctime)s %(message)s', level=log.DEBUG)
     log.info("Started")
