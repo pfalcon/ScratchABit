@@ -41,6 +41,11 @@ def area_props(area):
     return area[PROPS]
 
 
+class InvalidAddrException(Exception):
+    "Thrown when dereferencing address which doesn't exist in AddressSpace."
+    pass
+
+
 class AddressSpace:
     UNK = 0
     CODE = 0x01
@@ -100,6 +105,8 @@ class AddressSpace:
 
     def get_byte(self, addr):
         off, area = self.addr2area(addr)
+        if area is None:
+            raise InvalidAddrException(addr)
         return area[BYTES][off]
 
     def get_data(self, addr, sz):
@@ -357,7 +364,12 @@ def analyze(callback=lambda cnt:None):
     while analisys_stack and limit:
         ea = analisys_stack.pop()
         init_cmd(ea)
-        insn_sz = _processor.ana()
+        try:
+            insn_sz = _processor.ana()
+        except InvalidAddrException:
+            # Ran out of memory area, just continue
+            # with the rest of paths
+            continue
 #        print("size: %d" % insn_sz, _processor.cmd)
         if insn_sz:
             if not _processor.emu():
