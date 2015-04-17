@@ -541,6 +541,24 @@ class Data(DisasmObj):
         return o
 
 
+class Unknown(DisasmObj):
+
+    virtual = False
+
+    def __init__(self, ea, val):
+        self.ea = ea
+        self.val = val
+
+    def render(self):
+        ch = ""
+        if 0x20 <= self.val <= 0x7e:
+            ch = " ; '%s'" % chr(self.val)
+        s = "%s0x%02x%s" % (idaapi.fillstr("unk", idaapi.DEFAULT_WIDTH), self.val, ch)
+        s += self.get_comment()
+        self.cache = s
+        return s
+
+
 class Xref(DisasmObj):
 
     indent = ""
@@ -649,11 +667,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
 
             f = flags[i]
             if f == AddressSpace.UNK:
-                v = bytes[i]
-                ch = ""
-                if 0x20 <= v <= 0x7e:
-                    ch = " ; '%s'" % chr(v)
-                out = Literal(addr, "%s0x%02x%s" % (idaapi.fillstr("unk", idaapi.DEFAULT_WIDTH), v, ch))
+                out = Unknown(addr, bytes[i])
                 i += 1
             elif f == AddressSpace.DATA:
                 sz = 1
