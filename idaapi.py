@@ -36,6 +36,9 @@ o_imm = "o_imm"
 o_reg = "o_reg"
 o_mem = "o_mem"
 o_near = "o_near"
+o_phrase = "o_phrase"
+o_displ = "o_displ"
+o_idpspec0 = "o_idpspec0"
 
 class BADADDR: pass
 
