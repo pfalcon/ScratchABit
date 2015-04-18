@@ -1,0 +1,24 @@
+# Specify which CPU plugin to use. Plugins are just Python modules/packages,
+# they are searched either on PYTHONPATH as usual or, additionally, in
+# subdirectories "plugins" and "plugins/cpu" of the ScratchABit dir.
+cpu x86_64_pymsasid
+
+# This defines memory area at the given address of the given size
+# and permissions (all of read/write/execute in this case)
+0x600000(0x1000) rwx
+# Alternatively, end address (inclusive) can be specified:
+#0x600000-0x600fff) rwx
+
+# Load binary code to disassemble to the defined memory area
+load example.bin 0x600000
+
+# Start disassembly from the addresses defined below (left-hand
+# side defines label for that address). Multiple entrypoints allowed.
+[entrypoints]
+start = 0x600000
+
+# Alternatively or additionally, entrypoints/symbol addresses may
+# be loaded from a file. Format is the same as above (actually, even
+# more relaxed, each line may have arbitrary prefix and suffix around
+# "label = addr" part).
+#load "ld-provides.ld"
