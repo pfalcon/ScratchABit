@@ -52,6 +52,11 @@ a parameter:
 
 Press F1 if in doubt what to do next.
 
+The above will work as expected if you're running on the terminal
+supporting VT100 emulation, which is the case on Linux and should
+be the case on any other modern Unix/POSIX system. If you are not
+on such system, see the FAQ.
+
 
 TODO/Things to decide
 ---------------------
@@ -82,3 +87,6 @@ it is fully retargettable using IDAPython API plugins. Many plugins are
 available, writing a new plugin is easy. To let users test-drive
 ScratchABit, a very simple (!) X86 processor plugin is included in the
 distribution, using Pymsasid disassembler under the hood.
+
+Q: I'm not on Linux, how can I run ScratchABit?
+A: Install Linux in an emulator on your system and rejoice.
