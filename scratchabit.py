@@ -227,7 +227,7 @@ class Editor(editor.EditorExt):
             help.help(self)
             self.update_screen()
         elif key == b"S":
-            save_state()
+            save_state(project_dir)
             self.show_status("Saved.")
 
 
@@ -318,35 +318,35 @@ def parse_disasm_def(fname):
                 print("Adding area: %s" % engine.str_area(a))
 
 
-def save_state():
-    if not os.path.isdir("bak"):
-        os.mkdir("bak")
+def save_state(project_dir):
+    if not os.path.isdir(project_dir):
+        os.makedirs(project_dir)
     files = ["project.labels", "project.comments", "project.args", "project.xrefs", "project.aspace"]
     for fname in files:
-        if os.path.exists(fname):
-            os.rename(fname, "bak/%s.bak" % fname)
-    with open("project.labels", "w") as f:
+        if os.path.exists(project_dir + "/" + fname):
+            os.rename(project_dir + "/" + fname, project_dir + "/" + fname + ".bak")
+    with open(project_dir + "/project.labels", "w") as f:
         engine.ADDRESS_SPACE.save_labels(f)
-    with open("project.comments", "w") as f:
+    with open(project_dir + "/project.comments", "w") as f:
         engine.ADDRESS_SPACE.save_comments(f)
-    with open("project.args", "w") as f:
+    with open(project_dir + "/project.args", "w") as f:
         engine.ADDRESS_SPACE.save_arg_props(f)
-    with open("project.xrefs", "w") as f:
+    with open(project_dir + "/project.xrefs", "w") as f:
         engine.ADDRESS_SPACE.save_xrefs(f)
-    with open("project.aspace", "w") as f:
+    with open(project_dir + "/project.aspace", "w") as f:
         engine.ADDRESS_SPACE.save_areas(f)
 
-def load_state():
+def load_state(project_dir):
     print("Loading state...")
-    with open("project.labels", "r") as f:
+    with open(project_dir + "/project.labels", "r") as f:
         engine.ADDRESS_SPACE.load_labels(f)
-    with open("project.comments", "r") as f:
+    with open(project_dir + "/project.comments", "r") as f:
         engine.ADDRESS_SPACE.load_comments(f)
-    with open("project.args", "r") as f:
+    with open(project_dir + "/project.args", "r") as f:
         engine.ADDRESS_SPACE.load_arg_props(f)
-    with open("project.xrefs", "r") as f:
+    with open(project_dir + "/project.xrefs", "r") as f:
         engine.ADDRESS_SPACE.load_xrefs(f)
-    with open("project.aspace", "r") as f:
+    with open(project_dir + "/project.aspace", "r") as f:
         engine.ADDRESS_SPACE.load_areas(f)
 
 
@@ -360,8 +360,12 @@ if __name__ == "__main__":
     p = CPU_PLUGIN.PROCESSOR_ENTRY()
     engine.set_processor(p)
 
-    if os.path.exists("project.labels"):
-        load_state()
+    # Strip suffix if any from def filename
+    project_name = sys.argv[1].rsplit(".", 1)[0]
+    project_dir = project_name + ".scratchabit"
+
+    if os.path.exists(project_dir + "/project.labels"):
+        load_state(project_dir)
     else:
         for label, addr in ENTRYPOINTS:
             engine.add_entrypoint(addr)
