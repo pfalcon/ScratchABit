@@ -38,6 +38,21 @@ facilitate easy reuse and tool writing, and storage in version control
 systems.
 
 
+Quick start
+-----------
+
+Clone the code using "git clone --recursive". If you cloned code without
+"--recursive", run "git submodule update".
+
+The repository includes a simple x86_64 binary code, and corresponding
+disassembly definition file. Start ScartchABit, giving the latter as
+a parameter:
+
+    python3 scratchabit.py example.def
+
+Press F1 if in doubt what to do next.
+
+
 TODO/Things to decide
 ---------------------
 
