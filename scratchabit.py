@@ -59,7 +59,7 @@ class Editor(editor.EditorExt):
 
     def goto_addr(self, to_addr, from_addr=None):
         if to_addr is None:
-            self.show_status("Cannot jump")
+            self.show_status("No address-like value to go to")
             return
 
         # If we can position cursor within current screen, do that,
@@ -77,7 +77,7 @@ class Editor(editor.EditorExt):
         model = engine.render_partial_around(to_addr, 0, HEIGHT * 2)
         self.show_status("Rendering time: %fs" % (time.time() - t))
         if not model:
-            self.show_status("Invalid address: 0x%x" % to_addr)
+            self.show_status("Unknown address: 0x%x" % to_addr)
             return
         self.set_model(model)
 
