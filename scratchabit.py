@@ -28,7 +28,7 @@ from pyedit import editorext as editor
 import help
 
 
-HEIGHT = 25
+HEIGHT = 21
 
 def disasm_one(p):
     insnsz = p.ana()
@@ -386,11 +386,11 @@ if __name__ == "__main__":
     #print(_model.lines())
     #sys.exit()
 
-    e = Editor(1, 1, 78, 23)
+    e = Editor(1, 1, 78, 21)
     e.init_tty()
     e.cls()
     e.enable_mouse()
-    e.draw_box(0, 0, 80, 25)
+    e.draw_box(0, 0, 80, 23)
     e.set_model(_model)
     e.goto_addr(show_addr)
     e.loop()
