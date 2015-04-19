@@ -103,6 +103,10 @@ class AddressSpace:
         off, area = self.addr2area(addr)
         file.readinto(memoryview(area[BYTES])[off:])
 
+    def is_valid_addr(self, addr):
+        off, area = self.addr2area(addr)
+        return area is not None
+
     def get_byte(self, addr):
         off, area = self.addr2area(addr)
         if area is None:

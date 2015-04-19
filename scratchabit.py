@@ -185,9 +185,10 @@ class Editor(editor.EditorExt):
             if not o:
                 self.show_status("Cannot convert operand to offset")
                 return
-            if o.type != idaapi.o_imm:
+            if o.type != idaapi.o_imm or not self.model.AS.is_valid_addr(o.get_addr()):
                 self.show_status("Cannot convert operand to offset: #%s: %s" % (o.n, o.type))
                 return
+
             if self.model.AS.get_arg_prop(addr, o.n, "type") == idaapi.o_mem:
                 self.model.AS.set_arg_prop(addr, o.n, "type", idaapi.o_imm)
                 self.model.AS.del_xref(addr, o.get_addr(), idaapi.dr_O)
