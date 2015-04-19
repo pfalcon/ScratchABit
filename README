@@ -45,7 +45,7 @@ Clone the code using "git clone --recursive". If you cloned code without
 "--recursive", run "git submodule update --init".
 
 The repository includes a simple x86_64 binary code, and corresponding
-disassembly definition file. Start ScartchABit, giving the latter as
+disassembly definition file. Start ScratchABit, giving the latter as
 a parameter:
 
     python3 scratchabit.py example.def
