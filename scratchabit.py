@@ -182,8 +182,11 @@ class Editor(editor.EditorExt):
             addr = self.cur_addr()
             line = self.get_cur_line()
             o = line.get_operand_addr()
-            if not o or o.type not in idaapi.o_imm:
-                self.show_status("Cannot convert operand to offset: #d: %s" % (o.n, o.type))
+            if not o:
+                self.show_status("Cannot convert operand to offset")
+                return
+            if o.type != idaapi.o_imm:
+                self.show_status("Cannot convert operand to offset: #%s: %s" % (o.n, o.type))
                 return
             if self.model.AS.get_arg_prop(addr, o.n, "type") == idaapi.o_mem:
                 self.model.AS.set_arg_prop(addr, o.n, "type", idaapi.o_imm)
