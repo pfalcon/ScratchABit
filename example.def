@@ -3,6 +3,9 @@
 # subdirectories "plugins" and "plugins/cpu" of the ScratchABit dir.
 cpu x86_64_pymsasid
 
+# Show up to this many raw bytes of code/data
+show bytes 4
+
 # This defines memory area at the given address of the given size
 # and permissions (all of read/write/execute in this case)
 0x600000(0x1000) rwx
