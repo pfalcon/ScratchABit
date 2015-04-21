@@ -253,7 +253,10 @@ class Editor(editor.EditorExt):
 
             F.add(npyscreen.FixedText, value="Press Tab to auto-complete", editable=False)
             F.edit()
-            res = self.model.AS.resolve_label(e.value)
+            if '0' <= e.value[0] <= '9':
+                res = int(e.value, 0)
+            else:
+                res = self.model.AS.resolve_label(e.value)
 
             self.update_screen()
             self.goto_addr(res, from_addr=self.cur_addr())
