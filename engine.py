@@ -216,6 +216,17 @@ class AddressSpace:
     def set_label(self, ea, label):
         self.labels[ea] = label
 
+    def get_label_list(self):
+        return sorted([x if isinstance(x, str) else self.get_default_label(x) for x in self.labels.values()])
+
+    def resolve_label(self, label):
+        for ea, l in self.labels.items():
+            if l == label:
+                return ea
+            if isinstance(l, int) and self.get_default_label(l) == label:
+                return ea
+        return None
+
     def get_comment(self, ea):
         return self.comments.get(ea)
 

@@ -24,6 +24,8 @@ import logging as log
 import engine
 import idaapi
 
+import curses
+import npyscreen
 from pyedit import editorext as editor
 import help
 
@@ -36,6 +38,20 @@ def disasm_one(p):
     print("%08x %s" % (p.cmd.ea, p.cmd.disasm))
     p.cmd.ea += p.cmd.size
     p.cmd.size = 0
+
+class LabelEntry(npyscreen.Autocomplete):
+
+    def set_choices(self, list):
+        self.choices = [None] + list
+
+    def auto_complete(self, input):
+        substr = self.value
+        self.choices[0] = substr
+        choices = list(filter(lambda x: substr.lower() in x.lower(), self.choices))
+        val = self.get_choice(choices)
+        if val >= 0:
+            self.value = choices[val]
+            self.parent.exit_editing()
 
 
 class Editor(editor.EditorExt):
@@ -222,11 +238,25 @@ class Editor(editor.EditorExt):
                     return
             self.update_screen()
         elif key == b"g":
-            res = self.dialog_edit_line(line="")
-            if res:
-                self.goto_addr(int(res, 0), from_addr=self.cur_addr())
-            else:
-                self.update_screen()
+
+            F = npyscreen.FormBaseNew(name='Go to', lines=6, columns=40, show_atx=4, show_aty=4)
+            e = F.add(LabelEntry, name="Labels")
+            e.set_choices(self.model.AS.get_label_list())
+
+            def h_enter_key(input):
+                if not e.value:
+                    # Hitting Enter with empty text entry opens autocomplete dropbox
+                    e.auto_complete(input)
+                else:
+                    F.exit_editing()
+            e.add_handlers({curses.ascii.CR: h_enter_key})
+
+            F.add(npyscreen.FixedText, value="Press Tab to auto-complete", editable=False)
+            F.edit()
+            res = self.model.AS.resolve_label(e.value)
+
+            self.update_screen()
+            self.goto_addr(res, from_addr=self.cur_addr())
         elif key == editor.KEY_F1:
             help.help(self)
             self.update_screen()
