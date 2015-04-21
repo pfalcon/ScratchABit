@@ -19,6 +19,7 @@ import os
 import os.path
 import time
 import re
+import string
 import logging as log
 
 import engine
@@ -190,6 +191,33 @@ class Editor(editor.EditorExt):
                 if sz > 4: sz = 1
                 self.model.AS.set_flags(addr, sz, self.model.AS.DATA, self.model.AS.DATA_CONT)
             self.update_model()
+        elif key == b"a":
+            addr = self.cur_addr()
+            fl = self.model.AS.get_flags(addr)
+            if fl != self.model.AS.UNK:
+                self.show_status("Undefine first")
+                return
+            sz = 0
+            label = "s_"
+            while True:
+                b = self.model.AS.get_byte(addr)
+                fl = self.model.AS.get_flags(addr)
+                if not (0x20 <= b <= 0x7e or b in (0x0a, 0x0d)):
+                    if b == 0:
+                        sz += 1
+                    break
+                if fl != self.model.AS.UNK:
+                    break
+                c = chr(b)
+                if c < '0' or c in string.punctuation:
+                    c = '_'
+                label += c
+                addr += 1
+                sz += 1
+            if sz > 0:
+                self.model.AS.set_flags(self.cur_addr(), sz, self.model.AS.STR, self.model.AS.DATA_CONT)
+                self.model.AS.make_unique_label(self.cur_addr(), label)
+                self.update_model()
         elif key == b"u":
             addr = self.cur_addr()
             self.model.undefine(addr)

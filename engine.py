@@ -52,6 +52,7 @@ class AddressSpace:
     CODE_CONT = 0x02
     DATA = 0x04
     DATA_CONT = 0x08
+    STR = 0x10  # Continuation is DATA_CONT
 
     def __init__(self):
         self.area_list = []
@@ -132,7 +133,7 @@ class AddressSpace:
         sz = 1
         if flags[off] == self.CODE:
             f = self.CODE_CONT
-        elif flags[off] == self.DATA:
+        elif flags[off] in (self.DATA, self.STR):
             f = self.DATA_CONT
         else:
             return 1
@@ -216,8 +217,23 @@ class AddressSpace:
     def set_label(self, ea, label):
         self.labels[ea] = label
 
+    def make_unique_label(self, ea, label):
+        existing = self.get_label_set()
+        cnt = 0
+        while True:
+            l = label
+            if cnt > 0:
+                l += "_%d" % cnt
+            if l not in existing:
+                self.labels[ea] = l
+                return l
+            cnt += 1
+
     def get_label_list(self):
         return sorted([x if isinstance(x, str) else self.get_default_label(x) for x in self.labels.values()])
+
+    def get_label_set(self):
+        return set(x if isinstance(x, str) else self.get_default_label(x) for x in self.labels.values())
 
     def resolve_label(self, label):
         for ea, l in self.labels.items():
@@ -556,6 +572,22 @@ class Data(DisasmObj):
         return o
 
 
+class String(DisasmObj):
+
+    virtual = False
+
+    def __init__(self, ea, sz, val):
+        self.ea = ea
+        self.sz = sz
+        self.val = val
+
+    def render(self):
+        s = "%s%s" % (data_sz2mnem(1), repr(self.val).replace("\\x00", "\\0"))
+        s += self.get_comment()
+        self.cache = s
+        return s
+
+
 class Unknown(DisasmObj):
 
     virtual = False
@@ -691,6 +723,16 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
                     sz += 1
                     j += 1
                 out = Data(addr, sz, ADDRESS_SPACE.get_data(addr, sz))
+                i += sz
+            elif f == AddressSpace.STR:
+                str = chr(bytes[i])
+                sz = 1
+                j = i + 1
+                while flags[j] == AddressSpace.DATA_CONT:
+                    str += chr(bytes[j])
+                    sz += 1
+                    j += 1
+                out = String(addr, sz, str)
                 i += sz
             elif f == AddressSpace.CODE:
                 out = Instruction(addr)

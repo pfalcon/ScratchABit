@@ -27,7 +27,7 @@ Current address commands:
 u - Undefine
 c - Make code
 d - Make/Cycle data
-a - Make ASCII string (TODO)
+a - Make ASCII string
 n - (Re)name address (make label)
 
 Current selected argument commands (ok to work on current command
