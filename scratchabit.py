@@ -255,15 +255,23 @@ class Editor(editor.EditorExt):
             label = self.model.AS.get_label(addr)
             def_label = self.model.AS.get_default_label(addr)
             s = label or def_label
-            res = self.dialog_edit_line(line=s)
-            if res:
+            while True:
+                res = self.dialog_edit_line(line=s)
+                if not res:
+                    break
                 if res == def_label:
                     res = addr
+                else:
+                    if self.model.AS.label_exists(res):
+                        s = res
+                        self.show_status("Duplicate label")
+                        continue
                 self.model.AS.set_label(addr, res)
                 if not label:
                     # If it's new label, we need to add it to model
                     self.update_model()
                     return
+                break
             self.update_screen()
         elif key == b"g":
 

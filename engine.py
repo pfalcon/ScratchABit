@@ -243,6 +243,9 @@ class AddressSpace:
                 return ea
         return None
 
+    def label_exists(self, label):
+        return label in self.get_label_set()
+
     def get_comment(self, ea):
         return self.comments.get(ea)
 
