@@ -20,6 +20,7 @@ import os.path
 import time
 import re
 import string
+import binascii
 import logging as log
 
 import engine
@@ -70,9 +71,19 @@ class Editor(editor.EditorExt):
         self.top_line = sys.maxsize
 
     def show_line(self, l):
+        global show_bytes
         if not isinstance(l, str):
-            l = "%08x " % l.ea + l.indent + l.render()
-        super().show_line(l)
+            res = "%08x " % l.ea
+            if show_bytes > 0:
+                bin = ""
+                if not l.virtual:
+                    b = self.model.AS.get_bytes(l.ea, l.size)
+                    bin = str(binascii.hexlify(b[:show_bytes]), "ascii")
+                    if l.size > show_bytes:
+                        bin += "+"
+                res += idaapi.fillstr(bin, show_bytes * 2 + 1)
+            res += l.indent + l.render()
+        super().show_line(res)
 
     def goto_addr(self, to_addr, from_addr=None):
         if to_addr is None:
@@ -138,7 +149,7 @@ class Editor(editor.EditorExt):
         return (line.ea, line.subno)
 
     def cur_operand_no(self, line):
-        col = self.col - engine.ADDR_FIELD_SIZE - len(line.indent)
+        col = self.col - engine.DisasmObj.LEADER_SIZE - len(line.indent)
         #self.show_status("Enter pressed: %s, %s" % (col, line))
         for i, pos in enumerate(line.arg_pos):
             if pos[0] <= col <= pos[1]:
@@ -306,6 +317,7 @@ class Editor(editor.EditorExt):
 
 CPU_PLUGIN = None
 ENTRYPOINTS = []
+show_bytes = 0
 
 def filter_config_line(l):
     l = re.sub(r"#.*$", "", l)
@@ -342,6 +354,7 @@ def parse_entrypoints(f):
 
 def parse_disasm_def(fname):
     global CPU_PLUGIN
+    global show_bytes
     with open(fname) as f:
         for l in f:
             l = filter_config_line(l)
@@ -374,6 +387,9 @@ def parse_disasm_def(fname):
                 args = l.split()
                 CPU_PLUGIN = __import__(args[1])
                 print("Loading CPU plugin %s" % (args[1]))
+            elif l.startswith("show bytes "):
+                args = l.split()
+                show_bytes = int(args[2])
             else:
                 if "(" in l:
                     m = re.match(r"(.+?)\s*\(\s*(.+?)\s*\)\s+(.+)", l)
@@ -432,6 +448,10 @@ if __name__ == "__main__":
 
     p = CPU_PLUGIN.PROCESSOR_ENTRY()
     engine.set_processor(p)
+
+    engine.DisasmObj.LEADER_SIZE = 8 + 1
+    if show_bytes:
+        engine.DisasmObj.LEADER_SIZE += show_bytes * 2 + 1
 
     # Strip suffix if any from def filename
     project_name = sys.argv[1].rsplit(".", 1)[0]

@@ -114,6 +114,12 @@ class AddressSpace:
             raise InvalidAddrException(addr)
         return area[BYTES][off]
 
+    def get_bytes(self, addr, sz):
+        off, area = self.addr2area(addr)
+        if area is None:
+            raise InvalidAddrException(addr)
+        return area[BYTES][off:off + sz]
+
     def get_data(self, addr, sz):
         off, area = self.addr2area(addr)
         val = 0
@@ -470,14 +476,15 @@ def data_sz2mnem(sz):
     s = {1: "db", 2: "dw", 4: "dd"}[sz]
     return idaapi.fillstr(s, idaapi.DEFAULT_WIDTH)
 
-# Size of address field in disasm window
-ADDR_FIELD_SIZE = 9
 
 class DisasmObj:
 
     # ea =
+    # size =
     # subno =  # relative no. of several lines corresponding to the same ea
 
+    # Size of "leader fields" in disasm window - address, raw bytes, etc.
+    LEADER_SIZE = 9
     indent = "  "
     arg_pos = ()
     virtual = True  # Doesn't correspond to bytes in memory: labels, etc.
@@ -497,9 +504,9 @@ class DisasmObj:
 
     def __len__(self):
         try:
-            return ADDR_FIELD_SIZE + len(self.indent) + len(self.cache)
+            return self.LEADER_SIZE + len(self.indent) + len(self.cache)
         except AttributeError:
-            return ADDR_FIELD_SIZE + len(self.indent) + len(self.render())
+            return self.LEADER_SIZE + len(self.indent) + len(self.render())
 
 
 class Instruction(idaapi.insn_t, DisasmObj):
@@ -555,14 +562,14 @@ class Data(DisasmObj):
 
     def __init__(self, ea, sz, val):
         self.ea = ea
-        self.sz = sz
+        self.size = sz
         self.val = val
 
     def render(self):
         if ADDRESS_SPACE.get_arg_prop(self.ea, 0, "type") == idaapi.o_mem:
-            s = "%s%s" % (data_sz2mnem(self.sz), ADDRESS_SPACE.get_label(self.val))
+            s = "%s%s" % (data_sz2mnem(self.size), ADDRESS_SPACE.get_label(self.val))
         else:
-            s = "%s0x%x" % (data_sz2mnem(self.sz), self.val)
+            s = "%s0x%x" % (data_sz2mnem(self.size), self.val)
         s += self.get_comment()
         self.cache = s
         return s
@@ -581,7 +588,7 @@ class String(DisasmObj):
 
     def __init__(self, ea, sz, val):
         self.ea = ea
-        self.sz = sz
+        self.size = sz
         self.val = val
 
     def render(self):
@@ -594,6 +601,7 @@ class String(DisasmObj):
 class Unknown(DisasmObj):
 
     virtual = False
+    size = 1
 
     def __init__(self, ea, val):
         self.ea = ea
