@@ -119,13 +119,24 @@ class Editor(editor.EditorExt):
         else:
             self.show_status("Unknown address: %x" % to_addr)
 
-    def update_model(self):
+    def update_model(self, stay_on_real=False):
+        """Re-render model and update screen in such way that cursor stayed
+        on the same line (as far as possible).
+        stay_on_real == False - try to stay on same relative line no. for
+        the current address.
+        stay_on_real == True - try to stay on the line which contains real
+        bytes for the current address (use this if you know that cursor
+        stayed on such line before the update).
+        """
         addr, subno = self.cur_addr_subno()
         t = time.time()
         model = engine.render_partial_around(addr, subno, HEIGHT * 2)
         self.show_status("Rendering time: %fs" % (time.time() - t))
         self.set_model(model)
-        self.cur_line = model.target_addr_lineno
+        if stay_on_real:
+            self.cur_line = model.target_addr_lineno_real
+        else:
+            self.cur_line = model.target_addr_lineno
         self.top_line = self.cur_line - self.row
         self.update_screen()
 
@@ -253,7 +264,7 @@ class Editor(editor.EditorExt):
                 if not label:
                     self.model.AS.make_auto_label(o.get_addr())
                 self.model.AS.add_xref(addr, o.get_addr(), idaapi.dr_O)
-            self.update_model()
+            self.update_model(True)
         elif key == b";":
             addr = self.cur_addr()
             comment = self.model.AS.get_comment(addr) or ""

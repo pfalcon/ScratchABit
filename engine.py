@@ -442,6 +442,7 @@ class Model:
         self.target_subno = target_subno
         self.target_addr_lineno_0 = -1
         self.target_addr_lineno = -1
+        self.target_addr_lineno_real = -1
 
     def lines(self):
         return self._lines
@@ -452,9 +453,15 @@ class Model:
             self._subcnt = 0
         if addr == self.target_addr:
             if self._subcnt == 0:
+                # Contains first line related to the given addr
                 self.target_addr_lineno_0 = self._cnt
             if self._subcnt == self.target_subno:
+                # Contains line no. target_subno related to the given addr
                 self.target_addr_lineno = self._cnt
+            if not line.virtual:
+                # Contains line where actual instr/data/unknown bytes are
+                # rendered (vs labels/xrefs/etc.)
+                self.target_addr_lineno_real = self._cnt
         self._lines.append(line)
         self._addr2line[(addr, self._subcnt)] = self._cnt
         line.subno = self._subcnt
