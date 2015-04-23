@@ -391,9 +391,14 @@ def parse_disasm_def(fname):
 
             if l.startswith("load"):
                 args = l.split()
-                addr = int(args[2], 0)
-                engine.ADDRESS_SPACE.load_content(addr, open(args[1], "rb"))
-                print("Loading %s @0x%x" % (args[1], addr))
+                if args[2][0] in string.digits:
+                    addr = int(args[2], 0)
+                    engine.ADDRESS_SPACE.load_content(open(args[1], "rb"), addr)
+                    print("Loading %s @0x%x" % (args[1], addr))
+                else:
+                    loader = __import__(args[2])
+                    entry = loader.load(engine.ADDRESS_SPACE, args[1])
+                    ENTRYPOINTS.append(("_ENTRY_", entry))
             elif l.startswith("cpu "):
                 args = l.split()
                 CPU_PLUGIN = __import__(args[1])
@@ -453,6 +458,7 @@ def load_state(project_dir):
 if __name__ == "__main__":
     sys.path.append("plugins")
     sys.path.append("plugins/cpu")
+    sys.path.append("plugins/loader")
     parse_disasm_def(sys.argv[1])
     log.basicConfig(filename="scratchabit.log", format='%(asctime)s %(message)s', level=log.DEBUG)
     log.info("Started")

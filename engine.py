@@ -100,9 +100,10 @@ class AddressSpace:
     def min_addr(self):
         return self.area_list[0][START]
 
-    def load_content(self, addr, file):
+    def load_content(self, file, addr,sz=None):
         off, area = self.addr2area(addr)
-        file.readinto(memoryview(area[BYTES])[off:])
+        to = off + sz if sz else None
+        file.readinto(memoryview(area[BYTES])[off:to])
 
     def is_valid_addr(self, addr):
         off, area = self.addr2area(addr)
