@@ -487,21 +487,36 @@ def data_sz2mnem(sz):
 
 class DisasmObj:
 
+    # Size of "leader fields" in disasm window - address, raw bytes, etc.
+    # May be set by MVC controller
+    LEADER_SIZE = 9
+
+    # Default indent for a line
+    indent = "  "
+
+    # Default operand positions list is empty and set on class level
+    # to save memory. To be overriden on object level.
+    arg_pos = ()
+
+    # If False, this object corresponds to real bytes in input binary stream
+    # If True, doesn't correspond to bytes in memory: labels, etc.
+    virtual = True
+
+    # Instance variable expected to be set on each instance:
     # ea =
     # size =
     # subno =  # relative no. of several lines corresponding to the same ea
 
-    # Size of "leader fields" in disasm window - address, raw bytes, etc.
-    LEADER_SIZE = 9
-    indent = "  "
-    arg_pos = ()
-    virtual = True  # Doesn't correspond to bytes in memory: labels, etc.
-
     def render(self):
-        # Render object as a string, set as .cache, and return
+        # Render object as a string, set it as .cache, and return it
         pass
 
     def get_operand_addr(self):
+        # Get "the most addressful" operand
+        # This for example will be called when Enter is pressed
+        # not on a specific instruction operand, so this should
+        # return value of the operand which contains an address
+        # (or the "most suitable" of them if there're few).
         return None
 
     def get_comment(self):
@@ -511,6 +526,8 @@ class DisasmObj:
         return comm
 
     def __len__(self):
+        # Each object should return real character len as display on the screen.
+        # Should be fast - called on each cursor movement.
         try:
             return self.LEADER_SIZE + len(self.indent) + len(self.cache)
         except AttributeError:
@@ -550,19 +567,6 @@ class Instruction(idaapi.insn_t, DisasmObj):
                 return i + 1
         return UA_MAXOP
 
-
-class Label(DisasmObj):
-
-    indent = ""
-
-    def __init__(self, ea):
-        self.ea = ea
-
-    def render(self):
-        label = ADDRESS_SPACE.get_label(self.ea)
-        s = "%s:" % label
-        self.cache = s
-        return s
 
 class Data(DisasmObj):
 
@@ -621,6 +625,20 @@ class Unknown(DisasmObj):
             ch = " ; '%s'" % chr(self.val)
         s = "%s0x%02x%s" % (idaapi.fillstr("unk", idaapi.DEFAULT_WIDTH), self.val, ch)
         s += self.get_comment()
+        self.cache = s
+        return s
+
+
+class Label(DisasmObj):
+
+    indent = ""
+
+    def __init__(self, ea):
+        self.ea = ea
+
+    def render(self):
+        label = ADDRESS_SPACE.get_label(self.ea)
+        s = "%s:" % label
         self.cache = s
         return s
 
