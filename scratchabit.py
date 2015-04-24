@@ -138,6 +138,7 @@ class Editor(editor.EditorExt):
         else:
             self.cur_line = model.target_addr_lineno
         self.top_line = self.cur_line - self.row
+        #log.debug("update_model: addr=%x, row=%d, cur_line=%d, top_line=%d" % (addr, self.row, self.cur_line, self.top_line))
         self.update_screen()
 
     def handle_cursor_keys(self, key):
