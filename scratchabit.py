@@ -311,13 +311,14 @@ class Editor(editor.EditorExt):
 
             F.add(npyscreen.FixedText, value="Press Tab to auto-complete", editable=False)
             F.edit()
-            if '0' <= e.value[0] <= '9':
-                res = int(e.value, 0)
-            else:
-                res = self.model.AS.resolve_label(e.value)
-
             self.update_screen()
-            self.goto_addr(res, from_addr=self.cur_addr())
+            if e.value:
+                if '0' <= e.value[0] <= '9':
+                    res = int(e.value, 0)
+                else:
+                    res = self.model.AS.resolve_label(e.value)
+
+                self.goto_addr(res, from_addr=self.cur_addr())
         elif key == editor.KEY_F1:
             help.help(self)
             self.update_screen()
