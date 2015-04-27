@@ -209,7 +209,7 @@ class Editor(editor.EditorExt):
                 self.model.AS.set_flags(addr, 1, self.model.AS.DATA, self.model.AS.DATA_CONT)
             else:
                 sz = self.model.AS.get_unit_size(addr)
-                self.model.undefine(addr)
+                self.model.undefine_unit(addr)
                 sz *= 2
                 if sz > 4: sz = 1
                 self.model.AS.set_flags(addr, sz, self.model.AS.DATA, self.model.AS.DATA_CONT)
@@ -243,7 +243,7 @@ class Editor(editor.EditorExt):
                 self.update_model()
         elif key == b"u":
             addr = self.cur_addr()
-            self.model.undefine(addr)
+            self.model.undefine_unit(addr)
             self.update_model()
         elif key == b"o":
             addr = self.cur_addr()

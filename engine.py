@@ -170,7 +170,7 @@ class AddressSpace:
         for i in range(sz - 1):
             flags[off + i] = rest_fl
 
-    def undefine(self, addr, sz):
+    def make_undefined(self, addr, sz):
         self.set_flags(addr, sz, self.UNK, self.UNK)
 
     def note_code(self, addr, sz):
@@ -475,9 +475,9 @@ class Model:
     def addr2line_no(self, addr):
         return self._addr2line.get((addr, -1))
 
-    def undefine(self, addr):
+    def undefine_unit(self, addr):
         sz = self.AS.get_unit_size(addr)
-        self.AS.undefine(addr, sz)
+        self.AS.make_undefined(addr, sz)
 
 
 def data_sz2mnem(sz):
