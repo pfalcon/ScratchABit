@@ -269,7 +269,7 @@ def ua_add_cref(opoff, ea, flags):
 def ua_dodata2(opoff, ea, dtype):
 #    print(opoff, hex(ea), dtype)
 #    address_map[ea] = {"type": type, "access": set()}
-    ADDRESS_SPACE.note_data(ea, DATA_SIZE[dtype])
+    ADDRESS_SPACE.make_data(ea, DATA_SIZE[dtype])
     ADDRESS_SPACE.make_auto_label(ea)
 
 def ua_add_dref(opoff, ea, access):

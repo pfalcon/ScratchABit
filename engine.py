@@ -173,14 +173,14 @@ class AddressSpace:
     def make_undefined(self, addr, sz):
         self.set_flags(addr, sz, self.UNK, self.UNK)
 
-    def note_code(self, addr, sz):
+    def make_code(self, addr, sz):
         off, area = self.addr2area(addr)
         area_byte_flags = area[FLAGS]
         area_byte_flags[off] |= self.CODE
         for i in range(sz - 1):
             area_byte_flags[off + 1 + i] |= self.CODE_CONT
 
-    def note_data(self, addr, sz):
+    def make_data(self, addr, sz):
         off, area = self.addr2area(addr)
         area_byte_flags = area[FLAGS]
         area_byte_flags[off] |= self.DATA
@@ -417,7 +417,7 @@ def analyze(callback=lambda cnt:None):
         if insn_sz:
             if not _processor.emu():
                 assert False
-            ADDRESS_SPACE.note_code(ea, insn_sz)
+            ADDRESS_SPACE.make_code(ea, insn_sz)
             _processor.out()
 #            print("%08x %s" % (_processor.cmd.ea, _processor.cmd.disasm))
 #            print("---------")
