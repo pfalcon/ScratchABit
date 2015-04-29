@@ -75,6 +75,8 @@ class AddressSpace:
         # Cached last accessed area
         self.last_area = None
 
+    # Memory Area API
+
     def add_area(self, start, end, props):
         sz = end - start + 1
         bytes = bytearray(sz)
@@ -100,7 +102,9 @@ class AddressSpace:
     def min_addr(self):
         return self.area_list[0][START]
 
-    def load_content(self, file, addr,sz=None):
+    # Binary Data API
+
+    def load_content(self, file, addr, sz=None):
         off, area = self.addr2area(addr)
         to = off + sz if sz else None
         file.readinto(memoryview(area[BYTES])[off:to])
@@ -127,6 +131,8 @@ class AddressSpace:
         for i in range(sz):
             val = val | (area[BYTES][off + i] << 8 * i)
         return val
+
+    # Binary Data Flags API
 
     def get_flags(self, addr):
         off, area = self.addr2area(addr)
@@ -186,6 +192,8 @@ class AddressSpace:
         area_byte_flags[off] |= self.DATA
         for i in range(sz - 1):
             area_byte_flags[off + 1 + i] |= self.DATA_CONT
+
+    # Label API
 
     def get_default_label_prefix(self, ea):
         fl = self.get_flags(ea)
@@ -253,11 +261,15 @@ class AddressSpace:
     def label_exists(self, label):
         return label in self.get_label_set()
 
+    # Comment API
+
     def get_comment(self, ea):
         return self.comments.get(ea)
 
     def set_comment(self, ea, comm):
         self.comments[ea] = comm
+
+    # (Pseudo)instruction Argument Properties API
 
     def set_arg_prop(self, ea, arg_no, prop, prop_val):
         if ea not in self.arg_props:
@@ -271,6 +283,8 @@ class AddressSpace:
     def get_arg_prop(self, ea, arg_no, prop):
         return self.arg_props.get(ea, {}).get(arg_no, {}).get(prop)
 
+    # Xref API
+
     def add_xref(self, from_ea, to_ea, type):
         self.xrefs.setdefault(to_ea, {})[from_ea] = type
 
@@ -282,7 +296,8 @@ class AddressSpace:
     def get_xrefs(self, ea):
         return self.xrefs.get(ea)
 
-    # Persistance API
+    # Persistence API
+
     def save_labels(self, stream):
         for addr in sorted(self.labels.keys()):
             l = self.labels[addr]
