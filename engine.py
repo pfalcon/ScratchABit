@@ -283,6 +283,17 @@ class AddressSpace:
     def get_arg_prop(self, ea, arg_no, prop):
         return self.arg_props.get(ea, {}).get(arg_no, {}).get(prop)
 
+    def make_arg_offset(self, insn_addr, arg_no, ref_addr):
+        # Convert an immediate argument to an offset one
+        # insn_addr - address of (pseudo)instruction
+        # arg_no - argument no. of instruction
+        # ref_addr - value of the argument
+        self.set_arg_prop(insn_addr, arg_no, "type", idaapi.o_mem)
+        label = self.get_label(ref_addr)
+        if not label:
+            self.make_auto_label(ref_addr)
+        self.add_xref(insn_addr, ref_addr, idaapi.dr_O)
+
     # Xref API
 
     def add_xref(self, from_ea, to_ea, type):
