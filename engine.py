@@ -193,6 +193,13 @@ class AddressSpace:
         for i in range(sz - 1):
             area_byte_flags[off + 1 + i] |= self.DATA_CONT
 
+    def make_data_array(self, addr, sz, num_items):
+        # Make a data array. First-class arrays are not supported so far,
+        # so just mark data units sequentially
+        for i in range(num_items):
+            self.make_data(addr, sz)
+            addr += sz
+
     # Label API
 
     def get_default_label_prefix(self, ea):
