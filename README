@@ -61,7 +61,7 @@ on such system, see the FAQ.
 TODO/Things to decide
 ---------------------
 
-* Currently works with flat binary files, add ELF support.
+* Parse and use debugging information present in ELF (etc.) files.
 * Currently uses multiple files for "database", each storing particular
   type of information. Switch to a single YAML file instead?
 * Add color (low priority, (unbloated!) patches welcome).
