@@ -72,6 +72,8 @@ class AddressSpace:
         # at the very least, this should differentiate between literal
         # numeric values and addresses/offsets/pointers to other objects
         self.arg_props = {}
+        # Problem spots which automatic control/data flow couldn't resolve
+        self.issues = {}
         # Cached last accessed area
         self.last_area = None
 
@@ -313,6 +315,17 @@ class AddressSpace:
 
     def get_xrefs(self, ea):
         return self.xrefs.get(ea)
+
+    # Issues API
+
+    def add_issue(self, ea, descr):
+        self.issues[ea] = descr
+
+    def get_issues(self):
+        res = []
+        for ea in sorted(self.issues.keys()):
+            res.append((ea, self.issues[ea]))
+        return res
 
     # Persistence API
 
