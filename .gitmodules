@@ -9,4 +9,4 @@
 	url = https://github.com/pfalcon/npyscreen
 [submodule "plugins/loader/pyelftools"]
 	path = plugins/loader/pyelftools
-	url = https://github.com/eliben/pyelftools
+	url = https://github.com/pfalcon/pyelftools
