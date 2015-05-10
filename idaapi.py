@@ -276,6 +276,14 @@ def ua_add_dref(opoff, ea, access):
     ADDRESS_SPACE.add_xref(_processor.cmd.ea, ea, access)
     pass
 
+Q_jumps = 1
+
+def QueueMark(type, ea):
+    if type == Q_jumps:
+        ADDRESS_SPACE.add_issue(ea, "Indirect jump")
+    else:
+        assert 0
+
 #
 # End of Address space access API
 #
