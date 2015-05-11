@@ -322,6 +322,20 @@ class Editor(editor.EditorExt):
         elif key == b"S":
             save_state(project_dir)
             self.show_status("Saved.")
+        elif key == b"\x11":  # ^Q
+            F = npyscreen.Popup(name='Problems list', lines=18)
+            class IssueList(npyscreen.MultiLine):
+                def display_value(self, vl):
+                    return "%08x %s" % vl
+            lw = F.add(IssueList, name="Problems")
+            #lw.return_exit = True
+            lw.values = self.model.AS.get_issues()
+            lw.add_handlers({curses.ascii.CR: lambda key: (lw.h_select_exit(key), F.exit_editing(), 1)})
+            F.edit()
+            self.update_screen()
+            if lw.value is not None:
+                val = lw.values[lw.value][0]
+                self.goto_addr(val, from_addr=self.cur_addr())
 
 
 CPU_PLUGIN = None
