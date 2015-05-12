@@ -336,6 +336,8 @@ class Editor(editor.EditorExt):
             if lw.value is not None:
                 val = lw.values[lw.value][0]
                 self.goto_addr(val, from_addr=self.cur_addr())
+        else:
+            self.show_status("Unbound key: " + repr(key))
 
 
 CPU_PLUGIN = None
