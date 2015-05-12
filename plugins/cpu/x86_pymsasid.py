@@ -87,6 +87,9 @@ class X86Processor(processor_t):
                 else:
                     ua_add_cref(0, op.addr, fl_JN)
 
+            if flow in ("call", "jmp") and op.type != o_near:
+                QueueMark(Q_jumps, self.cmd.ea)
+
         if flow in ("call", "jcc", "hlt", "seq"):
             ua_add_cref(0, self.cmd.ea + self.cmd.size, fl_F)
 
