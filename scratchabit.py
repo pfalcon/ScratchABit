@@ -433,7 +433,7 @@ def parse_disasm_def(fname):
                     start = int(m.group(1), 0)
                     end = int(m.group(2), 0)
                     props = m.group(3)
-                a = engine.ADDRESS_SPACE.add_area(start, end, props.upper())
+                a = engine.ADDRESS_SPACE.add_area(start, end, {"access": props.upper()})
                 print("Adding area: %s" % engine.str_area(a))
 
 

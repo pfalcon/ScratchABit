@@ -27,7 +27,7 @@ def load_exe(aspace, elffile):
         #print("p_vaddr=%x p_memsz=%x" % (seg["p_vaddr"], seg["p_memsz"]))
         #print()
         if seg["p_type"] == "PT_LOAD":
-            aspace.add_area(seg["p_vaddr"], seg["p_vaddr"] + seg["p_memsz"] - 1, "TODO")
+            aspace.add_area(seg["p_vaddr"], seg["p_vaddr"] + seg["p_memsz"] - 1, {"access": "TODO"})
             seg.stream.seek(seg['p_offset'])
             aspace.load_content(seg.stream, seg["p_vaddr"], seg["p_filesz"])
         elif seg["p_type"] == "PT_DYNAMIC":
