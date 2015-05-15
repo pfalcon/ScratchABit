@@ -18,15 +18,8 @@ def adjust_plt_addr(addr):
     return addr & ~0xf
 
 
-def load(aspace, fname):
-
-    f = open(fname, "rb")
-    elffile = ELFFile(f)
+def load_exe(aspace, elffile):
     wordsz = elffile.elfclass // 8
-    #print(elffile)
-    #print(elffile.header)
-    #print("entry: %x" % elffile["e_entry"])
-    #print()
 
     for seg in elffile.iter_segments():
         #print(seg)
@@ -140,6 +133,21 @@ def load(aspace, fname):
                     pltrel += entry_struct.sizeof()
 
     return elffile["e_entry"]
+
+
+def load(aspace, fname):
+
+    f = open(fname, "rb")
+    elffile = ELFFile(f)
+    #print(elffile)
+    #print(elffile.header)
+    #print("entry: %x" % elffile["e_entry"])
+    #print()
+
+    if elffile.num_segments():
+        return load_exe(aspace, elffile)
+
+    assert False, "No ELF segments found"
 
 
 if __name__ == "__main__":
