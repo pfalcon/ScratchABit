@@ -412,7 +412,7 @@ def parse_disasm_def(fname):
                 else:
                     loader = __import__(args[2])
                     entry = loader.load(engine.ADDRESS_SPACE, args[1])
-                    log.info("Loaded %s, entrypoint: %s", args[1], entry)
+                    log.info("Loaded %s, entrypoint: %s", args[1], hex(entry) if entry is not None else None)
                     if entry is not None:
                         ENTRYPOINTS.append(("_ENTRY_", entry))
             elif l.startswith("cpu "):
