@@ -154,6 +154,9 @@ if __name__ == "__main__":
     import sys
     class Stub:
         def __getattr__(self, attr):
-            return lambda *a, **kw: None
+            def dump(*a, **kw):
+                print("AS.%s(%r, %s)" % (attr, a, kw))
+                return 0
+            return dump
 
     load(Stub(), sys.argv[1])
