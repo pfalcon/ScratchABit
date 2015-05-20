@@ -121,6 +121,12 @@ class AddressSpace:
             raise InvalidAddrException(addr)
         return area[BYTES][off]
 
+    def set_byte(self, addr, val):
+        off, area = self.addr2area(addr)
+        if area is None:
+            raise InvalidAddrException(addr)
+        area[BYTES][off] = val & 0xff
+
     def get_bytes(self, addr, sz):
         off, area = self.addr2area(addr)
         if area is None:
@@ -133,6 +139,13 @@ class AddressSpace:
         for i in range(sz):
             val = val | (area[BYTES][off + i] << 8 * i)
         return val
+
+    def set_data(self, addr, data, sz):
+        off, area = self.addr2area(addr)
+        val = 0
+        for i in range(sz):
+            area[BYTES][off + i] = data & 0xff
+            data >>= 8
 
     # Binary Data Flags API
 
