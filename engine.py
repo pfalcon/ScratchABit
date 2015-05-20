@@ -779,7 +779,8 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             model.add_line(a[START], Literal(a[START], "; Start of 0x%x area (%s)" % (a[START], a[PROPS].get("name", "noname"))))
         bytes = a[BYTES]
         flags = a[FLAGS]
-        while i < len(flags):
+        areasize = len(bytes)
+        while i < areasize:
             addr = a[START] + i
             # If we didn't yet reach target address, compensate for
             # the following decrement of num_lines. The logic is:
@@ -803,7 +804,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             elif f == AddressSpace.DATA:
                 sz = 1
                 j = i + 1
-                while flags[j] == AddressSpace.DATA_CONT:
+                while j < areasize and flags[j] == AddressSpace.DATA_CONT:
                     sz += 1
                     j += 1
                 out = Data(addr, sz, ADDRESS_SPACE.get_data(addr, sz))
@@ -812,7 +813,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
                 str = chr(bytes[i])
                 sz = 1
                 j = i + 1
-                while flags[j] == AddressSpace.DATA_CONT:
+                while j < areasize and flags[j] == AddressSpace.DATA_CONT:
                     str += chr(bytes[j])
                     sz += 1
                     j += 1
