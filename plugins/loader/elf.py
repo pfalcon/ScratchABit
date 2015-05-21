@@ -1,6 +1,9 @@
 from pyelftools.elftools.elf.elffile import ELFFile
 from pyelftools.elftools.elf.relocation import Relocation
 from pyelftools.elftools.elf.enums import ENUM_D_TAG
+from pyelftools.elftools.elf.constants import SH_FLAGS
+from pyelftools.elftools.elf.sections import SymbolTableSection
+from pyelftools.elftools.elf.relocation import RelocationSection
 
 # PLT is Procedure Linkage Table, part of (read-only) code
 # GOT is Global Offset Table, part of (generally read-write) data
@@ -135,6 +138,106 @@ def load_exe(aspace, elffile):
     return elffile["e_entry"]
 
 
+def load_obj(aspace, elffile):
+    wordsz = elffile.elfclass // 8
+    addr = 0x10000
+    sec_map = {}
+    for i, sec in enumerate(elffile.iter_sections()):
+        if sec["sh_flags"] & SH_FLAGS.SHF_ALLOC and sec["sh_size"]:
+            name = str(sec.name, "ascii")
+            size = sec["sh_size"]
+            print(name, sec.header)
+            aspace.add_area(addr, addr + size - 1, {"name": name, "access": "TODO"})
+            if sec["sh_type"] == "SHT_PROGBITS":
+                sec.stream.seek(sec['sh_offset'])
+                aspace.load_content(sec.stream, addr, size)
+            aspace.set_label(addr, name)
+            sec_map[i] = (sec, addr)
+            addr += size + 0xfff
+            addr &= ~0xfff
+            print()
+
+    for _sec in elffile.iter_sections():
+        if not isinstance(_sec, SymbolTableSection):
+            continue
+
+        symtab = {}
+        for i, sym in enumerate(_sec.iter_symbols()):
+            symtab[i] = sym
+#            print(sym.name, sym.entry)
+
+            if sym.name and sym["st_shndx"] != "SHN_UNDEF":
+                sec, sec_start = sec_map[sym["st_shndx"]]
+                aspace.set_label(sym["st_value"] + sec_start, str(sym.name, "utf-8"))
+
+                if sym["st_info"]["type"] == "STT_FUNC":
+                    aspace.analisys_stack_push(sym["st_value"] + sec_start)
+                if sym["st_info"]["type"] == "STT_OBJECT":
+                    # TODO: Set as data of given sym["st_size"]
+                    aspace.make_data_array(sym["st_value"] + sec_start, 1, sym["st_size"])
+                    pass
+
+        break
+
+    R_XTENSA_32 = 1
+    R_XTENSA_SLOT0_OP = 20
+    R_XTENSA_ASM_EXPAND = 11
+
+    for rel_sec in elffile.iter_sections():
+        if not isinstance(rel_sec, RelocationSection):
+            continue
+        if rel_sec["sh_info"] not in sec_map:
+            continue
+        target_sec, addr = sec_map[rel_sec["sh_info"]]
+        print(rel_sec.header, target_sec.name)
+        for reloc in rel_sec.iter_relocations():
+            print(reloc)
+
+            sym = symtab[reloc['r_info_sym']]
+            symname = str(sym.name, "utf-8")
+            if reloc["r_addend"] != 0:
+                symname += "+%d" % reloc["r_addend"]
+            value = None
+            sym_sec, sym_sec_addr = None, None
+            if sym.entry["st_shndx"] != "SHN_UNDEF":
+                sym_sec, sym_sec_addr = sec_map[sym.entry["st_shndx"]]
+                value = sym.entry["st_value"] + sym_sec_addr + reloc["r_addend"]
+
+
+            if reloc["r_info_type"] == R_XTENSA_32:
+                aspace.set_comment(addr + reloc["r_offset"], "R_XTENSA_32: %s" % (symname))
+                aspace.make_data(addr + reloc["r_offset"], wordsz)
+                print(sym.entry)
+                if value is not None:
+                    sym_sec, sym_sec_addr = sec_map[sym.entry["st_shndx"]]
+                    data = aspace.get_data(addr + reloc["r_offset"], wordsz)
+                    data += value
+                    aspace.set_data(addr + reloc["r_offset"], data, wordsz)
+                    aspace.make_arg_offset(addr + reloc["r_offset"], 0, data)
+            elif reloc["r_info_type"] == R_XTENSA_SLOT0_OP:
+                aspace.set_comment(addr + reloc["r_offset"], "R_XTENSA_SLOT0_OP: %s" % (symname))
+                opcode = aspace.get_byte(addr + reloc["r_offset"])
+                if opcode & 0xf == 0x5:
+                    # call
+                    if value is not None:
+                        p = addr + reloc["r_offset"]
+                        value -= ((p & ~0x3) + 4)
+                        assert value & 0x3 == 0
+                        value = value >> 2
+                        aspace.set_byte(p, (opcode & ~0xc0) | ((value << 6) & 0xc0))
+                        aspace.set_byte(p + 1, value >> 2)
+                        aspace.set_byte(p + 2, value >> 10)
+                if opcode & 0xf == 0x1:
+                    # l32r
+                    pass
+            elif reloc["r_info_type"] == R_XTENSA_ASM_EXPAND:
+                aspace.set_comment(addr + reloc["r_offset"], "R_XTENSA_ASM_EXPAND: %s" % (symname))
+            else:
+                assert False, "Unknown reloc type: %d" % reloc["r_info_type"]
+#        break
+
+
+
 def load(aspace, fname):
 
     f = open(fname, "rb")
@@ -147,7 +250,8 @@ def load(aspace, fname):
     if elffile.num_segments():
         return load_exe(aspace, elffile)
 
-    assert False, "No ELF segments found"
+    return load_obj(aspace, elffile)
+    #assert False, "No ELF segments found"
 
 
 if __name__ == "__main__":
