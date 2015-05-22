@@ -1,3 +1,5 @@
+import logging as log
+
 from pyelftools.elftools.elf.elffile import ELFFile
 from pyelftools.elftools.elf.relocation import Relocation
 from pyelftools.elftools.elf.enums import ENUM_D_TAG
@@ -22,6 +24,8 @@ def adjust_plt_addr(addr):
 
 
 def load_exe(aspace, elffile):
+    log.debug("Loading executable ELF")
+
     wordsz = elffile.elfclass // 8
 
     for seg in elffile.iter_segments():
@@ -30,9 +34,12 @@ def load_exe(aspace, elffile):
         #print("p_vaddr=%x p_memsz=%x" % (seg["p_vaddr"], seg["p_memsz"]))
         #print()
         if seg["p_type"] == "PT_LOAD":
-            aspace.add_area(seg["p_vaddr"], seg["p_vaddr"] + seg["p_memsz"] - 1, {"access": "TODO"})
-            seg.stream.seek(seg['p_offset'])
-            aspace.load_content(seg.stream, seg["p_vaddr"], seg["p_filesz"])
+            if seg["p_memsz"]:
+                aspace.add_area(seg["p_vaddr"], seg["p_vaddr"] + seg["p_memsz"] - 1, {"access": "TODO"})
+                seg.stream.seek(seg['p_offset'])
+                aspace.load_content(seg.stream, seg["p_vaddr"], seg["p_filesz"])
+            else:
+                log.warning("Skipping empty ELF segment: %s", seg.header)
         elif seg["p_type"] == "PT_DYNAMIC":
             aspace.set_label(seg["p_vaddr"], "ELF.DYNAMIC")
 
