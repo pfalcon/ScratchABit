@@ -85,6 +85,8 @@ class AddressSpace:
         flags = bytearray(sz)
         a = (start, end, props, bytes, flags)
         self.area_list.append(a)
+        # Area list should be sorted. Assume it's short and just resort it each time.
+        self.area_list.sort()
         return a
 
     def area_no(self, area):
