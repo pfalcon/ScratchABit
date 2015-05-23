@@ -715,7 +715,7 @@ class Xref(DisasmObj):
         self.type = type
 
     def render(self):
-        s = "; xref: 0x%x %s" % (self.from_addr, self.type)
+        s = (" " * idaapi.DEFAULT_XREF_INDENT) + "; xref: 0x%x %s" % (self.from_addr, self.type)
         self.cache = s
         return s
 

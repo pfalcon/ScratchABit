@@ -151,6 +151,8 @@ COLOR_ERROR = "*"
 DEFAULT_WIDTH = 8
 # Default indentation of instructions
 DEFAULT_INDENT = 4
+# Default indentation of xref comments
+DEFAULT_XREF_INDENT = 13
 
 u_line = None
 
