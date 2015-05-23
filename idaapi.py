@@ -146,6 +146,11 @@ class processor_t:
 #
 
 COLOR_ERROR = "*"
+# Non-IDAPython symbols
+# Default instruction field width, 8 is IDA standard
+DEFAULT_WIDTH = 8
+# Default indentation of instructions
+DEFAULT_INDENT = 4
 
 u_line = None
 
@@ -162,9 +167,7 @@ def fillstr(s, width):
         s += " " * (width - len(s))
     return s
 
-DEFAULT_WIDTH = 16
-
-def OutMnem(width):
+def OutMnem(width=DEFAULT_WIDTH):
     global _processor, u_line
 #    print(_processor.instruc[cmd.itype])
     s = _processor.instruc[_processor.cmd.itype]["name"]

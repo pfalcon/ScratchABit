@@ -554,7 +554,7 @@ class DisasmObj:
     LEADER_SIZE = 9
 
     # Default indent for a line
-    indent = "  "
+    indent = " " * idaapi.DEFAULT_INDENT
 
     # Default operand positions list is empty and set on class level
     # to save memory. To be overriden on object level.
