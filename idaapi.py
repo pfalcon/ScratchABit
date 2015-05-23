@@ -212,7 +212,11 @@ def out_one_operand(op_no):
 def OutValue(op, flags):
     global u_line
 #    print(op, flags)
-    u_line.write(hex(op.value))
+    if flags & OOF_ADDR:
+        val = op.addr
+    else:
+        val = op.value
+    u_line.write(hex(val))
 
 def out_name_expr(op, ea, offset):
     global u_line
