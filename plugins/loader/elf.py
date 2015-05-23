@@ -23,8 +23,8 @@ def adjust_plt_addr(addr):
     return addr & ~0xf
 
 
-def load_exe(aspace, elffile):
-    log.debug("Loading executable ELF")
+def load_segments(aspace, elffile):
+    log.debug("Loading ELF segments")
 
     wordsz = elffile.elfclass // 8
 
@@ -145,14 +145,21 @@ def load_exe(aspace, elffile):
     return elffile["e_entry"]
 
 
-def load_obj(aspace, elffile):
+def load_sections(aspace, elffile):
     wordsz = elffile.elfclass // 8
-    addr = 0x10000
+    is_exe = elffile["e_type"] == "ET_EXEC"
+    addr_cnt = 0x10000
     sec_map = {}
+
+    # As section order may be arbitrary, make sure to allocate allocatable sections first
     for i, sec in enumerate(elffile.iter_sections()):
         if sec["sh_flags"] & SH_FLAGS.SHF_ALLOC and sec["sh_size"]:
             name = str(sec.name, "ascii")
             size = sec["sh_size"]
+            if is_exe:
+                addr = sec["sh_addr"]
+            else:
+                addr = addr_cnt
             print(name, sec.header)
             aspace.add_area(addr, addr + size - 1, {"name": name, "access": "TODO"})
             if sec["sh_type"] == "SHT_PROGBITS":
@@ -160,10 +167,11 @@ def load_obj(aspace, elffile):
                 aspace.load_content(sec.stream, addr, size)
             aspace.set_label(addr, name)
             sec_map[i] = (sec, addr)
-            addr += size + 0xfff
-            addr &= ~0xfff
+            addr_cnt += size + 0xfff
+            addr_cnt &= ~0xfff
             print()
 
+    # Process symbols
     for _sec in elffile.iter_sections():
         if not isinstance(_sec, SymbolTableSection):
             continue
@@ -173,18 +181,24 @@ def load_obj(aspace, elffile):
             symtab[i] = sym
 #            print(sym.name, sym.entry)
 
-            if sym.name and sym["st_shndx"] != "SHN_UNDEF":
-                sec, sec_start = sec_map[sym["st_shndx"]]
-                aspace.set_label(sym["st_value"] + sec_start, str(sym.name, "utf-8"))
+            if sym.name and sym["st_shndx"] != "SHN_UNDEF" \
+                        and sym["st_info"]["type"] in ("STT_NOTYPE", "STT_FUNC", "STT_OBJECT", "STT_COMMON"):
+                sec_start = 0
+                if not is_exe and sym["st_shndx"] != "SHN_ABS":
+                    sec, sec_start = sec_map[sym["st_shndx"]]
+
+                symname = str(sym.name, "utf-8")
+                aspace.set_label(sym["st_value"] + sec_start, symname)
 
                 if sym["st_info"]["type"] == "STT_FUNC":
                     aspace.analisys_stack_push(sym["st_value"] + sec_start)
                 if sym["st_info"]["type"] == "STT_OBJECT":
-                    # TODO: Set as data of given sym["st_size"]
                     aspace.make_data_array(sym["st_value"] + sec_start, 1, sym["st_size"])
-                    pass
 
         break
+
+    if is_exe:
+        return elffile["e_entry"]
 
     R_XTENSA_32 = 1
     R_XTENSA_SLOT0_OP = 20
@@ -254,11 +268,13 @@ def load(aspace, fname):
     #print("entry: %x" % elffile["e_entry"])
     #print()
 
-    if elffile.num_segments():
-        return load_exe(aspace, elffile)
+    if elffile.num_sections():
+        return load_sections(aspace, elffile)
 
-    return load_obj(aspace, elffile)
-    #assert False, "No ELF segments found"
+    if elffile.num_segments():
+        return load_segments(aspace, elffile)
+
+    assert False, "No ELF sections or segments found"
 
 
 if __name__ == "__main__":
