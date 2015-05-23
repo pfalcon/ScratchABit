@@ -727,6 +727,8 @@ class Xref(DisasmObj):
 
 class Literal(DisasmObj):
 
+    indent = ""
+
     def __init__(self, ea, str):
         self.ea = ea
         self.cache = str
