@@ -23,6 +23,14 @@ def adjust_plt_addr(addr):
     return addr & ~0xf
 
 
+def sh_flags_to_access(x):
+    s = "R"
+    for flag, c in ((SH_FLAGS.SHF_WRITE, "W"), (SH_FLAGS.SHF_EXECINSTR, "X")):
+        if x & flag:
+             s += c
+    return s
+
+
 def load_segments(aspace, elffile):
     log.debug("Loading ELF segments")
 
@@ -161,7 +169,8 @@ def load_sections(aspace, elffile):
             else:
                 addr = addr_cnt
             print(name, sec.header)
-            aspace.add_area(addr, addr + size - 1, {"name": name, "access": "TODO"})
+            access = sh_flags_to_access(sec["sh_flags"])
+            aspace.add_area(addr, addr + size - 1, {"name": name, "access": access})
             if sec["sh_type"] == "SHT_PROGBITS":
                 sec.stream.seek(sec['sh_offset'])
                 aspace.load_content(sec.stream, addr, size)
