@@ -496,7 +496,10 @@ if __name__ == "__main__":
         for label, addr in ENTRYPOINTS:
             engine.add_entrypoint(addr)
             engine.ADDRESS_SPACE.set_label(addr, label)
-        engine.analyze()
+        def _progress(cnt):
+            sys.stdout.write("Performing initial analysis... %d\r" % cnt)
+        engine.analyze(_progress)
+        print()
 
     #engine.print_address_map()
 
