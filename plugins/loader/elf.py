@@ -3,7 +3,7 @@ import logging as log
 from pyelftools.elftools.elf.elffile import ELFFile
 from pyelftools.elftools.elf.relocation import Relocation
 from pyelftools.elftools.elf.enums import ENUM_D_TAG
-from pyelftools.elftools.elf.constants import SH_FLAGS
+from pyelftools.elftools.elf.constants import SH_FLAGS, P_FLAGS
 from pyelftools.elftools.elf.sections import SymbolTableSection
 from pyelftools.elftools.elf.relocation import RelocationSection
 
@@ -22,6 +22,12 @@ def adjust_plt_addr(addr):
     # x86_32
     return addr & ~0xf
 
+def p_flags_to_access(x):
+    s = ''
+    for flag, c in ((P_FLAGS.PF_R, "R"), (P_FLAGS.PF_W, "W"), (P_FLAGS.PF_X, "X")):
+        if x & flag:
+             s += c
+    return s
 
 def sh_flags_to_access(x):
     s = "R"
@@ -43,7 +49,8 @@ def load_segments(aspace, elffile):
         #print()
         if seg["p_type"] == "PT_LOAD":
             if seg["p_memsz"]:
-                aspace.add_area(seg["p_vaddr"], seg["p_vaddr"] + seg["p_memsz"] - 1, {"access": "TODO"})
+                access = p_flags_to_access(seg["p_flags"])
+                aspace.add_area(seg["p_vaddr"], seg["p_vaddr"] + seg["p_memsz"] - 1, {"access": access})
                 seg.stream.seek(seg['p_offset'])
                 aspace.load_content(seg.stream, seg["p_vaddr"], seg["p_filesz"])
             else:
