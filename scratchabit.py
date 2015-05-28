@@ -336,6 +336,11 @@ class Editor(editor.EditorExt):
             if lw.value is not None:
                 val = lw.values[lw.value][0]
                 self.goto_addr(val, from_addr=self.cur_addr())
+        elif key == b"i":
+            off, area = self.model.AS.addr2area(self.cur_addr())
+            props = area[engine.PROPS]
+            percent = off / (area[engine.END] - area[engine.START] + 1)
+            self.show_status("Area: 0x%x %s (%s): %.3f%%" % (area[engine.START], props.get("name", "noname"), props["access"], percent))
         else:
             self.show_status("Unbound key: " + repr(key))
 
