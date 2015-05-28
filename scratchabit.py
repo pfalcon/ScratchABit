@@ -341,6 +341,22 @@ class Editor(editor.EditorExt):
             props = area[engine.PROPS]
             percent = off / (area[engine.END] - area[engine.START] + 1)
             self.show_status("Area: 0x%x %s (%s): %.3f%%" % (area[engine.START], props.get("name", "noname"), props["access"], percent))
+        elif key == b"W":
+            class TextSaveModel:
+                def __init__(self, f, ctrl):
+                    self.f = f
+                    self.ctrl = ctrl
+                    self.cnt = 0
+                def add_line(self, addr, line):
+                    line = line.indent + line.render() + "\n"
+                    self.f.write(line)
+                    if self.cnt % 256 == 0:
+                        self.ctrl.show_status("Writing: 0x%x" % addr)
+                    self.cnt += 1
+            out_fname = "out.lst"
+            with open(out_fname, "w") as f:
+                engine.render_partial(TextSaveModel(f, self), 0, 0, 10000000)
+            self.show_status("Disassembly listing written: " + out_fname)
         else:
             self.show_status("Unbound key: " + repr(key))
 
