@@ -496,9 +496,9 @@ if __name__ == "__main__":
     sys.path.append("plugins")
     sys.path.append("plugins/cpu")
     sys.path.append("plugins/loader")
-    parse_disasm_def(sys.argv[1])
     log.basicConfig(filename="scratchabit.log", format='%(asctime)s %(message)s', level=log.DEBUG)
     log.info("Started")
+    parse_disasm_def(sys.argv[1])
 
     p = CPU_PLUGIN.PROCESSOR_ENTRY()
     engine.set_processor(p)
