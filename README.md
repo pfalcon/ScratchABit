@@ -81,12 +81,19 @@ TODO/Things to decide
 FAQ
 ---
 
-Q: What processors/architectures are supported?
+> Q: What processors/architectures are supported?
+
 A: ScratchABit doesn't support any processor architectures on its own,
 it is fully retargettable using IDAPython API plugins. Many plugins are
 available, writing a new plugin is easy. To let users test-drive
 ScratchABit, a very simple (!) X86 processor plugin is included in the
 distribution, using Pymsasid disassembler under the hood.
 
-Q: I'm not on Linux, how can I run ScratchABit?
+> Q: I'm not on Linux, how can I run ScratchABit?
+
 A: Install Linux in an emulator on your system and rejoice.
+
+> Q: Mandatory screenshot?
+
+A: Sure:
+![screenshot](https://raw.githubusercontent.com/pfalcon/ScratchABit/master/docs/scratchabit.png)
