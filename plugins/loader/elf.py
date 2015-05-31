@@ -6,6 +6,24 @@ from pyelftools.elftools.elf.enums import ENUM_D_TAG
 from pyelftools.elftools.elf.constants import SH_FLAGS, P_FLAGS
 from pyelftools.elftools.elf.sections import SymbolTableSection
 from pyelftools.elftools.elf.relocation import RelocationSection
+from pyelftools.elftools.common.exceptions import ELFError
+
+MACH_MAP = {
+    "EM_386": "x86",
+}
+
+def detect(fname):
+    f = open(fname, "rb")
+    try:
+        elffile = ELFFile(f)
+    except ELFError:
+        return None
+
+    #print(elffile.header)
+    print(elffile["e_ident"]["EI_CLASS"])
+    bitness = 32 if elffile["e_ident"]["EI_CLASS"] == "ELFCLASS32" else 64
+    return "%s_%s" % (MACH_MAP[elffile["e_machine"]], bitness)
+
 
 # PLT is Procedure Linkage Table, part of (read-only) code
 # GOT is Global Offset Table, part of (generally read-write) data
