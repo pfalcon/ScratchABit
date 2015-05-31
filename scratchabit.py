@@ -398,6 +398,14 @@ def parse_entrypoints(f):
             ENTRYPOINTS.append((label, int(addr, 0)))
     return ""
 
+
+def load_target_file(loader, fname):
+    entry = loader.load(engine.ADDRESS_SPACE, fname)
+    log.info("Loaded %s, entrypoint: %s", fname, hex(entry) if entry is not None else None)
+    if entry is not None:
+        ENTRYPOINTS.append(("_ENTRY_", entry))
+
+
 def parse_disasm_def(fname):
     global CPU_PLUGIN
     global show_bytes
@@ -432,10 +440,7 @@ def parse_disasm_def(fname):
                     print("Loading %s @0x%x" % (args[1], addr))
                 else:
                     loader = __import__(args[2])
-                    entry = loader.load(engine.ADDRESS_SPACE, args[1])
-                    log.info("Loaded %s, entrypoint: %s", args[1], hex(entry) if entry is not None else None)
-                    if entry is not None:
-                        ENTRYPOINTS.append(("_ENTRY_", entry))
+                    load_target_file(loader, args[1])
             elif l.startswith("cpu "):
                 args = l.split()
                 CPU_PLUGIN = __import__(args[1])
@@ -498,7 +503,26 @@ if __name__ == "__main__":
     sys.path.append("plugins/loader")
     log.basicConfig(filename="scratchabit.log", format='%(asctime)s %(message)s', level=log.DEBUG)
     log.info("Started")
-    parse_disasm_def(sys.argv[1])
+
+    if sys.argv[1].endswith(".def"):
+        parse_disasm_def(sys.argv[1])
+        project_name = sys.argv[1].rsplit(".", 1)[0]
+    else:
+        import default_plugins
+        for loader_id in default_plugins.loaders:
+            loader = __import__(loader_id)
+            arch_id = loader.detect(sys.argv[1])
+            if arch_id:
+                break
+        if not arch_id:
+            print("Error: file '%s' not recognized by default loaders" % sys.argv[1])
+            sys.exit(1)
+        if arch_id not in default_plugins.cpus:
+            print("Error: no plugin for CPU '%s' as detected for file '%s'" % (arch_id, sys.argv[1]))
+            sys.exit(1)
+        load_target_file(loader, sys.argv[1])
+        CPU_PLUGIN = __import__(default_plugins.cpus[arch_id])
+        project_name = sys.argv[1]
 
     p = CPU_PLUGIN.PROCESSOR_ENTRY()
     engine.set_processor(p)
@@ -508,7 +532,6 @@ if __name__ == "__main__":
         engine.DisasmObj.LEADER_SIZE += show_bytes * 2 + 1
 
     # Strip suffix if any from def filename
-    project_name = sys.argv[1].rsplit(".", 1)[0]
     project_dir = project_name + ".scratchabit"
 
     if os.path.exists(project_dir + "/project.labels"):
