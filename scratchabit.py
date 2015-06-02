@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # ScratchABit - interactive disassembler
 #
 # Copyright (c) 2015 Paul Sokolovsky
