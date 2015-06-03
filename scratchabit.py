@@ -340,8 +340,8 @@ class Editor(editor.EditorExt):
         elif key == b"i":
             off, area = self.model.AS.addr2area(self.cur_addr())
             props = area[engine.PROPS]
-            percent = off / (area[engine.END] - area[engine.START] + 1)
-            self.show_status("Area: 0x%x %s (%s): %.3f%%" % (area[engine.START], props.get("name", "noname"), props["access"], percent))
+            percent = 100 * off / (area[engine.END] - area[engine.START] + 1)
+            self.show_status("Area: 0x%x %s (%s): %.1f%%" % (area[engine.START], props.get("name", "noname"), props["access"], percent))
         elif key == b"W":
             class TextSaveModel:
                 def __init__(self, f, ctrl):
