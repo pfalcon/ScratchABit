@@ -851,7 +851,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             if not num_lines:
                 return
 
-        model.add_line(a[END], Literal(a[END], "; End of 0x%x area" % a[START]))
+        model.add_line(a[END], Literal(a[END], "; End of 0x%x area (%s)" % (a[START], a[PROPS].get("name", "noname"))))
 
 
 def flag2char(f):
