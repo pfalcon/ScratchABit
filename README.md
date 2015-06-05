@@ -67,12 +67,10 @@ Press F1 if in doubt what to do next.
 TODO/Things to decide
 ---------------------
 
-* Parse and use debugging information present in ELF (etc.) files.
 * Currently uses multiple files for "database", each storing particular
   type of information. Switch to a single YAML file instead?
 * Add color (low priority, (unbloated!) patches welcome).
-* Few important UI commands to implement yet for comfortable work (e.g.
-  list/search a label).
+* Few important UI commands to implement yet for comfortable work.
 * Offer to save DB on quit if modified.
 * Git integration for DB saving.
 * Improve robustness (add exception handler at the main loop level, don't
@@ -82,6 +80,8 @@ TODO/Things to decide
   accessing individual bytes of previosly detected word - higher priority).
 * See how to support other types of IDAPython plugins besides just processor
   modules.
+* Parse and use debugging information (e.g. DWARF) present in ELF (etc.)
+  files.
 
 
 FAQ
