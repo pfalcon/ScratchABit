@@ -223,6 +223,19 @@ def OutValue(op, flags):
         val = op.value
     u_line.write(hex(val))
 
+def OutLong(val, base):
+    global u_line
+    if base == 2:
+        u_line.write(bin(val))
+    elif base == 8:
+        u_line.write(oct(val))
+    elif base == 10:
+        u_line.write(str(val))
+    elif base == 16:
+        u_line.write(hex(val))
+    else:
+        raise NotImplementetError
+
 def out_name_expr(op, ea, offset):
     global u_line
 #    print(op, ea, offset)
