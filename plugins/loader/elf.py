@@ -230,8 +230,6 @@ def load_sections(aspace, elffile):
                 if sym["st_info"]["type"] == "STT_OBJECT":
                     aspace.make_data_array(sym["st_value"] + sec_start, 1, sym["st_size"])
 
-        break
-
     if is_exe:
         return elffile["e_entry"]
 
