@@ -358,6 +358,34 @@ class Editor(editor.EditorExt):
             with open(out_fname, "w") as f:
                 engine.render_partial(TextSaveModel(f, self), 0, 0, 10000000)
             self.show_status("Disassembly listing written: " + out_fname)
+        elif key == b"/":
+            class FoundException(Exception): pass
+            class TextSearchModel:
+                def __init__(self, substr, ctrl):
+                    self.search = substr
+                    self.ctrl = ctrl
+                    self.cnt = 0
+                def add_line(self, addr, line):
+                    line = line.render()
+                    if self.search in line:
+                        raise FoundException(addr)
+                    if self.cnt % 256 == 0:
+                        self.ctrl.show_status("Searching: 0x%x" % addr)
+                    self.cnt += 1
+
+            F = npyscreen.FormBaseNew(name='Text Search', lines=5, columns=40, show_atx=4, show_aty=4)
+            e = F.add(npyscreen.TitleText, name="Search for:")
+            e.entry_widget.add_handlers({curses.ascii.CR: lambda k: F.exit_editing()})
+            F.edit()
+            self.update_screen()
+            self.show_status("str: " + e.value)
+            try:
+                engine.render_from(TextSearchModel(e.value, self), self.cur_addr(), 10000000)
+            except FoundException as res:
+                self.goto_addr(res.args[0], from_addr=self.cur_addr())
+            else:
+                self.show_status("Not found: " + e.value)
+
         else:
             self.show_status("Unbound key: " + repr(key))
 

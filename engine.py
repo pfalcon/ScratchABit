@@ -781,6 +781,13 @@ def render_partial_around(addr, subno, context_lines):
     return model
 
 
+def render_from(model, addr, num_lines):
+    off, area = ADDRESS_SPACE.addr2area(addr)
+    if area is None:
+        return None
+    render_partial(model, ADDRESS_SPACE.area_list.index(area), off, num_lines)
+
+
 def render_partial(model, area_no, offset, num_lines, target_addr=-1):
     model.AS = ADDRESS_SPACE
     start = True
