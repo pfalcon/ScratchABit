@@ -465,7 +465,7 @@ def init_cmd(ea):
 
 def analyze(callback=lambda cnt:None):
     cnt = 0
-    limit = 40000
+    limit = 1000000
     while analisys_stack and limit:
         ea = analisys_stack.pop()
         init_cmd(ea)
