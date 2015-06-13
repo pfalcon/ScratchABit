@@ -63,6 +63,7 @@ class Editor(editor.EditorExt):
         super().__init__(*args)
         self.model = None
         self.addr_stack = []
+        self.search_str = None
 
     def set_model(self, model):
         self.model = model
@@ -156,6 +157,12 @@ class Editor(editor.EditorExt):
     def cur_addr(self):
         line = self.get_cur_line()
         return line.ea
+
+    def next_addr(self):
+        try:
+            return self.content[self.cur_line + 1].ea
+        except:
+            return None
 
     def cur_addr_subno(self):
         line = self.get_cur_line()
@@ -358,7 +365,7 @@ class Editor(editor.EditorExt):
             with open(out_fname, "w") as f:
                 engine.render_partial(TextSaveModel(f, self), 0, 0, 10000000)
             self.show_status("Disassembly listing written: " + out_fname)
-        elif key == b"/":
+        elif key in (b"/", b"?"):  # "/" and Shift+"/"
             class FoundException(Exception): pass
             class TextSearchModel:
                 def __init__(self, substr, ctrl):
@@ -372,19 +379,23 @@ class Editor(editor.EditorExt):
                     if self.cnt % 256 == 0:
                         self.ctrl.show_status("Searching: 0x%x" % addr)
                     self.cnt += 1
+            if key == b"/":
+                F = npyscreen.FormBaseNew(name='Text Search', lines=5, columns=40, show_atx=4, show_aty=4)
+                e = F.add(npyscreen.TitleText, name="Search for:")
+                e.entry_widget.add_handlers({curses.ascii.CR: lambda k: F.exit_editing()})
+                F.edit()
+                self.update_screen()
+                self.search_str = e.value
+                addr = self.cur_addr()
+            else:
+                addr = self.next_addr()
 
-            F = npyscreen.FormBaseNew(name='Text Search', lines=5, columns=40, show_atx=4, show_aty=4)
-            e = F.add(npyscreen.TitleText, name="Search for:")
-            e.entry_widget.add_handlers({curses.ascii.CR: lambda k: F.exit_editing()})
-            F.edit()
-            self.update_screen()
-            self.show_status("str: " + e.value)
             try:
-                engine.render_from(TextSearchModel(e.value, self), self.cur_addr(), 10000000)
+                engine.render_from(TextSearchModel(self.search_str, self), addr, 10000000)
             except FoundException as res:
                 self.goto_addr(res.args[0], from_addr=self.cur_addr())
             else:
-                self.show_status("Not found: " + e.value)
+                self.show_status("Not found: " + self.search_str)
 
         else:
             self.show_status("Unbound key: " + repr(key))
