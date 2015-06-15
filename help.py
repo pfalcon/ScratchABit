@@ -30,6 +30,7 @@ c - Make code
 d - Make/Cycle data
 a - Make ASCII string
 n - (Re)name address (make label)
+i - Info
 
 Current selected argument commands (ok to work on current command
 if only 1 suitable arg):
