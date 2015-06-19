@@ -38,6 +38,13 @@ if only 1 suitable arg):
 Enter - Goto address in operand
 h - Decimal/hex number (TODO)
 o - Make an offset/address
+
+Cross-reference type key (xref: <addr> <type>):
+c - call from <addr>
+j - jump from <addr>
+r - read at <addr>
+w - write at <addr>
+o - offset/address taken at <addr>
 """
 
 from pyedit.editorext import Viewer
