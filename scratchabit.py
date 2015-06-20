@@ -356,7 +356,7 @@ class Editor(editor.EditorExt):
                     self.ctrl = ctrl
                     self.cnt = 0
                 def add_line(self, addr, line):
-                    line = line.indent + line.render() + "\n"
+                    line = ("%08x " % addr) + line.indent + line.render() + "\n"
                     self.f.write(line)
                     if self.cnt % 256 == 0:
                         self.ctrl.show_status("Writing: 0x%x" % addr)
