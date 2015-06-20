@@ -256,7 +256,7 @@ def out_register(reg):
 def MakeLine(output_buffer):
 #    global cmd
     global _processor
-    _processor.cmd.disasm = output_buffer.getvalue()
+    _processor.cmd.disasm = output_buffer.getvalue().rstrip()
 
 #
 # End of instruction rendition API
