@@ -255,6 +255,10 @@ class AddressSpace:
         return label
 
     def set_label(self, ea, label):
+        # Make sure the label can be actually visible - create an area for it if none
+        off, area = self.addr2area(ea)
+        if area is None:
+            self.add_area(ea, ea, {"name": "autocreated to host %s label" % label})
         self.labels[ea] = label
 
     def make_unique_label(self, ea, label):
