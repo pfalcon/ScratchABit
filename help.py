@@ -54,8 +54,15 @@ T = 2
 W = 70
 H = 20
 
+cpu_help = ""
+
+def set_cpu_help(txt):
+    global cpu_help
+    cpu_help = "\nCPU-specific information:\n" + txt
+
+
 def help(screen):
     screen.dialog_box(L, T, W, H)
     v = Viewer(L + 1, T + 1, W - 2, H - 2)
-    v.set_lines(HELP.splitlines())
+    v.set_lines((HELP + cpu_help).splitlines())
     v.loop()

@@ -566,6 +566,8 @@ if __name__ == "__main__":
 
     p = CPU_PLUGIN.PROCESSOR_ENTRY()
     engine.set_processor(p)
+    if hasattr(p, "help_text"):
+        help.set_cpu_help(p.help_text)
 
     engine.DisasmObj.LEADER_SIZE = 8 + 1
     if show_bytes:
