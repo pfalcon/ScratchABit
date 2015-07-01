@@ -214,7 +214,7 @@ class AddressSpace:
     def make_data_array(self, addr, sz, num_items):
         # Make a data array. First-class arrays are not supported so far,
         # so just mark data units sequentially
-        self.set_comment(addr, "Array, num items: %d" % num_items)
+        self.set_comment(addr, "Array, num %s: %d" % ("bytes" if sz == 1 else "items", num_items))
         for i in range(num_items):
             self.make_data(addr, sz)
             addr += sz
