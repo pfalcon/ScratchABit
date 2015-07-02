@@ -15,6 +15,10 @@ show bytes 4
 # Load binary code to disassemble to the defined memory area
 load example.bin 0x600000
 
+# And/or load a structured executable (e.g. ELF) via a specific
+# loader plugin ("elf" below).
+#load example-elf elf
+
 # Start disassembly from the addresses defined below (left-hand
 # side defines label for that address). Multiple entrypoints allowed.
 [entrypoints]
