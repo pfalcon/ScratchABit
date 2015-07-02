@@ -21,6 +21,7 @@ load example.bin 0x600000
 
 # Start disassembly from the addresses defined below (left-hand
 # side defines label for that address). Multiple entrypoints allowed.
+# Address first in list is what will be shown after load.
 [entrypoints]
 start = 0x600000
 
