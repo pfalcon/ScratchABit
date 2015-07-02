@@ -63,6 +63,20 @@ includes a simple x86_64 raw binary code, and corresponding .def file:
 
 Press F1 if in doubt what to do next.
 
+Using Plugins
+-------------
+
+IDAPython processor plugins can be loaded from anywhere on the Python
+module path. Alternatively, you can symlink the plugin .py file into
+the plugins/cpu subdirectory.
+
+After the plugin is made available, create a new definition file based
+on example.def that sets the plugin module name in the 'cpu xxx' line.
+
+For a very simple example that uses an external plugin, see this
+[esp8266.def file](https://gist.github.com/projectgus/f898d5798e3e44240796)
+that works with the xtensa.py file from the
+[ida-xtensa repository](https://github.com/pfalcon/ida-xtensa).
 
 TODO/Things to decide
 ---------------------
