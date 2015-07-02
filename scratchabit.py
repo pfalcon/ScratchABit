@@ -580,7 +580,8 @@ if __name__ == "__main__":
         load_state(project_dir)
     else:
         for label, addr in ENTRYPOINTS:
-            engine.add_entrypoint(addr)
+            if engine.ADDRESS_SPACE.is_exec(addr):
+                engine.add_entrypoint(addr)
             engine.ADDRESS_SPACE.set_label(addr, label)
         def _progress(cnt):
             sys.stdout.write("Performing initial analysis... %d\r" % cnt)
