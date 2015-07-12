@@ -31,6 +31,7 @@ d - Make/Cycle data
 a - Make ASCII string
 n - (Re)name address (make label)
 i - Info
+/ - Search thru listing starting from current addr (Shift+/ - continue)
 
 Current selected argument commands (ok to work on current command
 if only 1 suitable arg):
