@@ -74,6 +74,9 @@ class AddressSpace:
         self.arg_props = {}
         # Problem spots which automatic control/data flow couldn't resolve
         self.issues = {}
+        # Function start and beyond-end addresses
+        self.func_start = {}
+        self.func_end = {}
         # Cached last accessed area
         self.last_area = None
 
@@ -343,6 +346,23 @@ class AddressSpace:
     def get_xrefs(self, ea):
         return self.xrefs.get(ea)
 
+    # Functions API
+
+    def make_func(self, from_ea, to_ea_excl):
+        self.func_start[from_ea] = to_ea_excl
+        if to_ea_excl is not None:
+            self.func_end[to_ea_excl] = from_ea
+
+    # If ea is start of function, return function name (i.e. its label)
+    def get_func_start(self, ea):
+        if ea in self.func_start:
+            return self.get_label(ea)
+
+    # If ea is end of function, return function name (i.e. its label)
+    def get_func_end(self, ea):
+        if ea in self.func_end:
+            return self.get_label(self.func_end[ea])
+
     # Issues API
 
     def add_issue(self, ea, descr):
@@ -418,6 +438,28 @@ class AddressSpace:
                     break
                 from_addr, type = l.split()
                 self.xrefs.setdefault(addr, {})[int(from_addr, 16)] = type
+
+    def save_funcs(self, stream):
+        for addr in sorted(self.func_start.keys()):
+            stream.write("%08x " % addr)
+            if addr in self.func_end:
+                stream.write("%08x\n" % self.func_end[addr])
+            else:
+                stream.write("?\n")
+
+    def load_funcs(self, stream):
+        while True:
+            l = stream.readline().rstrip()
+            if not l:
+                break
+            start, end = l.split()
+            start = int(start, 16)
+            if end == "?":
+                end = None
+            else:
+                end = int(end, 16)
+                self.func_end[end] = start
+            self.func_start[start] = end
 
     def save_areas(self, stream):
         for a in self.area_list:
@@ -823,6 +865,10 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             if target_addr >= 0 and addr < target_addr:
                 num_lines += 1
 
+            func_start = ADDRESS_SPACE.get_func_start(addr)
+            if func_start:
+                model.add_line(addr, Literal(addr, "; Start of '%s' function" % func_start))
+
             xrefs = ADDRESS_SPACE.get_xrefs(addr)
             if xrefs:
                 for from_addr in sorted(xrefs.keys()):
@@ -835,6 +881,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             f = flags[i]
             if f == AddressSpace.UNK:
                 out = Unknown(addr, bytes[i])
+                sz = 1
                 i += 1
             elif f == AddressSpace.DATA:
                 sz = 1
@@ -857,14 +904,19 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             elif f == AddressSpace.CODE:
                 out = Instruction(addr)
                 _processor.cmd = out
-                insn_sz = _processor.ana()
+                sz = _processor.ana()
                 _processor.out()
-                i += insn_sz
+                i += sz
             else:
                 assert 0, "flags=%x" % f
 
             model.add_line(addr, out)
             #sys.stdout.write(out + "\n")
+
+            func_end = ADDRESS_SPACE.get_func_end(addr + sz)
+            if func_end:
+                model.add_line(addr, Literal(addr, "; End of '%s' function" % func_end))
+
             num_lines -= 1
             if not num_lines:
                 return

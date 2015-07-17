@@ -520,6 +520,8 @@ def save_state(project_dir):
         engine.ADDRESS_SPACE.save_arg_props(f)
     with open(project_dir + "/project.xrefs", "w") as f:
         engine.ADDRESS_SPACE.save_xrefs(f)
+    with open(project_dir + "/project.funcs", "w") as f:
+        engine.ADDRESS_SPACE.save_funcs(f)
     with open(project_dir + "/project.aspace", "w") as f:
         engine.ADDRESS_SPACE.save_areas(f)
 
@@ -533,6 +535,8 @@ def load_state(project_dir):
         engine.ADDRESS_SPACE.load_arg_props(f)
     with open(project_dir + "/project.xrefs", "r") as f:
         engine.ADDRESS_SPACE.load_xrefs(f)
+    with open(project_dir + "/project.funcs", "r") as f:
+        engine.ADDRESS_SPACE.load_funcs(f)
     with open(project_dir + "/project.aspace", "r") as f:
         engine.ADDRESS_SPACE.load_areas(f)
 

@@ -286,6 +286,7 @@ def ua_add_cref(opoff, ea, flags):
     elif flags == fl_CN:
         ADDRESS_SPACE.make_label("fun_", ea)
         ADDRESS_SPACE.add_xref(_processor.cmd.ea, ea, "c")
+        ADDRESS_SPACE.make_func(ea, None)
 
 
 def ua_dodata2(opoff, ea, dtype):
