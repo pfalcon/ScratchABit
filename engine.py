@@ -353,6 +353,9 @@ class AddressSpace:
         if to_ea_excl is not None:
             self.func_end[to_ea_excl] = from_ea
 
+    def is_func(self, ea):
+        return ea in self.func_start
+
     # If ea is start of function, return function name (i.e. its label)
     def get_func_start(self, ea):
         if ea in self.func_start:
