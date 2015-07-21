@@ -227,6 +227,10 @@ def load_sections(aspace, elffile):
 
                 if sym["st_info"]["type"] == "STT_FUNC":
                     aspace.analisys_stack_push(sym["st_value"] + sec_start)
+                    if sym["st_size"]:
+                        aspace.make_func(sym["st_value"] + sec_start, sym["st_value"] + sec_start + sym["st_size"])
+                    else:
+                        aspace.make_func(sym["st_value"] + sec_start, None)
                 if sym["st_info"]["type"] == "STT_OBJECT":
                     aspace.make_data_array(sym["st_value"] + sec_start, 1, sym["st_size"])
 
