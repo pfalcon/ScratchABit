@@ -495,7 +495,7 @@ class AddressSpace:
 
     # Hack for idaapi interfacing
     # TODO: should go to "Analysis" object
-    def analisys_stack_push(self, ea, is_call):
+    def analisys_stack_push(self, ea, is_call=True):
         global analisys_stack_branches, analisys_stack_calls
         # If we know something is func (e.g. from loader), jump
         # to it means tail-call.
