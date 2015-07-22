@@ -276,7 +276,7 @@ def ua_add_cref(opoff, ea, flags):
         log.warning("ua_add_cref: Cannot get flags for %x - not adding cref", ea)
         return
     if fl == ADDRESS_SPACE.UNK:
-        ADDRESS_SPACE.analisys_stack_push(ea)
+        ADDRESS_SPACE.analisys_stack_push(ea, flags == fl_CN)
     else:
         assert fl == ADDRESS_SPACE.CODE, "While adding cref from 0x%x to 0x%x, dest flags are: 0x%x" % (_processor.cmd.ea, ea, fl)
         pass

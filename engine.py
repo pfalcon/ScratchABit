@@ -495,10 +495,14 @@ class AddressSpace:
 
     # Hack for idaapi interfacing
     # TODO: should go to "Analysis" object
-    @staticmethod
-    def analisys_stack_push(ea):
-        global analisys_stack
-        analisys_stack.append(ea)
+    def analisys_stack_push(self, ea, is_call):
+        global analisys_stack_branches, analisys_stack_calls
+        # If we know something is func (e.g. from loader), jump
+        # to it means tail-call.
+        if is_call or self.is_func(ea):
+            analisys_stack_calls.append(ea)
+        else:
+            analisys_stack_branches.append(ea)
 
 
 ADDRESS_SPACE = AddressSpace()
@@ -509,10 +513,14 @@ def set_processor(p):
     idaapi.set_processor(p)
 
 
-analisys_stack = []
+analisys_stack_calls = []
+analisys_stack_branches = []
 
-def add_entrypoint(ea):
-    analisys_stack.append(ea)
+def add_entrypoint(ea, as_func=True):
+    if as_func:
+        analisys_stack_calls.append(ea)
+    else:
+        analisys_stack_branches.append(ea)
 
 def init_cmd(ea):
     _processor.cmd.ea = ea
@@ -522,8 +530,14 @@ def init_cmd(ea):
 def analyze(callback=lambda cnt:None):
     cnt = 0
     limit = 1000000
-    while analisys_stack and limit:
-        ea = analisys_stack.pop()
+    while limit:
+        if analisys_stack_branches:
+            ea = analisys_stack_branches.pop()
+        elif analisys_stack_calls:
+            ea = analisys_stack_calls.pop()
+            log.info("Starting analysis of function 0x%x" % ea)
+        else:
+            break
         init_cmd(ea)
         try:
             insn_sz = _processor.ana()

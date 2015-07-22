@@ -204,7 +204,7 @@ class Editor(editor.EditorExt):
         elif key == b"c":
             addr = self.cur_addr()
             self.show_status("Analyzing at %x" % addr)
-            engine.add_entrypoint(addr)
+            engine.add_entrypoint(addr, False)
             engine.analyze(self.analyze_status)
             self.update_model()
         elif key == b"d":
