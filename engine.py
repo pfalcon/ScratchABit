@@ -46,6 +46,12 @@ class InvalidAddrException(Exception):
     pass
 
 
+class Function:
+    def __init__(self, start, end=None):
+        self.start = start
+        self.end = end
+
+
 class AddressSpace:
     UNK = 0
     CODE = 0x01
@@ -349,9 +355,10 @@ class AddressSpace:
     # Functions API
 
     def make_func(self, from_ea, to_ea_excl):
-        self.func_start[from_ea] = to_ea_excl
+        f = Function(from_ea, to_ea_excl)
+        self.func_start[from_ea] = f
         if to_ea_excl is not None:
-            self.func_end[to_ea_excl] = from_ea
+            self.func_end[to_ea_excl] = f
 
     def is_func(self, ea):
         return ea in self.func_start
@@ -364,7 +371,7 @@ class AddressSpace:
     # If ea is end of function, return function name (i.e. its label)
     def get_func_end(self, ea):
         if ea in self.func_end:
-            return self.get_label(self.func_end[ea])
+            return self.get_label(self.func_end[ea].start)
 
     # Issues API
 
