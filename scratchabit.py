@@ -542,9 +542,12 @@ def load_state(project_dir):
 
 
 if __name__ == "__main__":
-    sys.path.append("plugins")
-    sys.path.append("plugins/cpu")
-    sys.path.append("plugins/loader")
+    # Plugin dirs are relative to the dir where scratchabit.py resides.
+    # sys.path[0] below provide absolute path of this dir, resolved for
+    # symlinks.
+    plugin_dirs = ["plugins", "plugins/cpu", "plugins/loader"]
+    for d in plugin_dirs:
+        sys.path.append(os.path.join(sys.path[0], d))
     log.basicConfig(filename="scratchabit.log", format='%(asctime)s %(message)s', level=log.DEBUG)
     log.info("Started")
 
