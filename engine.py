@@ -19,6 +19,8 @@ import binascii
 import json
 import logging as log
 
+from rangeset import RangeSet
+
 import idaapi
 import idc
 
@@ -47,10 +49,24 @@ class InvalidAddrException(Exception):
 
 
 class Function:
+
     def __init__(self, start, end=None):
+        self.ranges = RangeSet()
         self.start = start
         self.end = end
 
+    def add_insn(self, addr, sz):
+        self.ranges.add((addr, addr + sz))
+
+    def get_end(self):
+        if self.end is not None:
+            return self.end
+        return self.ranges.bounds()[1]
+
+    def get_end_method(self):
+        if self.end is not None:
+            return "as set by loader (detected: 0x%x)" % (self.ranges.bounds()[1] - 1)
+        return "as detected"
 
 class AddressSpace:
     UNK = 0
@@ -354,24 +370,28 @@ class AddressSpace:
 
     # Functions API
 
-    def make_func(self, from_ea, to_ea_excl):
+    def make_func(self, from_ea, to_ea_excl=None):
+        if from_ea in self.func_start:
+            return self.func_start[from_ea]
         f = Function(from_ea, to_ea_excl)
         self.func_start[from_ea] = f
         if to_ea_excl is not None:
             self.func_end[to_ea_excl] = f
+        return f
 
     def is_func(self, ea):
         return ea in self.func_start
 
-    # If ea is start of function, return function name (i.e. its label)
+    # If ea is start of function, return Function object
     def get_func_start(self, ea):
-        if ea in self.func_start:
-            return self.get_label(ea)
+        return self.func_start.get(ea)
 
-    # If ea is end of function, return function name (i.e. its label)
+    # If ea is end of function, return Function object
     def get_func_end(self, ea):
-        if ea in self.func_end:
-            return self.get_label(self.func_end[ea].start)
+        return self.func_end.get(ea)
+
+    def set_func_end(self, func, ea):
+        self.func_end[ea] = func
 
     # Issues API
 
@@ -534,16 +554,26 @@ def init_cmd(ea):
     _processor.cmd.size = 0
     _processor.cmd.disasm = None
 
+def finish_func(f):
+    if f:
+        log.info("Function %s (0x%x) ranges: %s" % (ADDRESS_SPACE.get_label(f.start), f.start, f.ranges.str(hex)))
+        end = f.get_end()
+        ADDRESS_SPACE.set_func_end(f, end)
+
 def analyze(callback=lambda cnt:None):
     cnt = 0
     limit = 1000000
+    current_func = None
     while limit:
         if analisys_stack_branches:
             ea = analisys_stack_branches.pop()
         elif analisys_stack_calls:
+            finish_func(current_func)
             ea = analisys_stack_calls.pop()
             log.info("Starting analysis of function 0x%x" % ea)
+            current_func = ADDRESS_SPACE.make_func(ea)
         else:
+            finish_func(current_func)
             break
         init_cmd(ea)
         try:
@@ -557,6 +587,8 @@ def analyze(callback=lambda cnt:None):
             if not _processor.emu():
                 assert False
             ADDRESS_SPACE.make_code(ea, insn_sz)
+            if current_func:
+                current_func.add_insn(ea, insn_sz)
             _processor.out()
 #            print("%08x %s" % (_processor.cmd.ea, _processor.cmd.disasm))
 #            print("---------")
@@ -889,9 +921,9 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             if target_addr >= 0 and addr < target_addr:
                 num_lines += 1
 
-            func_start = ADDRESS_SPACE.get_func_start(addr)
-            if func_start:
-                model.add_line(addr, Literal(addr, "; Start of '%s' function" % func_start))
+            func = ADDRESS_SPACE.get_func_start(addr)
+            if func:
+                model.add_line(addr, Literal(addr, "; Start of '%s' function" % ADDRESS_SPACE.get_label(func.start)))
 
             xrefs = ADDRESS_SPACE.get_xrefs(addr)
             if xrefs:
@@ -939,7 +971,9 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
 
             func_end = ADDRESS_SPACE.get_func_end(addr + sz)
             if func_end:
-                model.add_line(addr, Literal(addr, "; End of '%s' function" % func_end))
+                model.add_line(addr, Literal(addr, "; End of '%s' function (%s)" % (
+                    ADDRESS_SPACE.get_label(func_end.start), func_end.get_end_method()
+                )))
 
             num_lines -= 1
             if not num_lines:
