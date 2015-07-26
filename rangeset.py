@@ -30,7 +30,8 @@ class RangeSet:
         self.r.append(r)
 
     def bounds(self):
-        return (self.r[0][0], self.r[-1][1])
+        if self.r:
+            return (self.r[0][0], self.r[-1][1])
 
     def __str__(self):
         return str(self.r)

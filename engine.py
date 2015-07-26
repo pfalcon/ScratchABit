@@ -61,7 +61,9 @@ class Function:
     def get_end(self):
         if self.end is not None:
             return self.end
-        return self.ranges.bounds()[1]
+        bounds = self.ranges.bounds()
+        if bounds:
+            return bounds[1]
 
     def get_end_method(self):
         if self.end is not None:
@@ -558,7 +560,8 @@ def finish_func(f):
     if f:
         log.info("Function %s (0x%x) ranges: %s" % (ADDRESS_SPACE.get_label(f.start), f.start, f.ranges.str(hex)))
         end = f.get_end()
-        ADDRESS_SPACE.set_func_end(f, end)
+        if end is not None:
+            ADDRESS_SPACE.set_func_end(f, end)
 
 def analyze(callback=lambda cnt:None):
     cnt = 0
