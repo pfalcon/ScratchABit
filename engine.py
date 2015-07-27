@@ -567,6 +567,7 @@ analisys_stack_branches = []
 
 def add_entrypoint(ea, as_func=True):
     if as_func:
+        ADDRESS_SPACE.make_func(ea, None)
         analisys_stack_calls.append(ea)
     else:
         analisys_stack_branches.append(ea)
