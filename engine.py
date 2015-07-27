@@ -58,6 +58,12 @@ class Function:
     def add_insn(self, addr, sz):
         self.ranges.add((addr, addr + sz))
 
+    def add_range(self, start, end):
+        self.ranges.add((start, end))
+
+    def get_ranges(self):
+        return self.ranges.to_list()
+
     def get_end(self):
         if self.end is not None:
             return self.end
@@ -98,7 +104,7 @@ class AddressSpace:
         self.arg_props = {}
         # Problem spots which automatic control/data flow couldn't resolve
         self.issues = {}
-        # Function start and beyond-end addresses
+        # Function start and beyond-end addresses, map to Function object
         self.func_start = {}
         self.func_end = {}
         # Cached last accessed area
@@ -472,26 +478,40 @@ class AddressSpace:
                 self.xrefs.setdefault(addr, {})[int(from_addr, 16)] = type
 
     def save_funcs(self, stream):
+        stream.write("# begin symtab_end ranges...\n")
         for addr in sorted(self.func_start.keys()):
             stream.write("%08x " % addr)
-            if addr in self.func_end:
-                stream.write("%08x\n" % self.func_end[addr])
+            func = self.func_start[addr]
+            end = func.get_end()
+            if end is not None:
+                stream.write("%08x" % end)
             else:
-                stream.write("?\n")
+                stream.write("% 8s" % "?")
+            for r in func.get_ranges():
+                stream.write(" %08x-%08x" % r)
+            stream.write("\n")
 
     def load_funcs(self, stream):
         while True:
             l = stream.readline().rstrip()
             if not l:
                 break
-            start, end = l.split()
+            if l[0] == "#":
+                continue
+            start, end, *ranges = l.split()
             start = int(start, 16)
             if end == "?":
                 end = None
             else:
                 end = int(end, 16)
-                self.func_end[end] = start
-            self.func_start[start] = end
+
+            f = Function(start, end)
+            self.func_start[start] = f
+            if end is not None:
+                self.func_end[end] = f
+            for r in ranges:
+                r = [int(x, 16) for x in r.split("-")]
+                f.add_range(*r)
 
     def save_areas(self, stream):
         for a in self.area_list:
