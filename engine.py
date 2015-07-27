@@ -407,7 +407,7 @@ class AddressSpace:
         for start, func in self.func_start.items():
             if ea >= start:
                 end = func.get_end()
-                if ea < end:
+                if end is not None and ea < end:
                     return func
 
     # Issues API
