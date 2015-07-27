@@ -401,6 +401,15 @@ class AddressSpace:
     def set_func_end(self, func, ea):
         self.func_end[ea] = func
 
+    # Look up function containing address
+    def lookup_func(self, ea):
+        # TODO: use binary search instead
+        for start, func in self.func_start.items():
+            if ea >= start:
+                end = func.get_end()
+                if ea < end:
+                    return func
+
     # Issues API
 
     def add_issue(self, ea, descr):
