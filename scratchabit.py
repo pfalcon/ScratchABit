@@ -508,7 +508,8 @@ def parse_disasm_def(fname):
 def save_state(project_dir):
     if not os.path.isdir(project_dir):
         os.makedirs(project_dir)
-    files = ["project.labels", "project.comments", "project.args", "project.xrefs", "project.aspace"]
+    files = ["project.labels", "project.comments", "project.args",
+             "project.xrefs", "project.funcs", "project.aspace"]
     for fname in files:
         if os.path.exists(project_dir + "/" + fname):
             os.rename(project_dir + "/" + fname, project_dir + "/" + fname + ".bak")
