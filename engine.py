@@ -491,7 +491,7 @@ class AddressSpace:
         for addr in sorted(self.func_start.keys()):
             stream.write("%08x " % addr)
             func = self.func_start[addr]
-            end = func.get_end()
+            end = func.end
             if end is not None:
                 stream.write("%08x" % end)
             else:
