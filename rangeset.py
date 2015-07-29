@@ -13,11 +13,20 @@ class RangeSet:
         last = len(self.r) - 1
         for i, t in enumerate(self.r):
             if r[0] == t[1]:
-                if i != last and r[1] == self.r[i + 1][0]:
-                    self.r[i] = (t[0], self.r[i + 1][1])
+                new = (t[0], r[1])
+                if i != last and new[1] == self.r[i + 1][0]:
+                    self.r[i] = (new[0], self.r[i + 1][1])
                     del self.r[i + 1]
                 else:
-                    self.r[i] = (t[0], r[1])
+                    self.r[i] = new
+                return
+            elif r[1] == t[0]:
+                new = (r[0], t[1])
+                if i != 0 and new[0] == self.r[i - 1][1]:
+                    self.r[i] = (self.r[i - 1][0], new[1])
+                    del self.r[i - 1]
+                else:
+                    self.r[i] = new
                 return
             elif r[0] < t[0]:
                 if i > 0:
