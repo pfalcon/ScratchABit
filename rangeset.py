@@ -85,3 +85,14 @@ if __name__ == "__main__":
     r.add((20, 40))
     #assert r.to_list() == [(10, 40)]
     print(list(r))
+
+    r = RangeSet()
+    r.add((30, 40))
+    r.add((10, 20))
+    r.add((20, 30))
+    assert r.to_list() == [(10, 40)]
+
+    r = RangeSet()
+    r.add((10, 20))
+    r.add((1, 10))
+    assert r.to_list() == [(1, 20)]
