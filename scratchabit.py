@@ -624,6 +624,9 @@ if __name__ == "__main__":
         e.set_model(_model)
         e.goto_addr(show_addr)
         e.loop()
+    except:
+        log.exception("Unhandled exception")
+        raise
     finally:
         e.cursor(True)
         e.deinit_tty()
