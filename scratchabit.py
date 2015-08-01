@@ -625,5 +625,6 @@ if __name__ == "__main__":
         e.goto_addr(show_addr)
         e.loop()
     finally:
+        e.cursor(True)
         e.deinit_tty()
         e.wr("\n\n")
