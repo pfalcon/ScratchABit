@@ -907,9 +907,9 @@ def render_partial_around(addr, subno, context_lines):
             # Reached beginning of address space, just set as such
             off = 0
     assert off >= 0
-    log.debug("render_partial_around: %x, %s", off, str_area(area))
+    log.debug("render_partial_around: 0x%x, %s", off, str_area(area))
     off = ADDRESS_SPACE.adjust_offset_reverse(off, area)
-    log.debug("render_partial_around adjusted: %x, %s", off, str_area(area))
+    log.debug("render_partial_around adjusted: 0x%x, %s", off, str_area(area))
     model = Model(addr, subno)
     render_partial(model, ADDRESS_SPACE.area_list.index(area), off, context_lines, addr)
     log.debug("render_partial_around model done, lines: %d", len(model.lines()))
