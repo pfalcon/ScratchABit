@@ -94,6 +94,8 @@ class AddressSpace:
         self.addr_map = {}
         # Map from address to its label
         self.labels = {}
+        # Map from label to its address
+        self.labels_rev = {}
         # Map from address to its comment
         self.comments = {}
         # Map from address to its cross-reference records
@@ -279,7 +281,9 @@ class AddressSpace:
             return
         if not prefix:
             prefix = self.get_default_label_prefix(ea)
-        self.labels[ea] = "%s%08x" % (prefix, ea)
+        l = "%s%08x" % (prefix, ea)
+        self.labels[ea] = l
+        self.labels_rev[l] = ea
 
     # auto_label will change its prefix automatically based on
     # type of data it points.
@@ -287,6 +291,7 @@ class AddressSpace:
         if ea in self.labels:
             return
         self.labels[ea] = ea
+        self.labels_rev[ea] = ea
 
     def get_label(self, ea):
         label = self.labels.get(ea)
@@ -300,35 +305,35 @@ class AddressSpace:
         if area is None:
             self.add_area(ea, ea, {"name": "autocreated to host %s label" % label})
         self.labels[ea] = label
+        self.labels_rev[label] = ea
 
     def make_unique_label(self, ea, label):
-        existing = self.get_label_set()
         cnt = 0
         while True:
             l = label
             if cnt > 0:
                 l += "_%d" % cnt
-            if l not in existing:
+            if l not in self.labels_rev:
                 self.labels[ea] = l
+                self.labels_rev[l] = ea
                 return l
             cnt += 1
 
     def get_label_list(self):
         return sorted([x if isinstance(x, str) else self.get_default_label(x) for x in self.labels.values()])
 
-    def get_label_set(self):
-        return set(x if isinstance(x, str) else self.get_default_label(x) for x in self.labels.values())
-
     def resolve_label(self, label):
-        for ea, l in self.labels.items():
-            if l == label:
-                return ea
-            if isinstance(l, int) and self.get_default_label(l) == label:
-                return ea
-        return None
+        if label in self.labels_rev:
+            return self.labels_rev[label]
+        try:
+            ea = int(label.split("_", 1)[1], 16)
+        except:
+            return None
+        if ea in self.labels_rev and self.get_default_label(ea) == label:
+            return ea
 
     def label_exists(self, label):
-        return label in self.get_label_set()
+        return label in self.labels_rev
 
     # Comment API
 
@@ -441,6 +446,7 @@ class AddressSpace:
             else:
                 label = addr
             self.labels[addr] = label
+            self.labels_rev[label] = addr
 
     def save_comments(self, stream):
         for addr in sorted(self.comments.keys()):
