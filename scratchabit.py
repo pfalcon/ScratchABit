@@ -619,7 +619,7 @@ if __name__ == "__main__":
         for label, addr in ENTRYPOINTS:
             if engine.ADDRESS_SPACE.is_exec(addr):
                 engine.add_entrypoint(addr)
-            engine.ADDRESS_SPACE.set_label(addr, label)
+            engine.ADDRESS_SPACE.make_unique_label(addr, label)
         def _progress(cnt):
             sys.stdout.write("Performing initial analysis... %d\r" % cnt)
         engine.analyze(_progress)

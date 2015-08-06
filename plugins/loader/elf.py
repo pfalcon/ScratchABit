@@ -82,7 +82,7 @@ def load_segments(aspace, elffile):
                 #print(s.name, hex(s["st_value"]), s.entry)
                 symtab[i] = s
                 if s["st_shndx"] != "SHN_UNDEF":
-                    aspace.set_label(s["st_value"], str(s.name, "utf-8"))
+                    aspace.make_unique_label(s["st_value"], str(s.name, "utf-8"))
 
                     if s["st_info"]["type"] == "STT_FUNC":
                         aspace.analisys_stack_push(s["st_value"])
@@ -171,7 +171,7 @@ def load_segments(aspace, elffile):
                     aspace.analisys_stack_push(lazy_code)
 
                     real_func = adjust_plt_addr(lazy_code)
-                    aspace.set_label(real_func, symname)
+                    aspace.make_unique_label(real_func, symname)
                     aspace.analisys_stack_push(real_func)
 
                     pltrel += entry_struct.sizeof()
@@ -200,7 +200,7 @@ def load_sections(aspace, elffile):
             if sec["sh_type"] == "SHT_PROGBITS":
                 sec.stream.seek(sec['sh_offset'])
                 aspace.load_content(sec.stream, addr, size)
-            aspace.set_label(addr, name)
+            aspace.make_unique_label(addr, name)
             sec_map[i] = (sec, addr)
             addr_cnt += size + 0xfff
             addr_cnt &= ~0xfff
@@ -223,7 +223,7 @@ def load_sections(aspace, elffile):
                     sec, sec_start = sec_map[sym["st_shndx"]]
 
                 symname = str(sym.name, "utf-8")
-                aspace.set_label(sym["st_value"] + sec_start, symname)
+                aspace.make_unique_label(sym["st_value"] + sec_start, symname)
 
                 if sym["st_info"]["type"] == "STT_FUNC":
                     aspace.analisys_stack_push(sym["st_value"] + sec_start)
