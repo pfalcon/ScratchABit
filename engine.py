@@ -308,6 +308,9 @@ class AddressSpace:
         self.labels_rev[label] = ea
 
     def make_unique_label(self, ea, label):
+        existing = self.get_label(ea)
+        if existing == label:
+            return label
         cnt = 0
         while True:
             l = label
