@@ -317,8 +317,7 @@ class AddressSpace:
             if cnt > 0:
                 l += "__%d" % cnt
             if l not in self.labels_rev:
-                self.labels[ea] = l
-                self.labels_rev[l] = ea
+                self.set_label(ea, l)
                 return l
             cnt += 1
 
