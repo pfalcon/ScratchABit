@@ -315,7 +315,7 @@ class AddressSpace:
         while True:
             l = label
             if cnt > 0:
-                l += "_%d" % cnt
+                l += "__%d" % cnt
             if l not in self.labels_rev:
                 self.labels[ea] = l
                 self.labels_rev[l] = ea
