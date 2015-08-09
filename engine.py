@@ -226,6 +226,11 @@ class AddressSpace:
                 break
         return off
 
+    def adjust_addr_reverse(self, addr):
+        off, area = self.addr2area(addr)
+        if area is None:
+            return None
+        return self.adjust_offset_reverse(off, area) + area[START]
 
     def set_flags(self, addr, sz, head_fl, rest_fl=0):
         off, area = self.addr2area(addr)

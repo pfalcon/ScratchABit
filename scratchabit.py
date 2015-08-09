@@ -91,6 +91,11 @@ class Editor(editor.EditorExt):
         if to_addr is None:
             self.show_status("No address-like value to go to")
             return
+        adj_addr = self.model.AS.adjust_addr_reverse(to_addr)
+        if adj_addr is None:
+            self.show_status("Unknown address: 0x%x" % to_addr)
+            return
+        to_addr = adj_addr
 
         # If we can position cursor within current screen, do that,
         # to avoid jumpy UI
