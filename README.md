@@ -87,8 +87,8 @@ TODO/Things to decide
 * Few important UI commands to implement yet for comfortable work.
 * Offer to save DB on quit if modified.
 * Git integration for DB saving.
-* Improve robustness (add exception handler at the main loop level, don't
-  abort the application, show to user/log and continue).
+* ~~Improve robustness (add exception handler at the main loop level, don't
+  abort the application, show to user/log and continue).~~
 * Try to deal with code flow inconsistencies (e.g. within an instruction
   - low priority for intended usage) and data access inconsistencies (e.g.
   accessing individual bytes of previosly detected word - higher priority).
