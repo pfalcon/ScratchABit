@@ -86,10 +86,6 @@ class AddressSpace:
 
     def __init__(self):
         self.area_list = []
-        # Map from area start address to area byte content
-        self.area_bytes = {}
-        # Map from area start address to each byte's flags
-        self.area_byte_flags = {}
         # Map from referenced addresses to their properties
         self.addr_map = {}
         # Map from address to its label
