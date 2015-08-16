@@ -261,6 +261,14 @@ class AddressSpace:
             self.make_data(addr, sz)
             addr += sz
 
+    # Address properties API
+
+    def set_addr_prop(self, addr, prop, val):
+        self.addr_map.setdefault(addr, {})[prop] = val
+
+    def get_addr_prop(self, addr, prop, default=None):
+        return self.addr_map.get(addr, {}).get(prop, default)
+
     # Label API
 
     def get_default_label_prefix(self, ea):
