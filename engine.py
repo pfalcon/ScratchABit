@@ -293,6 +293,7 @@ class AddressSpace:
         l = "%s%08x" % (prefix, ea)
         self.labels[ea] = l
         self.labels_rev[l] = ea
+        self.set_addr_prop(ea, "label", l)
 
     # auto_label will change its prefix automatically based on
     # type of data it points.
@@ -300,10 +301,13 @@ class AddressSpace:
         if ea in self.labels:
             return
         self.labels[ea] = ea
+        self.set_addr_prop(ea, "label", ea)
         self.labels_rev[ea] = ea
 
     def get_label(self, ea):
+        label_ = self.get_addr_prop(ea, "label")
         label = self.labels.get(ea)
+        assert label == label_, "%x: %s vs %s" % (ea, label, label_)
         if isinstance(label, int):
             return "%s%08x" % (self.get_default_label_prefix(ea), label)
         return label
@@ -314,6 +318,7 @@ class AddressSpace:
         if area is None:
             self.add_area(ea, ea, {"name": "autocreated to host %s label" % label})
         self.labels[ea] = label
+        self.set_addr_prop(ea, "label", label)
         self.labels_rev[label] = ea
 
     def make_unique_label(self, ea, label):
@@ -349,10 +354,14 @@ class AddressSpace:
     # Comment API
 
     def get_comment(self, ea):
-        return self.comments.get(ea)
+        comm = self.comments.get(ea)
+        comm_ = self.get_addr_prop(ea, "comm")
+        assert comm == comm_
+        return comm
 
     def set_comment(self, ea, comm):
         self.comments[ea] = comm
+        self.set_addr_prop(ea, "comm", comm)
 
     # (Pseudo)instruction Argument Properties API
 
@@ -365,8 +374,18 @@ class AddressSpace:
         props = arg_props[arg_no]
         props[prop] = prop_val
 
+        arg_props = self.get_addr_prop(ea, "args", {})
+        if arg_no not in arg_props:
+            arg_props[arg_no] = {}
+        props = arg_props[arg_no]
+        props[prop] = prop_val
+        self.set_addr_prop(ea, "args", arg_props)
+
     def get_arg_prop(self, ea, arg_no, prop):
-        return self.arg_props.get(ea, {}).get(arg_no, {}).get(prop)
+        arg_props = self.arg_props.get(ea, {})
+        arg_props_ = self.get_addr_prop(ea, "args", {})
+        assert arg_props == arg_props_
+        return arg_props.get(arg_no, {}).get(prop)
 
     def make_arg_offset(self, insn_addr, arg_no, ref_addr):
         # Convert an immediate argument to an offset one
@@ -383,11 +402,17 @@ class AddressSpace:
 
     def add_xref(self, from_ea, to_ea, type):
         self.xrefs.setdefault(to_ea, {})[from_ea] = type
+        xrefs = self.get_addr_prop(to_ea, "xrefs", {})
+        xrefs[from_ea] = type
+        self.set_addr_prop(to_ea, "xrefs", xrefs)
 
     def del_xref(self, from_ea, to_ea, type):
         if to_ea in self.xrefs:
             assert self.xrefs[to_ea][from_ea] == type
             del self.xrefs[to_ea][from_ea]
+        xrefs = self.get_addr_prop(to_ea, "xrefs", {})
+        del xrefs[from_ea]
+        self.set_addr_prop(to_ea, "xrefs", xrefs)
 
     def get_xrefs(self, ea):
         return self.xrefs.get(ea)
@@ -399,8 +424,11 @@ class AddressSpace:
             return self.func_start[from_ea]
         f = Function(from_ea, to_ea_excl)
         self.func_start[from_ea] = f
+        self.set_addr_prop(from_ea, "fun_s", f)
+
         if to_ea_excl is not None:
             self.func_end[to_ea_excl] = f
+            self.set_addr_prop(to_ea_excl, "fun_e", f)
         return f
 
     def is_func(self, ea):
@@ -416,6 +444,7 @@ class AddressSpace:
 
     def set_func_end(self, func, ea):
         self.func_end[ea] = func
+        self.set_addr_prop(ea, "fun_e", func)
 
     # Look up function containing address
     def lookup_func(self, ea):
