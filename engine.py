@@ -585,6 +585,62 @@ class AddressSpace:
                 i += 32
             stream.write("\n")
 
+    def save_ref_yaml(self, stream):
+        """Save "reference YAML" file, based on broken-down property dicts.
+        This has 2 purposes: a) as reference to compare with YAML generated
+        from new common address properties dicts; b) to migrate broken-down
+        save files to YAML.
+        """
+        log.info("Saving YAML start")
+        addrs = set(self.labels.keys())
+        addrs.update(self.comments.keys())
+        addrs.update(self.xrefs.keys())
+        addrs.update(self.arg_props.keys())
+        addrs.update(self.func_start.keys())
+        for addr in sorted(addrs):
+                label = self.labels.get(addr)
+                comm = self.get_comment(addr)
+                xrefs = self.get_xrefs(addr)
+                args = self.arg_props.get(addr)
+                func = self.func_start.get(addr)
+                if label or comm or xrefs or args or func:
+                    stream.write("0x%08x:\n" % addr)
+                    stream.write(" f: %s %02x\n" % (flag2char(self.get_flags(addr)), self.get_flags(addr)))
+                    if label is not None:
+                        if label == addr:
+                            stream.write(" l:\n")
+                        else:
+                            stream.write(" l: %s\n" % label)
+                    if addr in self.arg_props:
+                        stream.write(" args:\n")
+                        for arg_no, data in sorted(self.arg_props[addr].items()):
+                            stream.write("  %s: %r\n" % (arg_no, data))
+                            #for k, v in sorted(data.items()):
+                            #    stream.write("   %s: %s\n" % (k, v))
+                    if comm is not None:
+                        stream.write(" cmnt: %r\n" % comm)
+
+                    if func is not None:
+                        if func.end is not None:
+                            stream.write(" fn_end: 0x%08x\n" % func.end)
+                        else:
+                            stream.write(" fn_end: '?'\n")
+                        stream.write(" fn_ranges: [")
+                        first = True
+                        for r in func.get_ranges():
+                            if not first:
+                                stream.write(", ")
+                            stream.write("[0x%08x,0x%08x]" % r)
+                            first = False
+                        stream.write("]\n")
+
+                    if xrefs is not None:
+                        stream.write(" x:\n" % xrefs)
+                        for from_addr in sorted(xrefs.keys()):
+                            stream.write(" - 0x%08x: %s\n" % (from_addr, xrefs[from_addr]))
+                addr += 1
+        log.info("Saving YAML done")
+
     def load_areas(self, stream):
         for a in self.area_list:
             l = stream.readline()
