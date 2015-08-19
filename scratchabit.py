@@ -559,6 +559,8 @@ def save_state(project_dir):
         engine.ADDRESS_SPACE.save_funcs(f)
     with open(project_dir + "/project.aspace", "w") as f:
         engine.ADDRESS_SPACE.save_areas(f)
+    with open(project_dir + "/project.yaml-ref", "w") as f:
+        engine.ADDRESS_SPACE.save_ref_yaml(f)
 
 def load_state(project_dir):
     print("Loading state...")
