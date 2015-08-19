@@ -402,6 +402,7 @@ class AddressSpace:
 
     def add_xref(self, from_ea, to_ea, type):
         self.xrefs.setdefault(to_ea, {})[from_ea] = type
+
         xrefs = self.get_addr_prop(to_ea, "xrefs", {})
         xrefs[from_ea] = type
         self.set_addr_prop(to_ea, "xrefs", xrefs)
@@ -415,7 +416,10 @@ class AddressSpace:
         self.set_addr_prop(to_ea, "xrefs", xrefs)
 
     def get_xrefs(self, ea):
-        return self.xrefs.get(ea)
+        xrefs_ = self.get_addr_prop(ea, "xrefs", None)
+        xrefs = self.xrefs.get(ea)
+        assert xrefs == xrefs_
+        return xrefs
 
     # Functions API
 
