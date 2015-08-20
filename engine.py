@@ -641,6 +641,124 @@ class AddressSpace:
                 addr += 1
         log.info("Saving YAML done")
 
+    def save_addr_props(self, stream):
+        for addr, props in sorted(self.addr_map.items()):
+                    # If entry has just fun_e data, skip it
+                    if len(props) == 1 and "fun_e" in props:
+                        continue
+                    stream.write("0x%08x:\n" % addr)
+                    stream.write(" f: %s %02x\n" % (flag2char(self.get_flags(addr)), self.get_flags(addr)))
+                    label = props.get("label")
+                    arg_props = props.get("args")
+                    comm = props.get("comm")
+                    xrefs = props.get("xrefs")
+                    func = props.get("fun_s")
+                    if label is not None:
+                        if label == addr:
+                            stream.write(" l:\n")
+                        else:
+                            stream.write(" l: %s\n" % label)
+                    if arg_props is not None:
+                        stream.write(" args:\n")
+                        for arg_no, data in sorted(self.arg_props[addr].items()):
+                            stream.write("  %s: %r\n" % (arg_no, data))
+                            #for k, v in sorted(data.items()):
+                            #    stream.write("   %s: %s\n" % (k, v))
+                    if comm is not None:
+                        stream.write(" cmnt: %r\n" % comm)
+
+                    if func is not None:
+                        if func.end is not None:
+                            stream.write(" fn_end: 0x%08x\n" % func.end)
+                        else:
+                            stream.write(" fn_end: '?'\n")
+                        stream.write(" fn_ranges: [")
+                        first = True
+                        for r in func.get_ranges():
+                            if not first:
+                                stream.write(", ")
+                            stream.write("[0x%08x,0x%08x]" % r)
+                            first = False
+                        stream.write("]\n")
+
+                    if xrefs is not None:
+                        stream.write(" x:\n" % xrefs)
+                        for from_addr in sorted(xrefs.keys()):
+                            stream.write(" - 0x%08x: %s\n" % (from_addr, xrefs[from_addr]))
+
+    def load_addr_props(self, stream):
+        l = stream.readline()
+        while l:
+            assert l.endswith(":\n")
+            addr = int(l[:-2], 0)
+            props = self.addr_map.get(addr, {})
+            l = stream.readline()
+            while l and l[0] == " ":
+                key, val = [x.strip() for x in l.split(":", 1)]
+                l = None
+
+                if key == "l":
+                    if not val:
+                        val = addr
+                    props["label"] = val
+                    # Loaded with load_labels() so far
+                    #self.labels_rev[val] = addr
+                    assert self.labels_rev[val] == addr, (val, addr, self.labels_rev[val])
+                elif key == "cmnt":
+                    props["comm"] = val[1:-1]
+                elif key == "fn_end":
+                    if val == "'?'":
+                        end = None
+                    else:
+                        end = int(val, 0)
+                    f = Function(addr, end)
+                    props["fun_s"] = f
+                    if end is not None:
+                        self.addr_map[end] = {"fun_e": f}
+                elif key == "fn_ranges":
+                    if val != "[]":
+                        assert val.startswith("[[") and val.endswith("]]"), val
+                        val = val[2:-2]
+                        f = props["fun_s"]
+                        for r in val.split("], ["):
+                            r = [int(x, 0) for x in r.split(",")]
+                            f.add_range(*r)
+
+                elif key == "args":
+                    arg_props = {}
+                    while True:
+                        l = stream.readline()
+                        if not l or not l.startswith("  "):
+                            break
+                        arg_no, data = [x.strip() for x in l.split(":", 1)]
+                        assert data[0] == "{" and data[-1] == "}"
+                        data = data[1:-1]
+                        vals = {}
+                        for pair in data.split(","):
+                            seq = [x.strip() for x in pair.split(":", 1)]
+                            for x in seq:
+                                assert x[0] == "'" and x[-1] == "'", x
+                            k, v = [x[1:-1] for x in seq]
+                            vals[k] = v
+                        arg_props[int(arg_no)] = vals
+                    props["args"] = arg_props
+
+                elif key == "x":
+                    xrefs = {}
+                    while True:
+                        l = stream.readline()
+                        if not l or not l.startswith(" - "):
+                            break
+                        key, val = [x.strip() for x in l[3:].split(":", 1)]
+                        xrefs[int(key, 0)] = val
+                    assert xrefs
+                    props["xrefs"] = xrefs
+
+                if l is None:
+                    l = stream.readline()
+
+            self.addr_map[addr] = props
+
     def load_areas(self, stream):
         for a in self.area_list:
             l = stream.readline()
