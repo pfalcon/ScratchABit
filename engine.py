@@ -305,9 +305,7 @@ class AddressSpace:
         self.labels_rev[ea] = ea
 
     def get_label(self, ea):
-        label_ = self.get_addr_prop(ea, "label")
-        label = self.labels.get(ea)
-        assert label == label_, "%x: %s vs %s" % (ea, label, label_)
+        label = self.get_addr_prop(ea, "label")
         if isinstance(label, int):
             return "%s%08x" % (self.get_default_label_prefix(ea), label)
         return label
@@ -354,9 +352,7 @@ class AddressSpace:
     # Comment API
 
     def get_comment(self, ea):
-        comm = self.comments.get(ea)
-        comm_ = self.get_addr_prop(ea, "comm")
-        assert comm == comm_
+        comm = self.get_addr_prop(ea, "comm")
         return comm
 
     def set_comment(self, ea, comm):
@@ -382,9 +378,7 @@ class AddressSpace:
         self.set_addr_prop(ea, "args", arg_props)
 
     def get_arg_prop(self, ea, arg_no, prop):
-        arg_props = self.arg_props.get(ea, {})
-        arg_props_ = self.get_addr_prop(ea, "args", {})
-        assert arg_props == arg_props_
+        arg_props = self.get_addr_prop(ea, "args", {})
         return arg_props.get(arg_no, {}).get(prop)
 
     def make_arg_offset(self, insn_addr, arg_no, ref_addr):
@@ -416,9 +410,7 @@ class AddressSpace:
         self.set_addr_prop(to_ea, "xrefs", xrefs)
 
     def get_xrefs(self, ea):
-        xrefs_ = self.get_addr_prop(ea, "xrefs", None)
-        xrefs = self.xrefs.get(ea)
-        assert xrefs == xrefs_
+        xrefs = self.get_addr_prop(ea, "xrefs", None)
         return xrefs
 
     # Functions API
