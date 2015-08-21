@@ -587,6 +587,8 @@ class AddressSpace:
         save files to YAML.
         """
         log.info("Saving YAML start")
+        stream.write("header:\n")
+        stream.write(" version: 1.0\n")
         addrs = set(self.labels.keys())
         addrs.update(self.comments.keys())
         addrs.update(self.xrefs.keys())
@@ -637,6 +639,8 @@ class AddressSpace:
         log.info("Saving YAML done")
 
     def save_addr_props(self, stream):
+        stream.write("header:\n")
+        stream.write(" version: 1.0\n")
         for addr, props in sorted(self.addr_map.items()):
                     # If entry has just fun_e data, skip it
                     if len(props) == 1 and "fun_e" in props:
@@ -682,6 +686,10 @@ class AddressSpace:
                             stream.write(" - 0x%08x: %s\n" % (from_addr, xrefs[from_addr]))
 
     def load_addr_props(self, stream):
+        l = stream.readline()
+        assert l == "header:\n"
+        l = stream.readline()
+        assert l == " version: 1.0\n"
         l = stream.readline()
         while l:
             assert l.endswith(":\n")
