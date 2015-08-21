@@ -600,7 +600,7 @@ class AddressSpace:
         for addr in sorted(addrs):
                 label = self.labels.get(addr)
                 comm = self.get_comment(addr)
-                xrefs = self.get_xrefs(addr)
+                xrefs = self.xrefs.get(addr)
                 args = self.arg_props.get(addr)
                 func = self.func_start.get(addr)
                 if label or comm or xrefs or args or func:
