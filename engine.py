@@ -269,6 +269,9 @@ class AddressSpace:
     def get_addr_prop(self, addr, prop, default=None):
         return self.addr_map.get(addr, {}).get(prop, default)
 
+    def get_addr_prop_dict(self, addr):
+        return self.addr_map.get(addr, {})
+
     # Label API
 
     def get_default_label_prefix(self, ea):
@@ -1168,16 +1171,17 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             if target_addr >= 0 and addr < target_addr:
                 num_lines += 1
 
-            func = ADDRESS_SPACE.get_func_start(addr)
+            props = ADDRESS_SPACE.get_addr_prop_dict(addr)
+            func = props.get("fun_s")
             if func:
                 model.add_line(addr, Literal(addr, "; Start of '%s' function" % ADDRESS_SPACE.get_label(func.start)))
 
-            xrefs = ADDRESS_SPACE.get_xrefs(addr)
+            xrefs = props.get("xrefs")
             if xrefs:
                 for from_addr in sorted(xrefs.keys()):
                     model.add_line(addr, Xref(addr, from_addr, xrefs[from_addr]))
 
-            label = ADDRESS_SPACE.get_label(addr)
+            label = props.get("label")
             if label:
                 model.add_line(addr, Label(addr))
 
@@ -1216,7 +1220,9 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             model.add_line(addr, out)
             #sys.stdout.write(out + "\n")
 
-            func_end = ADDRESS_SPACE.get_func_end(addr + sz)
+            next_addr = addr + sz
+            next_props = ADDRESS_SPACE.get_addr_prop_dict(next_addr)
+            func_end = next_props.get("fun_e")
             if func_end:
                 model.add_line(addr, Literal(addr, "; End of '%s' function (%s)" % (
                     ADDRESS_SPACE.get_label(func_end.start), func_end.get_end_method()
