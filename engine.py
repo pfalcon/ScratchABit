@@ -693,9 +693,7 @@ class AddressSpace:
                     if not val:
                         val = addr
                     props["label"] = val
-                    # Loaded with load_labels() so far
-                    #self.labels_rev[val] = addr
-                    assert self.labels_rev[val] == addr, (val, addr, self.labels_rev[val])
+                    self.labels_rev[val] = addr
                 elif key == "cmnt":
                     props["comm"] = val[1:-1]
                 elif key == "fn_end":
