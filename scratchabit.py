@@ -31,7 +31,7 @@ import curses
 import npyscreen
 from pyedit import editorext as editor
 import help
-from saveload import *
+import saveload
 
 
 HEIGHT = 21
@@ -359,7 +359,7 @@ class Editor(editor.EditorExt):
             help.help(self)
             self.update_screen()
         elif key == b"S":
-            save_state(project_dir)
+            saveload.save_state(project_dir)
             self.show_status("Saved.")
         elif key == b"\x11":  # ^Q
             F = npyscreen.Popup(name='Problems list', lines=18)
@@ -582,8 +582,8 @@ if __name__ == "__main__":
     # Strip suffix if any from def filename
     project_dir = project_name + ".scratchabit"
 
-    if os.path.exists(project_dir + "/project.labels"):
-        load_state(project_dir)
+    if saveload.save_exists(project_dir):
+        saveload.load_state(project_dir)
     else:
         for label, addr in ENTRYPOINTS:
             if engine.ADDRESS_SPACE.is_exec(addr):

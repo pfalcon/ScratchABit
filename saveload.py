@@ -3,6 +3,10 @@ import os
 import engine
 
 
+def save_exists(project_dir):
+    return os.path.exists(project_dir + "/project.aspace")
+
+
 def save_state(project_dir):
     if not os.path.isdir(project_dir):
         os.makedirs(project_dir)
