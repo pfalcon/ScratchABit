@@ -86,20 +86,20 @@ class AddressSpace:
 
     def __init__(self):
         self.area_list = []
-        # Map from referenced addresses to their properties
+        # Map from referenced addresses to their properties. Among them:
+        # "args":
+        # Properties of instruction's args; at the very least, this should
+        # differentiate between literal numeric values and addresses/offsets/pointers
+        # to other objects
+        # "comm":
+        # Comment
+        # "label"
+        # Label
+        # "xref":
+        # Cross-reference records
         self.addr_map = {}
-        # Map from address to its label
-        self.labels = {}
         # Map from label to its address
         self.labels_rev = {}
-        # Map from address to its comment
-        self.comments = {}
-        # Map from address to its cross-reference records
-        self.xrefs = {}
-        # Map from code/data unit to properties of its args
-        # at the very least, this should differentiate between literal
-        # numeric values and addresses/offsets/pointers to other objects
-        self.arg_props = {}
         # Problem spots which automatic control/data flow couldn't resolve
         self.issues = {}
         # Function start and beyond-end addresses, map to Function object
@@ -289,21 +289,19 @@ class AddressSpace:
         return "%s%08x" % (prefix, ea)
 
     def make_label(self, prefix, ea):
-        if ea in self.labels:
+        if self.get_addr_prop(ea, "label"):
             return
         if not prefix:
             prefix = self.get_default_label_prefix(ea)
         l = "%s%08x" % (prefix, ea)
-        self.labels[ea] = l
-        self.labels_rev[l] = ea
         self.set_addr_prop(ea, "label", l)
+        self.labels_rev[l] = ea
 
     # auto_label will change its prefix automatically based on
     # type of data it points.
     def make_auto_label(self, ea):
-        if ea in self.labels:
+        if self.get_addr_prop(ea, "label"):
             return
-        self.labels[ea] = ea
         self.set_addr_prop(ea, "label", ea)
         self.labels_rev[ea] = ea
 
@@ -318,7 +316,6 @@ class AddressSpace:
         off, area = self.addr2area(ea)
         if area is None:
             self.add_area(ea, ea, {"name": "autocreated to host %s label" % label})
-        self.labels[ea] = label
         self.set_addr_prop(ea, "label", label)
         self.labels_rev[label] = ea
 
@@ -337,7 +334,7 @@ class AddressSpace:
             cnt += 1
 
     def get_label_list(self):
-        return sorted([x if isinstance(x, str) else self.get_default_label(x) for x in self.labels.values()])
+        return sorted([x if isinstance(x, str) else self.get_default_label(x) for x in self.labels_rev.keys()])
 
     def resolve_label(self, label):
         if label in self.labels_rev:
@@ -359,20 +356,11 @@ class AddressSpace:
         return comm
 
     def set_comment(self, ea, comm):
-        self.comments[ea] = comm
         self.set_addr_prop(ea, "comm", comm)
 
     # (Pseudo)instruction Argument Properties API
 
     def set_arg_prop(self, ea, arg_no, prop, prop_val):
-        if ea not in self.arg_props:
-            self.arg_props[ea] = {}
-        arg_props = self.arg_props[ea]
-        if arg_no not in arg_props:
-            arg_props[arg_no] = {}
-        props = arg_props[arg_no]
-        props[prop] = prop_val
-
         arg_props = self.get_addr_prop(ea, "args", {})
         if arg_no not in arg_props:
             arg_props[arg_no] = {}
@@ -398,16 +386,11 @@ class AddressSpace:
     # Xref API
 
     def add_xref(self, from_ea, to_ea, type):
-        self.xrefs.setdefault(to_ea, {})[from_ea] = type
-
         xrefs = self.get_addr_prop(to_ea, "xrefs", {})
         xrefs[from_ea] = type
         self.set_addr_prop(to_ea, "xrefs", xrefs)
 
     def del_xref(self, from_ea, to_ea, type):
-        if to_ea in self.xrefs:
-            assert self.xrefs[to_ea][from_ea] == type
-            del self.xrefs[to_ea][from_ea]
         xrefs = self.get_addr_prop(to_ea, "xrefs", {})
         del xrefs[from_ea]
         self.set_addr_prop(to_ea, "xrefs", xrefs)
@@ -467,70 +450,6 @@ class AddressSpace:
 
     # Persistence API
 
-    def save_labels(self, stream):
-        for addr in sorted(self.labels.keys()):
-            l = self.labels[addr]
-            if l == addr:
-                # auto label
-                stream.write("%08x\n" % addr)
-            else:
-                stream.write("%08x %s\n" % (addr, l))
-
-    def load_labels(self, stream):
-        for l in stream:
-            vals = l.split()
-            addr = int(vals[0], 16)
-            if len(vals) > 1:
-                label = vals[1]
-            else:
-                label = addr
-            self.labels[addr] = label
-            self.labels_rev[label] = addr
-
-    def save_comments(self, stream):
-        for addr in sorted(self.comments.keys()):
-            stream.write("%08x %s\n" % (addr, json.dumps(self.comments[addr])))
-
-    def load_comments(self, stream):
-        for l in stream:
-            addr, comment = l.split(None, 1)
-            addr = int(addr, 16)
-            self.comments[addr] = json.loads(comment)
-
-    def save_arg_props(self, stream):
-        for addr in sorted(self.arg_props.keys()):
-            stream.write("%08x %s\n" % (addr, json.dumps(self.arg_props[addr])))
-
-    def load_arg_props(self, stream):
-        for l in stream:
-            addr, props = l.split(None, 1)
-            addr = int(addr, 16)
-            props = json.loads(props)
-            # Stupud json can't have numeric keys
-            props = {int(k): v for k, v in props.items()}
-            self.arg_props[addr] = props
-
-    def save_xrefs(self, stream):
-        for addr in sorted(self.xrefs.keys()):
-            stream.write("%08x\n" % addr)
-            xrefs = self.xrefs[addr]
-            for from_addr in sorted(xrefs.keys()):
-                stream.write("%08x %s\n" % (from_addr, xrefs[from_addr]))
-            stream.write("\n")
-
-    def load_xrefs(self, stream):
-        while True:
-            l = stream.readline().rstrip()
-            if not l:
-                break
-            addr = int(l, 16)
-            while True:
-                l = stream.readline().rstrip()
-                if not l:
-                    break
-                from_addr, type = l.split()
-                self.xrefs.setdefault(addr, {})[int(from_addr, 16)] = type
-
     def save_funcs(self, stream):
         stream.write("# begin symtab_end ranges...\n")
         for addr in sorted(self.func_start.keys()):
@@ -580,63 +499,6 @@ class AddressSpace:
                 i += 32
             stream.write("\n")
 
-    def save_ref_yaml(self, stream):
-        """Save "reference YAML" file, based on broken-down property dicts.
-        This has 2 purposes: a) as reference to compare with YAML generated
-        from new common address properties dicts; b) to migrate broken-down
-        save files to YAML.
-        """
-        log.info("Saving YAML start")
-        stream.write("header:\n")
-        stream.write(" version: 1.0\n")
-        addrs = set(self.labels.keys())
-        addrs.update(self.comments.keys())
-        addrs.update(self.xrefs.keys())
-        addrs.update(self.arg_props.keys())
-        addrs.update(self.func_start.keys())
-        for addr in sorted(addrs):
-                label = self.labels.get(addr)
-                comm = self.get_comment(addr)
-                xrefs = self.xrefs.get(addr)
-                args = self.arg_props.get(addr)
-                func = self.func_start.get(addr)
-                if label or comm or xrefs or args or func:
-                    stream.write("0x%08x:\n" % addr)
-                    stream.write(" f: %s %02x\n" % (flag2char(self.get_flags(addr)), self.get_flags(addr)))
-                    if label is not None:
-                        if label == addr:
-                            stream.write(" l:\n")
-                        else:
-                            stream.write(" l: %s\n" % label)
-                    if addr in self.arg_props:
-                        stream.write(" args:\n")
-                        for arg_no, data in sorted(self.arg_props[addr].items()):
-                            stream.write("  %s: %r\n" % (arg_no, data))
-                            #for k, v in sorted(data.items()):
-                            #    stream.write("   %s: %s\n" % (k, v))
-                    if comm is not None:
-                        stream.write(" cmnt: %r\n" % comm)
-
-                    if func is not None:
-                        if func.end is not None:
-                            stream.write(" fn_end: 0x%08x\n" % func.end)
-                        else:
-                            stream.write(" fn_end: '?'\n")
-                        stream.write(" fn_ranges: [")
-                        first = True
-                        for r in func.get_ranges():
-                            if not first:
-                                stream.write(", ")
-                            stream.write("[0x%08x,0x%08x]" % r)
-                            first = False
-                        stream.write("]\n")
-
-                    if xrefs is not None:
-                        stream.write(" x:\n" % xrefs)
-                        for from_addr in sorted(xrefs.keys()):
-                            stream.write(" - 0x%08x: %s\n" % (from_addr, xrefs[from_addr]))
-                addr += 1
-        log.info("Saving YAML done")
 
     def save_addr_props(self, stream):
         stream.write("header:\n")
