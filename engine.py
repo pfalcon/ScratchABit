@@ -659,7 +659,7 @@ class AddressSpace:
                             stream.write(" l: %s\n" % label)
                     if arg_props is not None:
                         stream.write(" args:\n")
-                        for arg_no, data in sorted(self.arg_props[addr].items()):
+                        for arg_no, data in sorted(arg_props.items()):
                             stream.write("  %s: %r\n" % (arg_no, data))
                             #for k, v in sorted(data.items()):
                             #    stream.write("   %s: %s\n" % (k, v))
