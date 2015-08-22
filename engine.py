@@ -646,7 +646,8 @@ class AddressSpace:
                     if len(props) == 1 and "fun_e" in props:
                         continue
                     stream.write("0x%08x:\n" % addr)
-                    stream.write(" f: %s %02x\n" % (flag2char(self.get_flags(addr)), self.get_flags(addr)))
+                    fl = self.get_flags(addr)
+                    stream.write(" f: %s %02x\n" % (flag2char(fl), fl))
                     label = props.get("label")
                     arg_props = props.get("args")
                     comm = props.get("comm")
