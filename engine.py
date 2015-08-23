@@ -97,14 +97,13 @@ class AddressSpace:
         # Label
         # "xref":
         # Cross-reference records
+        # "fun_s", "fun_e"
+        # Function start and beyond-end addresses, map to Function object
         self.addr_map = {}
         # Map from label to its address
         self.labels_rev = {}
         # Problem spots which automatic control/data flow couldn't resolve
         self.issues = {}
-        # Function start and beyond-end addresses, map to Function object
-        self.func_start = {}
-        self.func_end = {}
         # Cached last accessed area
         self.last_area = None
 
@@ -402,37 +401,36 @@ class AddressSpace:
     # Functions API
 
     def make_func(self, from_ea, to_ea_excl=None):
-        if from_ea in self.func_start:
-            return self.func_start[from_ea]
+        f = self.get_addr_prop(from_ea, "fun_s")
+        if f is not None:
+            return f
         f = Function(from_ea, to_ea_excl)
-        self.func_start[from_ea] = f
         self.set_addr_prop(from_ea, "fun_s", f)
 
         if to_ea_excl is not None:
-            self.func_end[to_ea_excl] = f
             self.set_addr_prop(to_ea_excl, "fun_e", f)
         return f
 
     def is_func(self, ea):
-        return ea in self.func_start
+        return self.get_addr_prop(ea, "fun_s") is not None
 
     # If ea is start of function, return Function object
     def get_func_start(self, ea):
-        return self.func_start.get(ea)
+        return self.get_addr_prop(ea, "fun_s")
 
     # If ea is end of function, return Function object
     def get_func_end(self, ea):
-        return self.func_end.get(ea)
+        return self.get_addr_prop(ea, "fun_e")
 
     def set_func_end(self, func, ea):
-        self.func_end[ea] = func
         self.set_addr_prop(ea, "fun_e", func)
 
     # Look up function containing address
     def lookup_func(self, ea):
-        # TODO: use binary search instead
-        for start, func in self.func_start.items():
-            if ea >= start:
+        # TODO: cache func ranges, use binary search instead
+        for start, props in self.addr_map.items():
+            func = props.get("fun_s")
+            if func and ea >= start:
                 end = func.get_end()
                 if end is not None and ea < end:
                     return func
@@ -449,42 +447,6 @@ class AddressSpace:
         return res
 
     # Persistence API
-
-    def save_funcs(self, stream):
-        stream.write("# begin symtab_end ranges...\n")
-        for addr in sorted(self.func_start.keys()):
-            stream.write("%08x " % addr)
-            func = self.func_start[addr]
-            end = func.end
-            if end is not None:
-                stream.write("%08x" % end)
-            else:
-                stream.write("% 8s" % "?")
-            for r in func.get_ranges():
-                stream.write(" %08x-%08x" % r)
-            stream.write("\n")
-
-    def load_funcs(self, stream):
-        while True:
-            l = stream.readline().rstrip()
-            if not l:
-                break
-            if l[0] == "#":
-                continue
-            start, end, *ranges = l.split()
-            start = int(start, 16)
-            if end == "?":
-                end = None
-            else:
-                end = int(end, 16)
-
-            f = Function(start, end)
-            self.func_start[start] = f
-            if end is not None:
-                self.func_end[end] = f
-            for r in ranges:
-                r = [int(x, 16) for x in r.split("-")]
-                f.add_range(*r)
 
     def save_areas(self, stream):
         for a in self.area_list:
