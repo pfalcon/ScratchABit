@@ -10,3 +10,6 @@
 [submodule "plugins/loader/pyelftools"]
 	path = plugins/loader/pyelftools
 	url = https://github.com/pfalcon/pyelftools
+[submodule "libs/picotui"]
+	path = libs/picotui
+	url = https://github.com/pfalcon/picotui
