@@ -48,7 +48,7 @@ w - write at <addr>
 o - offset/address taken at <addr>
 """
 
-from pyedit.editorext import Viewer
+from picotui.editorext import Viewer
 
 L = 5
 T = 2
