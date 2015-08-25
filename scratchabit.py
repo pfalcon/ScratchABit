@@ -51,7 +51,7 @@ class Editor(editor.EditorExt):
         super().__init__(*args)
         self.model = None
         self.addr_stack = []
-        self.search_str = None
+        self.search_str = ""
 
     def set_model(self, model):
         self.model = model
@@ -398,12 +398,16 @@ class Editor(editor.EditorExt):
                         self.ctrl.show_status("Searching: 0x%x" % addr)
                     self.cnt += 1
             if key == b"/":
-                F = npyscreen.FormBaseNew(name='Text Search', lines=5, columns=40, show_atx=4, show_aty=4)
-                e = F.add(npyscreen.TitleText, name="Search for:")
-                e.entry_widget.add_handlers({curses.ascii.CR: lambda k: F.exit_editing()})
-                F.edit()
+                d = Dialog(4, 4, title="Text Search")
+                d.add(1, 1, WLabel("Search for:"))
+                entry = WTextEntry(20, self.search_str)
+                entry.finish_dialog = ACTION_OK
+                d.add(13, 1, entry)
+                res = d.loop()
                 self.update_screen()
-                self.search_str = e.value
+                self.search_str = entry.get_text()
+                if res != ACTION_OK or not self.search_str:
+                    return
                 addr = self.cur_addr()
             else:
                 addr = self.next_addr()
