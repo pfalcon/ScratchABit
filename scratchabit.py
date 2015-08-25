@@ -29,6 +29,7 @@ import idaapi
 
 import curses
 import npyscreen
+from picotui.widgets import *
 from pyedit import editorext as editor
 import help
 import saveload
@@ -42,20 +43,6 @@ def disasm_one(p):
     print("%08x %s" % (p.cmd.ea, p.cmd.disasm))
     p.cmd.ea += p.cmd.size
     p.cmd.size = 0
-
-class LabelEntry(npyscreen.Autocomplete):
-
-    def set_choices(self, list):
-        self.choices = [None] + list
-
-    def auto_complete(self, input):
-        substr = self.value
-        self.choices[0] = substr
-        choices = list(filter(lambda x: substr.lower() in x.lower(), self.choices))
-        val = self.get_choice(choices)
-        if val >= 0:
-            self.value = choices[val]
-            self.parent.exit_editing()
 
 
 class Editor(editor.EditorExt):
@@ -332,29 +319,25 @@ class Editor(editor.EditorExt):
                 break
             self.update_screen()
         elif key == b"g":
+            d = Dialog(4, 4, title="Go to")
+            d.add(1, 1, WLabel("Label/addr:"))
+            entry = WAutoComplete(20, "", self.model.AS.get_label_list())
+            entry.popup_h = 12
+            entry.finish_dialog = ACTION_OK
+            d.add(13, 1, entry)
+            d.add(1, 2, WLabel("Press Down to auto-complete"))
+            res = d.loop()
 
-            F = npyscreen.FormBaseNew(name='Go to', lines=6, columns=40, show_atx=4, show_aty=4)
-            e = F.add(LabelEntry, name="Labels")
-            e.set_choices(self.model.AS.get_label_list())
-
-            def h_enter_key(input):
-                if not e.value:
-                    # Hitting Enter with empty text entry opens autocomplete dropbox
-                    e.auto_complete(input)
+            if res == ACTION_OK:
+                value = entry.get_text()
+                if '0' <= value[0] <= '9':
+                    addr = int(value, 0)
                 else:
-                    F.exit_editing()
-            e.add_handlers({curses.ascii.CR: h_enter_key})
+                    addr = self.model.AS.resolve_label(value)
+                self.goto_addr(addr, from_addr=self.cur_addr())
+            else:
+                self.update_screen()
 
-            F.add(npyscreen.FixedText, value="Press Tab to auto-complete", editable=False)
-            F.edit()
-            self.update_screen()
-            if e.value:
-                if '0' <= e.value[0] <= '9':
-                    res = int(e.value, 0)
-                else:
-                    res = self.model.AS.resolve_label(e.value)
-
-                self.goto_addr(res, from_addr=self.cur_addr())
         elif key == editor.KEY_F1:
             help.help(self)
             self.update_screen()
