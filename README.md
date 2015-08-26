@@ -114,7 +114,7 @@ distribution, using Pymsasid disassembler under the hood.
 
 > Q: I'm not on Linux, how can I run ScratchABit?
 
-A: Install Linux in an emulator on your system and rejoice.
+A: Install Linux in an emulator/VM on your system and rejoice.
 
 > Q: Mandatory screenshot?
 
