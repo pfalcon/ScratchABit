@@ -326,6 +326,7 @@ class Editor(editor.EditorExt):
             d.add(13, 1, entry)
             d.add(1, 2, WLabel("Press Down to auto-complete"))
             res = d.loop()
+            self.update_screen()
 
             if res == ACTION_OK:
                 value = entry.get_text()
@@ -334,8 +335,6 @@ class Editor(editor.EditorExt):
                 else:
                     addr = self.model.AS.resolve_label(value)
                 self.goto_addr(addr, from_addr=self.cur_addr())
-            else:
-                self.update_screen()
 
         elif key == editor.KEY_F1:
             help.help(self)
