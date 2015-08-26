@@ -345,19 +345,20 @@ class Editor(editor.EditorExt):
             saveload.save_state(project_dir)
             self.show_status("Saved.")
         elif key == b"\x11":  # ^Q
-            F = npyscreen.Popup(name='Problems list', lines=18)
-            class IssueList(npyscreen.MultiLine):
-                def display_value(self, vl):
-                    return "%08x %s" % vl
-            lw = F.add(IssueList, name="Problems")
-            #lw.return_exit = True
-            lw.values = self.model.AS.get_issues()
-            lw.add_handlers({curses.ascii.CR: lambda key: (lw.h_select_exit(key), F.exit_editing(), 1)})
-            F.edit()
+            class IssueList(WListBox):
+                def render_line(self, l):
+                    return "%08x %s" % l
+            d = Dialog(4, 4, title="Problems list")
+            lw = IssueList(40, 16, self.model.AS.get_issues())
+            lw.finish_dialog = ACTION_OK
+            d.add(1, 1, lw)
+            res = d.loop()
             self.update_screen()
-            if lw.value is not None:
-                val = lw.values[lw.value][0]
-                self.goto_addr(val, from_addr=self.cur_addr())
+            if res == ACTION_OK:
+                val = lw.get_cur_line()
+                if val:
+                    self.goto_addr(val[0], from_addr=self.cur_addr())
+
         elif key == b"i":
             off, area = self.model.AS.addr2area(self.cur_addr())
             props = area[engine.PROPS]
