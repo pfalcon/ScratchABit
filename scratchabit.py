@@ -28,7 +28,6 @@ import engine
 import idaapi
 
 import curses
-import npyscreen
 from picotui.widgets import *
 from pyedit import editorext as editor
 import help

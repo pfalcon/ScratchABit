@@ -4,9 +4,6 @@
 [submodule "plugins/cpu/pymsasid3"]
 	path = plugins/cpu/pymsasid3
 	url = https://github.com/pfalcon/pymsasid3
-[submodule "libs/npyscreen"]
-	path = libs/npyscreen
-	url = https://github.com/pfalcon/npyscreen
 [submodule "plugins/loader/pyelftools"]
 	path = plugins/loader/pyelftools
 	url = https://github.com/pfalcon/pyelftools
