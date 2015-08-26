@@ -45,8 +45,11 @@ To use ScratchABit, you need Python3 installed and VT100 (minimum) or
 XTerm (recommended) terminal or terminal emulator (any Unix system
 should be compliant, like Linux/BSD/etc, see also FAQ).
 
-Clone the code using "git clone --recursive". If you cloned code without
-"--recursive", run "git submodule update --init".
+Clone the code using:
+
+    git clone --recursive
+
+If you cloned code without `--recursive`, run `git submodule update --init`.
 
 If you want to disassemble a file in self-describing executable format
 (like ELF), just pass it as an argument to scratchabit.py. The repository
