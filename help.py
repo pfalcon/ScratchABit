@@ -20,6 +20,7 @@ Global commands (for letter commands, case matters):
 g - Goto address
 Esc - Return to address from previous Enter cmd (as stack)
 S - Save database
+W - Write disassembly listing to file 'out.lst'
 Ctrl+q - Show problems list
 q - Quit
 
