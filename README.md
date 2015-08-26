@@ -48,7 +48,7 @@ should be compliant, like Linux/BSD/etc, see also FAQ).
 Clone the code using "git clone --recursive". If you cloned code without
 "--recursive", run "git submodule update --init".
 
-If you want to disassemble a file in self-describing executabel format
+If you want to disassemble a file in self-describing executable format
 (like ELF), just pass it as an argument to scratchabit.py. The repository
 includes `example-elf` (x86 32bit) for quick start:
 
