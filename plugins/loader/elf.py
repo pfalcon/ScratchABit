@@ -21,7 +21,7 @@ def detect(fname):
         return None
 
     #print(elffile.header)
-    print(elffile["e_ident"]["EI_CLASS"])
+    #print(elffile["e_ident"]["EI_CLASS"])
     bitness = 32 if elffile["e_ident"]["EI_CLASS"] == "ELFCLASS32" else 64
     return "%s_%s" % (MACH_MAP[elffile["e_machine"]], bitness)
 
@@ -95,7 +95,7 @@ def load_segments(aspace, elffile):
 
             for tag in seg.iter_tags():
                 d_ptr = tag["d_ptr"]
-                print(tag, hex(d_ptr))
+                #print(tag, hex(d_ptr))
                 if tag['d_tag'] == 'DT_PLTGOT':
                     aspace.set_label(d_ptr, "ELF.PLTGOT")
                     aspace.make_data(d_ptr, wordsz)
@@ -156,7 +156,7 @@ def load_segments(aspace, elffile):
                     entry = entry_struct.parse(data)
                     reloc = Relocation(entry, elffile)
                     sym = symtab[reloc['r_info_sym']]
-                    print(reloc, sym.name, sym.entry)
+                    #print(reloc, sym.name, sym.entry)
                     symname = str(sym.name, "utf-8")
                     aspace.set_comment(pltrel, symname + ".plt")
                     aspace.make_arg_offset(pltrel, 0, aspace.get_data(pltrel, wordsz))
@@ -194,7 +194,7 @@ def load_sections(aspace, elffile):
                 addr = sec["sh_addr"]
             else:
                 addr = addr_cnt
-            print(name, sec.header)
+            #print(name, sec.header)
             access = sh_flags_to_access(sec["sh_flags"])
             aspace.add_area(addr, addr + size - 1, {"name": name, "access": access})
             if sec["sh_type"] == "SHT_PROGBITS":
@@ -204,7 +204,7 @@ def load_sections(aspace, elffile):
             sec_map[i] = (sec, addr)
             addr_cnt += size + 0xfff
             addr_cnt &= ~0xfff
-            print()
+            #print()
 
     # Process symbols
     for _sec in elffile.iter_sections():
@@ -247,9 +247,9 @@ def load_sections(aspace, elffile):
         if rel_sec["sh_info"] not in sec_map:
             continue
         target_sec, addr = sec_map[rel_sec["sh_info"]]
-        print(rel_sec.header, target_sec.name)
+        #print(rel_sec.header, target_sec.name)
         for reloc in rel_sec.iter_relocations():
-            print(reloc)
+            #print(reloc)
 
             sym = symtab[reloc['r_info_sym']]
             symname = str(sym.name, "utf-8")
@@ -265,7 +265,7 @@ def load_sections(aspace, elffile):
             if reloc["r_info_type"] == R_XTENSA_32:
                 aspace.set_comment(addr + reloc["r_offset"], "R_XTENSA_32: %s" % (symname))
                 aspace.make_data(addr + reloc["r_offset"], wordsz)
-                print(sym.entry)
+                #print(sym.entry)
                 if value is not None:
                     sym_sec, sym_sec_addr = sec_map[sym.entry["st_shndx"]]
                     data = aspace.get_data(addr + reloc["r_offset"], wordsz)
