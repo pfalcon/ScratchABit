@@ -30,6 +30,7 @@ import idaapi
 import curses
 from picotui.widgets import *
 from pyedit import editorext as editor
+import utils
 import help
 import saveload
 
@@ -202,8 +203,10 @@ class Editor(editor.EditorExt):
             log.info("Enter pressed: %s" % line)
             op_no = self.cur_operand_no(line)
             self.show_status("Enter pressed: %s, %s" % (self.col, op_no))
-            if isinstance(line, engine.DisasmObj):
-                to_addr = None
+            to_addr = None
+            # No longer try to jump only to addresses in args, parse
+            # textual representation below
+            if False and isinstance(line, engine.DisasmObj):
                 if op_no >= 0:
                     o = line[op_no]
                     to_addr = o.get_addr()
@@ -211,7 +214,18 @@ class Editor(editor.EditorExt):
                     o = line.get_operand_addr()
                     if o:
                         to_addr = o.get_addr()
-                self.goto_addr(to_addr, from_addr=line.ea)
+            if to_addr is None:
+                pos = self.col - line.LEADER_SIZE - len(line.indent)
+                word = utils.get_word_at_pos(line.cache, pos)
+                if word:
+                    if word[0].isdigit():
+                        to_addr = int(word, 0)
+                    else:
+                        to_addr = self.model.AS.resolve_label(word)
+                        if to_addr is None:
+                            self.show_status("Unknown address: %s" % word)
+                            return
+            self.goto_addr(to_addr, from_addr=line.ea)
         elif key == editor.KEY_ESC:
             if self.addr_stack:
                 self.show_status("Returning")
