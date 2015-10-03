@@ -977,7 +977,7 @@ def render_from(model, addr, num_lines):
     off, area = ADDRESS_SPACE.addr2area(addr)
     if area is None:
         return None
-    render_partial(model, ADDRESS_SPACE.area_list.index(area), off, num_lines)
+    return render_partial(model, ADDRESS_SPACE.area_list.index(area), off, num_lines)
 
 
 def render_partial(model, area_no, offset, num_lines, target_addr=-1):
@@ -1063,7 +1063,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
 
             num_lines -= 1
             if not num_lines:
-                return
+                return next_addr
 
         model.add_line(a[END], Literal(a[END], "; End of 0x%x area (%s)" % (a[START], a[PROPS].get("name", "noname"))))
 

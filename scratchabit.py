@@ -45,6 +45,19 @@ def disasm_one(p):
     p.cmd.size = 0
 
 
+class TextSaveModel:
+    def __init__(self, f, ctrl):
+        self.f = f
+        self.ctrl = ctrl
+        self.cnt = 0
+    def add_line(self, addr, line):
+        line = ("%08x " % addr) + line.indent + line.render() + "\n"
+        self.f.write(line)
+        if self.cnt % 256 == 0:
+            self.ctrl.show_status("Writing: 0x%x" % addr)
+        self.cnt += 1
+
+
 class Editor(editor.EditorExt):
 
     def __init__(self, *args):
@@ -381,21 +394,21 @@ class Editor(editor.EditorExt):
                 area[engine.START], props.get("name", "noname"), props["access"], percent, func
             ))
         elif key == b"W":
-            class TextSaveModel:
-                def __init__(self, f, ctrl):
-                    self.f = f
-                    self.ctrl = ctrl
-                    self.cnt = 0
-                def add_line(self, addr, line):
-                    line = ("%08x " % addr) + line.indent + line.render() + "\n"
-                    self.f.write(line)
-                    if self.cnt % 256 == 0:
-                        self.ctrl.show_status("Writing: 0x%x" % addr)
-                    self.cnt += 1
             out_fname = "out.lst"
             with open(out_fname, "w") as f:
                 engine.render_partial(TextSaveModel(f, self), 0, 0, 10000000)
             self.show_status("Disassembly listing written: " + out_fname)
+        elif key == b"\x17":  # Ctrl+W
+            func = self.model.AS.lookup_func(self.cur_addr())
+            if func:
+                funcname = self.model.AS.get_label(func.start)
+                outfile = funcname + ".lst"
+                with open(outfile, "w") as f:
+                    model = TextSaveModel(f, self)
+                    for start, end in func.get_ranges():
+                        while start < end:
+                            start = engine.render_from(model, start, 1)
+                self.show_status("Wrote file: %s" % outfile)
         elif key in (b"/", b"?"):  # "/" and Shift+"/"
             class FoundException(Exception): pass
             class TextSearchModel:
