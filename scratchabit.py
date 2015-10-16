@@ -30,6 +30,7 @@ import idaapi
 import curses
 from picotui.widgets import *
 from pyedit import editorext as editor
+from pyedit.editorext import Viewer
 import utils
 import help
 import saveload
@@ -393,6 +394,29 @@ class Editor(editor.EditorExt):
             self.show_status("Area: 0x%x %s (%s): %.1f%%, func: %s" % (
                 area[engine.START], props.get("name", "noname"), props["access"], percent, func
             ))
+        elif key == b"I":
+            L = 5
+            T = 2
+            W = 66
+            H = 20
+            self.dialog_box(L, T, W, H)
+            v = Viewer(L + 1, T + 1, W - 2, H - 2)
+            lines = []
+            for area in self.model.AS.get_areas():
+                props = area[engine.PROPS]
+                lines.append("%s:" % props.get("name", "noname"))
+                flags = area[engine.FLAGS]
+                l = ""
+                for i in range(len(flags)):
+                    if i % 64 == 0 and l:
+                        lines.append(l)
+                        l = ""
+                    l += engine.flag2char(flags[i])
+                if l:
+                    lines.append(l)
+            v.set_lines(lines)
+            v.loop()
+            self.update_screen()
         elif key == b"W":
             out_fname = "out.lst"
             with open(out_fname, "w") as f:

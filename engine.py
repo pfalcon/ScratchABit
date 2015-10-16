@@ -120,6 +120,9 @@ class AddressSpace:
         self.area_list.sort()
         return a
 
+    def get_areas(self):
+        return self.area_list
+
     def area_no(self, area):
         return self.area_list.index(area)
 
