@@ -787,6 +787,9 @@ class DisasmObj:
         except AttributeError:
             return self.LEADER_SIZE + len(self.indent) + len(self.render())
 
+    def content_len(self):
+        return len(self) - (self.LEADER_SIZE + len(self.indent))
+
 
 class Instruction(idaapi.insn_t, DisasmObj):
 
@@ -1052,6 +1055,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
 
             comm = props.get("comm")
             if comm:
+                comm_indent = " " * (out.content_len() + len(out.indent) + 2)
                 out.comment = "  ; " + comm.split("|", 1)[0]
 
             model.add_line(addr, out)
@@ -1059,7 +1063,9 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
 
             if comm:
                 for comm_l in comm.split("|")[1:]:
-                    model.add_line(addr, Literal(addr, "; " + comm_l))
+                    comm_obj = Literal(addr, "; " + comm_l)
+                    comm_obj.indent = comm_indent
+                    model.add_line(addr, comm_obj)
 
             next_addr = addr + sz
             next_props = ADDRESS_SPACE.get_addr_prop_dict(next_addr)
