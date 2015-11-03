@@ -319,9 +319,11 @@ class Editor(editor.EditorExt):
             addr = self.cur_addr()
             comment = self.model.AS.get_comment(addr) or ""
             res = self.dialog_edit_line(line=comment, width=60)
-            if res:
+            if res is not None:
                 self.model.AS.set_comment(addr, res)
-            self.update_screen()
+                self.update_model()
+            else:
+                self.update_screen()
         elif key == b"n":
             addr = self.cur_addr()
             label = self.model.AS.get_label(addr)

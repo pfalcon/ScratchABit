@@ -759,6 +759,9 @@ class DisasmObj:
     # If True, doesn't correspond to bytes in memory: labels, etc.
     virtual = True
 
+    # Textual comment to append
+    comment = ""
+
     # Instance variable expected to be set on each instance:
     # ea =
     # size =
@@ -776,12 +779,6 @@ class DisasmObj:
         # (or the "most suitable" of them if there're few).
         return None
 
-    def get_comment(self):
-        comm = ADDRESS_SPACE.get_comment(self.ea) or ""
-        if comm:
-            comm = "  ; " + comm
-        return comm
-
     def __len__(self):
         # Each object should return real character len as display on the screen.
         # Should be fast - called on each cursor movement.
@@ -798,7 +795,7 @@ class Instruction(idaapi.insn_t, DisasmObj):
     def render(self):
         _processor.cmd = self
         _processor.out()
-        s = self.disasm + self.get_comment()
+        s = self.disasm + self.comment
         self.cache = s
         return s
 
@@ -839,7 +836,7 @@ class Data(DisasmObj):
             s = "%s%s" % (data_sz2mnem(self.size), ADDRESS_SPACE.get_label(self.val))
         else:
             s = "%s0x%x" % (data_sz2mnem(self.size), self.val)
-        s += self.get_comment()
+        s += self.comment
         self.cache = s
         return s
 
@@ -862,7 +859,7 @@ class String(DisasmObj):
 
     def render(self):
         s = "%s%s" % (data_sz2mnem(1), repr(self.val).replace("\\x00", "\\0"))
-        s += self.get_comment()
+        s += self.comment
         self.cache = s
         return s
 
@@ -881,7 +878,7 @@ class Unknown(DisasmObj):
         if 0x20 <= self.val <= 0x7e:
             ch = " ; '%s'" % chr(self.val)
         s = "%s0x%02x%s" % (idaapi.fillstr("unk", idaapi.DEFAULT_WIDTH), self.val, ch)
-        s += self.get_comment()
+        s += self.comment
         self.cache = s
         return s
 
@@ -1053,8 +1050,16 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             else:
                 assert 0, "flags=%x" % f
 
+            comm = props.get("comm")
+            if comm:
+                out.comment = "  ; " + comm.split("|", 1)[0]
+
             model.add_line(addr, out)
             #sys.stdout.write(out + "\n")
+
+            if comm:
+                for comm_l in comm.split("|")[1:]:
+                    model.add_line(addr, Literal(addr, "; " + comm_l))
 
             next_addr = addr + sz
             next_props = ADDRESS_SPACE.get_addr_prop_dict(next_addr)
