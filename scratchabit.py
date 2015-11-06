@@ -186,6 +186,19 @@ class Editor(editor.EditorExt):
     def analyze_status(self, cnt):
         self.show_status("Analyzing (%d insts so far)" % cnt)
 
+    def write_func(self, addr):
+        func = self.model.AS.lookup_func(addr)
+        if func:
+            funcname = self.model.AS.get_label(func.start)
+            outfile = funcname + ".lst"
+            with open(outfile, "w") as f:
+                model = TextSaveModel(f, self)
+                for start, end in func.get_ranges():
+                    while start < end:
+                        start = engine.render_from(model, start, 1)
+            return outfile
+
+
     def handle_key(self, key):
         try:
             return self.handle_key_unprotected(key)
@@ -425,15 +438,8 @@ class Editor(editor.EditorExt):
                 engine.render_partial(TextSaveModel(f, self), 0, 0, 10000000)
             self.show_status("Disassembly listing written: " + out_fname)
         elif key == b"\x17":  # Ctrl+W
-            func = self.model.AS.lookup_func(self.cur_addr())
-            if func:
-                funcname = self.model.AS.get_label(func.start)
-                outfile = funcname + ".lst"
-                with open(outfile, "w") as f:
-                    model = TextSaveModel(f, self)
-                    for start, end in func.get_ranges():
-                        while start < end:
-                            start = engine.render_from(model, start, 1)
+            outfile = self.write_func(self.cur_addr())
+            if outfile:
                 self.show_status("Wrote file: %s" % outfile)
         elif key in (b"/", b"?"):  # "/" and Shift+"/"
             class FoundException(Exception): pass
