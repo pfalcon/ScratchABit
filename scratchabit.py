@@ -670,3 +670,4 @@ if __name__ == "__main__":
         e.cursor(True)
         e.deinit_tty()
         e.wr("\n\n")
+        saveload.save_session(project_dir, e)
