@@ -49,3 +49,11 @@ def save_session(project_dir, disasm_viewer):
         for a in disasm_viewer.addr_stack:
             f.write("%08x\n" % a)
         f.write("%08x\n" % disasm_viewer.cur_addr())
+
+
+def load_addr_stack(project_dir):
+    stack = []
+    with open(project_dir + "/session.addr_stack") as f:
+        for l in f:
+            stack.append(int(l, 16))
+    return stack

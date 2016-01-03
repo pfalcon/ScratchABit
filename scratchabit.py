@@ -641,10 +641,16 @@ if __name__ == "__main__":
 
     #engine.print_address_map()
 
-    if ENTRYPOINTS:
-        show_addr = ENTRYPOINTS[0][1]
+    addr_stack = []
+    if os.path.exists(project_dir + "/session.addr_stack"):
+        addr_stack = saveload.load_addr_stack(project_dir)
+        print(addr_stack)
+        show_addr = addr_stack.pop()
     else:
-        show_addr = engine.ADDRESS_SPACE.min_addr()
+        if ENTRYPOINTS:
+            show_addr = ENTRYPOINTS[0][1]
+        else:
+            show_addr = engine.ADDRESS_SPACE.min_addr()
 
     t = time.time()
     #_model = engine.render()
@@ -661,6 +667,7 @@ if __name__ == "__main__":
         e.enable_mouse()
         e.draw_box(0, 0, screen_size[0], screen_size[1] - 1)
         e.set_model(_model)
+        e.addr_stack = addr_stack
         e.goto_addr(show_addr)
         e.loop()
     except:
