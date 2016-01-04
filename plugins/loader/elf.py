@@ -11,6 +11,7 @@ from pyelftools.elftools.common.exceptions import ELFError
 MACH_MAP = {
     "EM_386": "x86",
     "EM_X86_64": "x86",
+    "EM_XTENSA": "xtensa",
 }
 
 def detect(fname):
