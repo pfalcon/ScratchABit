@@ -221,6 +221,10 @@ def OutValue(op, flags):
         val = op.addr
     else:
         val = op.value
+    # Undefined symbol value
+    if isinstance(val, str):
+        u_line.write(val)
+        return
     u_line.write(hex(val))
 
 def OutLong(val, base):
@@ -268,6 +272,10 @@ def MakeLine(output_buffer):
 
 def get_full_byte(ea):
     return ADDRESS_SPACE.get_byte(ea)
+
+# Extension
+def get_full_val(ea, val_sz):
+    return ADDRESS_SPACE.get_data(ea, val_sz)
 
 def ua_add_cref(opoff, ea, flags):
     try:

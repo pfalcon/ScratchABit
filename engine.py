@@ -176,6 +176,12 @@ class AddressSpace:
         return area[BYTES][off:off + sz]
 
     def get_data(self, addr, sz):
+        # TODO: address size
+        if sz == 4:
+            sym = self.get_addr_prop(addr, "sym")
+            if sym is not None:
+                return sym
+
         off, area = self.addr2area(addr)
         val = 0
         for i in range(sz):
@@ -380,6 +386,10 @@ class AddressSpace:
         # arg_no - argument no. of instruction
         # ref_addr - value of the argument
         self.set_arg_prop(insn_addr, arg_no, "type", idaapi.o_mem)
+        if isinstance(ref_addr, str):
+            # Undefined symbol
+            self.set_addr_prop(insn_addr, "sym", ref_addr)
+            return
         label = self.get_label(ref_addr)
         if not label:
             self.make_auto_label(ref_addr)
@@ -836,7 +846,11 @@ class Data(DisasmObj):
 
     def render(self):
         if ADDRESS_SPACE.get_arg_prop(self.ea, 0, "type") == idaapi.o_mem:
-            s = "%s%s" % (data_sz2mnem(self.size), ADDRESS_SPACE.get_label(self.val))
+            if isinstance(self.val, str):
+                label = self.val
+            else:
+                label = ADDRESS_SPACE.get_label(self.val)
+            s = "%s%s" % (data_sz2mnem(self.size), label)
         else:
             s = "%s0x%x" % (data_sz2mnem(self.size), self.val)
         s += self.comment

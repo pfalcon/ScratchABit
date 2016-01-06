@@ -273,6 +273,13 @@ def load_sections(aspace, elffile):
                     data += value
                     aspace.set_data(addr + reloc["r_offset"], data, wordsz)
                     aspace.make_arg_offset(addr + reloc["r_offset"], 0, data)
+                else:
+                    # Undefined symbol
+                    # TODO: This is more or less hacky way to do this. It would be
+                    # better to explicitly assign a symbolic alias to a value at
+                    # particular address, but so far we assume call below to do
+                    # that.
+                    aspace.make_arg_offset(addr + reloc["r_offset"], 0, symname)
             elif reloc["r_info_type"] == R_XTENSA_SLOT0_OP:
                 aspace.set_comment(addr + reloc["r_offset"], "R_XTENSA_SLOT0_OP: %s" % (symname))
                 opcode = aspace.get_byte(addr + reloc["r_offset"])
