@@ -322,9 +322,8 @@ class Editor(editor.EditorExt):
                 self.show_status("Cannot convert operand to offset: #%s: %s" % (o.n, o.type))
                 return
 
-            if self.model.AS.get_arg_prop(addr, o.n, "type") == idaapi.o_mem:
-                self.model.AS.set_arg_prop(addr, o.n, "type", idaapi.o_imm)
-                self.model.AS.del_xref(addr, o.get_addr(), idaapi.dr_O)
+            if self.model.AS.get_arg_prop(addr, o.n, "subtype") == engine.IMM_ADDR:
+                self.model.AS.unmake_arg_offset(addr, o.n, o.get_addr())
             else:
                 self.model.AS.make_arg_offset(addr, o.n, o.get_addr())
             self.update_model(True)

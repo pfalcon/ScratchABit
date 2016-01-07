@@ -34,6 +34,13 @@ PROPS = 2
 BYTES = 3
 FLAGS = 4
 
+IMM_UHEX = None
+IMM_SHEX = "shex"
+IMM_UDEC = "udec"
+IMM_SDEC = "sdec"
+IMM_CHAR = "chr"
+IMM_ADDR = "addr"
+
 def str_area(area):
     if not area:
         return "Area(None)"
@@ -315,6 +322,14 @@ class AddressSpace:
         self.set_addr_prop(ea, "label", ea)
         self.labels_rev[ea] = ea
 
+    # Delete a label, only if it's auto
+    def del_auto_label(self, ea):
+        label = self.get_addr_prop(ea, "label")
+        if not label or isinstance(label, str):
+            return
+        self.set_addr_prop(ea, "label", None)
+        del self.labels_rev[ea]
+
     def get_label(self, ea):
         label = self.get_addr_prop(ea, "label")
         if isinstance(label, int):
@@ -382,20 +397,43 @@ class AddressSpace:
         arg_props = self.get_addr_prop(ea, "args", {})
         return arg_props.get(arg_no, {}).get(prop)
 
+    def get_arg_prop_dict(self, ea, arg_no):
+        arg_props = self.get_addr_prop(ea, "args", {})
+        return arg_props.get(arg_no, {})
+
     def make_arg_offset(self, insn_addr, arg_no, ref_addr):
         # Convert an immediate argument to an offset one
         # insn_addr - address of (pseudo)instruction
         # arg_no - argument no. of instruction
-        # ref_addr - value of the argument
-        self.set_arg_prop(insn_addr, arg_no, "type", idaapi.o_mem)
+        # ref_addr - value of the argument (i.e. address it refers to)
+        old_subtype = self.get_arg_prop(insn_addr, arg_no, "subtype")
+        if old_subtype and old_subtype != IMM_ADDR:
+            # Preserve old numeric value subtype to unconvert back to it
+            # if need.
+            self.set_arg_prop(insn_addr, arg_no, "num_subtype", old_subtype)
+
+        self.set_arg_prop(insn_addr, arg_no, "subtype", IMM_ADDR)
+
         if isinstance(ref_addr, str):
-            # Undefined symbol
+            # Symbolic address
+            # TODO: this works only for "dd" virtual instruction
             self.set_addr_prop(insn_addr, "sym", ref_addr)
             return
+
         label = self.get_label(ref_addr)
         if not label:
             self.make_auto_label(ref_addr)
         self.add_xref(insn_addr, ref_addr, idaapi.dr_O)
+
+    def unmake_arg_offset(self, insn_addr, arg_no, ref_addr):
+        # Convert offset argument to normal immediate value
+        old_subtype = self.get_arg_prop(insn_addr, arg_no, "num_subtype")
+        self.set_arg_prop(insn_addr, arg_no, "subtype", old_subtype)
+        self.del_xref(insn_addr, ref_addr, idaapi.dr_O)
+        # If this was last xref, and label is automatic, kill it too
+        if not self.get_xrefs(ref_addr):
+            self.del_auto_label(ref_addr)
+
 
     # Xref API
 
@@ -847,11 +885,11 @@ class Data(DisasmObj):
         self.val = val
 
     def render(self):
-        if ADDRESS_SPACE.get_arg_prop(self.ea, 0, "type") == idaapi.o_mem:
-            if isinstance(self.val, str):
-                label = self.val
-            else:
-                label = ADDRESS_SPACE.get_label(self.val)
+        subtype = ADDRESS_SPACE.get_arg_prop(self.ea, 0, "subtype")
+        if subtype == IMM_ADDR:
+            label = self.val
+            if not isinstance(label, str):
+                label = ADDRESS_SPACE.get_label(label)
             s = "%s%s" % (data_sz2mnem(self.size), label)
         else:
             s = "%s0x%x" % (data_sz2mnem(self.size), self.val)

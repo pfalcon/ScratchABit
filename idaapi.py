@@ -32,8 +32,13 @@ UA_MAXOP = 6
 
 # Operand types
 o_void = "-"
+# Immediate value, can be either numeric value, or address of memory
+# ("offset"), further differentiated by value subtype (offset, hex, dec, etc.)
 o_imm = "o_imm"
 o_reg = "o_reg"
+# Location in memory. Should be used only if instruction guaranteedly
+# access memory at the given address of the given size (direct addressing
+# mode). Should not be mixed up with o_imm of offset subtype.
 o_mem = "o_mem"
 o_near = "o_near"
 o_phrase = "o_phrase"
@@ -194,23 +199,19 @@ def out_one_operand(op_no):
     global _processor, u_line
     cmd = _processor.cmd
 
+    # Init array of this operand's positions in output line
     if not hasattr(cmd, "arg_pos") or not cmd.arg_pos:
         cmd.arg_pos = [[0, 0] for i in range(UA_MAXOP)]
-    cmd.arg_pos[op_no][0] = len(u_line.getvalue())
 
     op = cmd[op_no]
-    patched = False
-    if op.type == o_imm:
-        if ADDRESS_SPACE.get_arg_prop(cmd.ea, op_no, "type") == o_mem:
-            # if native operand type is immediate value, but it was overriden to be
-            # address/offset, it should be output as such
-            op.addr = op.value
-            op.type = o_mem
-            patched = True
+    op.props = ADDRESS_SPACE.get_arg_prop_dict(cmd.ea, op_no)
+
+    # Record start position of this operand in output line
+    cmd.arg_pos[op_no][0] = len(u_line.getvalue())
 
     _processor.outop(op)
-    if patched:
-        op.type = o_imm
+
+    # Record end position of this operand in output line
     cmd.arg_pos[op_no][1] = len(u_line.getvalue())
 
 
@@ -225,7 +226,11 @@ def OutValue(op, flags):
     if isinstance(val, str):
         u_line.write(val)
         return
-    u_line.write(hex(val))
+    subtype = op.props.get("subtype")
+    if subtype == engine.IMM_ADDR:
+        out_name_expr(op, val, BADADDR)
+    else:
+        u_line.write(hex(val))
 
 def OutLong(val, base):
     global u_line
@@ -318,6 +323,22 @@ def QueueMark(type, ea):
 #
 # End of Address space access API
 #
+
+#
+# Instruction operands API
+#
+
+REF_OFF32 = 2
+
+def op_offset(ea, op_no, reftype):
+    raise NotImplementedError
+
+
+#
+# End of Instruction operands API
+#
+
+
 
 # Interfacing
 
