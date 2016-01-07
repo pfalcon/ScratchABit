@@ -297,7 +297,9 @@ class AddressSpace:
         return "%s%08x" % (prefix, ea)
 
     def make_label(self, prefix, ea):
-        if self.get_addr_prop(ea, "label"):
+        l = self.get_addr_prop(ea, "label")
+        if isinstance(l, str):
+            # If it's real label, don't change it
             return
         if not prefix:
             prefix = self.get_default_label_prefix(ea)
