@@ -536,9 +536,14 @@ class AddressSpace:
                         else:
                             stream.write(" l: %s\n" % label)
                     if arg_props is not None:
-                        stream.write(" args:\n")
+                        arg_props_header = False
                         for arg_no, data in sorted(arg_props.items()):
-                            stream.write("  %s: %r\n" % (arg_no, data))
+                            data = {k: v for k, v in data.items() if v is not None}
+                            if data:
+                                if not arg_props_header:
+                                    stream.write(" args:\n")
+                                    arg_props_header = True
+                                stream.write("  %s: %r\n" % (arg_no, data))
                             #for k, v in sorted(data.items()):
                             #    stream.write("   %s: %s\n" % (k, v))
                     if comm is not None:
@@ -558,7 +563,7 @@ class AddressSpace:
                             first = False
                         stream.write("]\n")
 
-                    if xrefs is not None:
+                    if xrefs:
                         stream.write(" x:\n" % xrefs)
                         for from_addr in sorted(xrefs.keys()):
                             stream.write(" - 0x%08x: %s\n" % (from_addr, xrefs[from_addr]))
