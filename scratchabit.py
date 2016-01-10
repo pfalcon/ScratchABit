@@ -311,6 +311,20 @@ class Editor(editor.EditorExt):
             addr = self.cur_addr()
             self.model.undefine_unit(addr)
             self.update_model()
+
+        elif key == b"h":
+            op_no = self.cur_operand_no(self.get_cur_line())
+            if op_no >= 0:
+                addr = self.cur_addr()
+                subtype = self.model.AS.get_arg_prop(addr, op_no, "subtype")
+                if subtype != engine.IMM_ADDR:
+                    next_subtype = {
+                        engine.IMM_UHEX: engine.IMM_UDEC,
+                        engine.IMM_UDEC: engine.IMM_UHEX,
+                    }
+                    self.model.AS.set_arg_prop(addr, op_no, "subtype", next_subtype[subtype])
+                    self.update_screen()
+                    self.show_status("Changed arg #%d to %s" % (op_no, next_subtype[subtype]))
         elif key == b"o":
             addr = self.cur_addr()
             line = self.get_cur_line()

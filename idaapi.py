@@ -229,6 +229,8 @@ def OutValue(op, flags):
     subtype = op.props.get("subtype")
     if subtype == engine.IMM_ADDR:
         out_name_expr(op, val, BADADDR)
+    elif subtype == engine.IMM_UDEC:
+        u_line.write(str(val))
     else:
         u_line.write(hex(val))
 
