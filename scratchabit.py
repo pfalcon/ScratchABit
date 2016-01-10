@@ -225,6 +225,7 @@ class Editor(editor.EditorExt):
 
 
     def handle_key_unprotected(self, key):
+        line = self.get_cur_line()
         if key == editor.KEY_ENTER:
             line = self.get_cur_line()
             log.info("Enter pressed: %s" % line)
@@ -259,6 +260,8 @@ class Editor(editor.EditorExt):
                 self.goto_addr(self.addr_stack.pop())
         elif key == b"q":
             return editor.KEY_QUIT
+        elif key == b"\x1b[5;5~":  # Ctrl+PgUp
+            self.goto_addr(self.model.AS.min_addr(), from_addr=line.ea)
         elif key == b"c":
             addr = self.cur_addr()
             self.show_status("Analyzing at %x" % addr)
