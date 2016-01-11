@@ -147,6 +147,9 @@ class AddressSpace:
     def min_addr(self):
         return self.area_list[0][START]
 
+    def max_addr(self):
+        return self.area_list[-1][END]
+
     def is_exec(self, addr):
         off, area = self.addr2area(addr)
         if not area:

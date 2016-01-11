@@ -262,6 +262,8 @@ class Editor(editor.EditorExt):
             return editor.KEY_QUIT
         elif key == b"\x1b[5;5~":  # Ctrl+PgUp
             self.goto_addr(self.model.AS.min_addr(), from_addr=line.ea)
+        elif key == b"\x1b[6;5~":  # Ctrl+PgDn
+            self.goto_addr(self.model.AS.max_addr(), from_addr=line.ea)
         elif key == b"c":
             addr = self.cur_addr()
             self.show_status("Analyzing at %x" % addr)
