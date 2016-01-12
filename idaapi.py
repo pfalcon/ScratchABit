@@ -285,16 +285,7 @@ def get_full_val(ea, val_sz):
     return ADDRESS_SPACE.get_data(ea, val_sz)
 
 def ua_add_cref(opoff, ea, flags):
-    try:
-        fl = ADDRESS_SPACE.get_flags(ea)
-    except engine.InvalidAddrException:
-        log.warning("ua_add_cref: Cannot get flags for %x - not adding cref", ea)
-        return
-    if fl == ADDRESS_SPACE.UNK:
-        ADDRESS_SPACE.analisys_stack_push(ea, flags == fl_CN)
-    else:
-        assert fl == ADDRESS_SPACE.CODE, "While adding cref from 0x%x to 0x%x, dest flags are: 0x%x" % (_processor.cmd.ea, ea, fl)
-        pass
+    ADDRESS_SPACE.analisys_stack_push(ea, flags == fl_CN)
     if flags == fl_JN:
         ADDRESS_SPACE.make_auto_label(ea)
         ADDRESS_SPACE.add_xref(_processor.cmd.ea, ea, "j")

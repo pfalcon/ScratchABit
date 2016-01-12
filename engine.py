@@ -90,6 +90,7 @@ class AddressSpace:
     DATA = 0x04
     DATA_CONT = 0x08
     STR = 0x10  # Continuation is DATA_CONT
+    FUNC = 0x80  # Can appear with CODE, meaning this instruction belongs to a function
 
     def __init__(self):
         self.area_list = []
@@ -207,17 +208,17 @@ class AddressSpace:
 
     # Binary Data Flags API
 
-    def get_flags(self, addr):
+    def get_flags(self, addr, mask=0x7f):
         off, area = self.addr2area(addr)
         if area is None:
             raise InvalidAddrException(addr)
-        return area[FLAGS][off]
+        return area[FLAGS][off] & mask
 
     def get_unit_size(self, addr):
         off, area = self.addr2area(addr)
         flags = area[FLAGS]
         sz = 1
-        if flags[off] == self.CODE:
+        if flags[off] & 0x7f == self.CODE:
             f = self.CODE_CONT
         elif flags[off] in (self.DATA, self.STR):
             f = self.DATA_CONT
@@ -257,10 +258,10 @@ class AddressSpace:
     def make_undefined(self, addr, sz):
         self.set_flags(addr, sz, self.UNK, self.UNK)
 
-    def make_code(self, addr, sz):
+    def make_code(self, addr, sz, extra_flags=0):
         off, area = self.addr2area(addr)
         area_byte_flags = area[FLAGS]
-        area_byte_flags[off] |= self.CODE
+        area_byte_flags[off] |= self.CODE | extra_flags
         for i in range(sz - 1):
             area_byte_flags[off + 1 + i] |= self.CODE_CONT
 
@@ -711,9 +712,20 @@ def analyze(callback=lambda cnt:None):
     while limit:
         if analisys_stack_branches:
             ea = analisys_stack_branches.pop()
+            fl = ADDRESS_SPACE.get_flags(ea, 0xff)
+            if current_func:
+                if fl == ADDRESS_SPACE.CODE | ADDRESS_SPACE.FUNC:
+                    continue
+                assert fl in (ADDRESS_SPACE.CODE, ADDRESS_SPACE.UNK)
+            else:
+                if fl != ADDRESS_SPACE.UNK:
+                    continue
         elif analisys_stack_calls:
             finish_func(current_func)
             ea = analisys_stack_calls.pop()
+            fun = ADDRESS_SPACE.get_func_start(ea)
+            if fun.get_ranges():
+                continue
             log.info("Starting analysis of function 0x%x" % ea)
             current_func = ADDRESS_SPACE.make_func(ea)
         else:
@@ -730,9 +742,11 @@ def analyze(callback=lambda cnt:None):
         if insn_sz:
             if not _processor.emu():
                 assert False
-            ADDRESS_SPACE.make_code(ea, insn_sz)
             if current_func:
                 current_func.add_insn(ea, insn_sz)
+                ADDRESS_SPACE.make_code(ea, insn_sz, ADDRESS_SPACE.FUNC)
+            else:
+                ADDRESS_SPACE.make_code(ea, insn_sz)
             _processor.out()
 #            print("%08x %s" % (_processor.cmd.ea, _processor.cmd.disasm))
 #            print("---------")
@@ -1083,7 +1097,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             if label:
                 model.add_line(addr, Label(addr))
 
-            f = flags[i]
+            f = flags[i] & 0x7f
             if f == AddressSpace.UNK:
                 out = Unknown(addr, bytes[i])
                 sz = 1
@@ -1149,6 +1163,8 @@ def flag2char(f):
         return "."
     elif f == AddressSpace.CODE:
         return "C"
+    elif f == AddressSpace.CODE | AddressSpace.FUNC:
+        return "F"
     elif f == AddressSpace.CODE_CONT:
         return "c"
     elif f == AddressSpace.DATA:
