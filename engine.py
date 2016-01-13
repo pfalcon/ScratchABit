@@ -1102,12 +1102,13 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
                 out = Unknown(addr, bytes[i])
                 sz = 1
                 i += 1
-            elif f == AddressSpace.DATA:
+            elif f & AddressSpace.DATA:
                 sz = 1
                 j = i + 1
-                while j < areasize and flags[j] == AddressSpace.DATA_CONT:
+                while j < areasize and flags[j] & AddressSpace.DATA_CONT:
                     sz += 1
                     j += 1
+                assert sz <= 4
                 out = Data(addr, sz, ADDRESS_SPACE.get_data(addr, sz))
                 i += sz
             elif f == AddressSpace.STR:
