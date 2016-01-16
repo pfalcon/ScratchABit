@@ -323,8 +323,12 @@ def QueueMark(type, ea):
 
 REF_OFF32 = 2
 
-def op_offset(ea, op_no, reftype):
-    raise NotImplementedError
+# TODO: ref_addr is extension
+def op_offset(ea, op_no, reftype, ref_addr):
+    ADDRESS_SPACE.make_arg_offset(ea, op_no, ref_addr)
+
+def is_offset(ea, op_no):
+    return ADDRESS_SPACE.get_arg_prop(ea, op_no, "subtype") == engine.IMM_ADDR
 
 
 #
