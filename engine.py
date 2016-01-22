@@ -801,8 +801,8 @@ class Model:
         self._cnt += 1
         self._subcnt += 1
 
-    def addr2line_no(self, addr):
-        return self._addr2line.get((addr, -1))
+    def addr2line_no(self, addr, subno=-1):
+        return self._addr2line.get((addr, subno))
 
     def undefine_unit(self, addr):
         sz = self.AS.get_unit_size(addr)

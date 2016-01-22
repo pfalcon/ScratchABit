@@ -93,6 +93,9 @@ class Editor(editor.EditorExt):
         if to_addr is None:
             self.show_status("No address-like value to go to")
             return
+        subno = -1
+        if isinstance(to_addr, tuple):
+            to_addr, subno = to_addr
         adj_addr = self.model.AS.adjust_addr_reverse(to_addr)
         if adj_addr is None:
             self.show_status("Unknown address: 0x%x" % to_addr)
@@ -101,7 +104,7 @@ class Editor(editor.EditorExt):
 
         # If we can position cursor within current screen, do that,
         # to avoid jumpy UI
-        no = self.model.addr2line_no(to_addr)
+        no = self.model.addr2line_no(to_addr, subno)
         if no is not None:
             if self.line_visible(no):
                 self.goto_line(no)
@@ -118,7 +121,7 @@ class Editor(editor.EditorExt):
             return
         self.set_model(model)
 
-        no = self.model.addr2line_no(to_addr)
+        no = self.model.addr2line_no(to_addr, subno)
         if no is not None:
             if from_addr is not None:
                 self.addr_stack.append(from_addr)
@@ -253,7 +256,7 @@ class Editor(editor.EditorExt):
                         if to_addr is None:
                             self.show_status("Unknown address: %s" % word)
                             return
-            self.goto_addr(to_addr, from_addr=line.ea)
+            self.goto_addr(to_addr, from_addr=self.cur_addr_subno())
         elif key == editor.KEY_ESC:
             if self.addr_stack:
                 self.show_status("Returning")
