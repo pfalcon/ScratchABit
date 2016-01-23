@@ -47,6 +47,8 @@ def save_session(project_dir, disasm_viewer):
     ensure_project_dir(project_dir)
     with open(project_dir + "/session.addr_stack", "w") as f:
         for a in disasm_viewer.addr_stack:
+            if isinstance(a, tuple):
+                a = a[0]
             f.write("%08x\n" % a)
         f.write("%08x\n" % disasm_viewer.cur_addr())
 
