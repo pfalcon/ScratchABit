@@ -291,7 +291,7 @@ class Editor(editor.EditorExt):
         elif key == b"a":
             addr = self.cur_addr()
             fl = self.model.AS.get_flags(addr)
-            if fl != self.model.AS.UNK:
+            if fl not in (self.model.AS.UNK, self.model.AS.DATA):
                 self.show_status("Undefine first")
                 return
             sz = 0
@@ -303,7 +303,7 @@ class Editor(editor.EditorExt):
                     if b == 0:
                         sz += 1
                     break
-                if fl != self.model.AS.UNK:
+                if fl not in (self.model.AS.UNK, self.model.AS.DATA, self.model.AS.DATA_CONT):
                     break
                 c = chr(b)
                 if c < '0' or c in string.punctuation:
