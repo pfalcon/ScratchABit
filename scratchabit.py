@@ -440,7 +440,7 @@ class Editor(editor.EditorExt):
             lines = []
             for area in self.model.AS.get_areas():
                 props = area[engine.PROPS]
-                lines.append("%s (%08x-%08x):" % (props.get("name", "noname"), area[engine.START], area[engine.END]))
+                lines.append("%08x-%08x %s:" % (area[engine.START], area[engine.END], props.get("name", "noname")))
                 flags = area[engine.FLAGS]
                 l = ""
                 for i in range(len(flags)):
