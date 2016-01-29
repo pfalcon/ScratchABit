@@ -181,12 +181,14 @@ def load_segments(aspace, elffile):
 
 
 def load_sections(aspace, elffile):
+    log.info("Processing ELF sections")
     wordsz = elffile.elfclass // 8
     is_exe = elffile["e_type"] == "ET_EXEC"
     addr_cnt = 0x10000
     sec_map = {}
 
     # As section order may be arbitrary, make sure to allocate allocatable sections first
+    log.info("Allocating and loading ELF sections")
     for i, sec in enumerate(elffile.iter_sections()):
         if sec["sh_flags"] & SH_FLAGS.SHF_ALLOC and sec["sh_size"]:
             name = str(sec.name, "ascii")
@@ -212,6 +214,9 @@ def load_sections(aspace, elffile):
         if not isinstance(_sec, SymbolTableSection):
             continue
 
+        sec_name = str(sec.name, "ascii")
+
+        log.info("Processing symbols from section '%s'" % sec_name)
         symtab = {}
         for i, sym in enumerate(_sec.iter_symbols()):
             symtab[i] = sym
@@ -245,6 +250,9 @@ def load_sections(aspace, elffile):
     for rel_sec in elffile.iter_sections():
         if not isinstance(rel_sec, RelocationSection):
             continue
+
+        sec_name = str(rel_sec.name, "ascii")
+        log.info("Processing relocations from section '%s'" % sec_name)
         if rel_sec["sh_info"] not in sec_map:
             continue
         target_sec, addr = sec_map[rel_sec["sh_info"]]
@@ -324,6 +332,7 @@ def load(aspace, fname):
 
 if __name__ == "__main__":
     import sys
+    log.basicConfig(level=log.DEBUG, stream=sys.stdout)
     class Stub:
         def __getattr__(self, attr):
             def dump(*a, **kw):
