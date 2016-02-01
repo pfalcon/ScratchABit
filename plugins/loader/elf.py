@@ -335,8 +335,10 @@ if __name__ == "__main__":
     log.basicConfig(level=log.DEBUG, stream=sys.stdout)
     class Stub:
         def __getattr__(self, attr):
-            def dump(*a, **kw):
-                print("AS.%s(%r, %s)" % (attr, a, kw))
+            def dump(*args, **kw):
+                args = [hex(a) if isinstance(a, int) else repr(a) for a in args]
+                args = ", ".join(args)
+                print("AS.%s(%s, %s)" % (attr, args, kw))
                 return 0
             return dump
 
