@@ -263,7 +263,7 @@ def load_sections(aspace, elffile):
             sym = symtab[reloc['r_info_sym']]
             symname = str(sym.name, "utf-8")
             if reloc["r_addend"] != 0:
-                symname += "+%d" % reloc["r_addend"]
+                symname += "+0x%x" % reloc["r_addend"]
             value = None
             sym_sec, sym_sec_addr = None, None
             if sym.entry["st_shndx"] != "SHN_UNDEF":
