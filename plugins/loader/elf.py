@@ -240,9 +240,6 @@ def load_sections(aspace, elffile):
                 if sym["st_info"]["type"] == "STT_OBJECT":
                     aspace.make_data_array(sym["st_value"] + sec_start, 1, sym["st_size"])
 
-    if is_exe:
-        return elffile["e_entry"]
-
     R_XTENSA_32 = 1
     R_XTENSA_SLOT0_OP = 20
     R_XTENSA_ASM_EXPAND = 11
@@ -310,6 +307,8 @@ def load_sections(aspace, elffile):
                 assert False, "Unknown reloc type: %d" % reloc["r_info_type"]
 #        break
 
+    if is_exe:
+        return elffile["e_entry"]
 
 
 def load(aspace, fname):
