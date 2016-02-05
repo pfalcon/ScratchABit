@@ -283,6 +283,7 @@ def load_sections(aspace, elffile):
 
 
             raddr = addr + reloc["r_offset"]
+
             if reloc["r_info_type"] == R_XTENSA_32:
                 aspace.set_comment(raddr, "R_XTENSA_32: %s" % (symname))
                 aspace.make_data(raddr, wordsz)
@@ -302,16 +303,16 @@ def load_sections(aspace, elffile):
                     # better to explicitly assign a symbolic alias to a value at
                     # particular address, but so far we assume call below to do
                     # that.
-                    aspace.make_arg_offset(addr + reloc["r_offset"], 0, symname)
+                    aspace.make_arg_offset(raddr, 0, symname)
             elif reloc["r_info_type"] == R_XTENSA_SLOT0_OP:
-                aspace.set_comment(addr + reloc["r_offset"], "R_XTENSA_SLOT0_OP: %s" % (symname))
+                aspace.set_comment(raddr, "R_XTENSA_SLOT0_OP: %s" % (symname))
                 if is_exe:
                     continue
-                opcode = aspace.get_byte(addr + reloc["r_offset"])
+                opcode = aspace.get_byte(raddr)
                 if opcode & 0xf == 0x5:
                     # call
                     if value is not None:
-                        p = addr + reloc["r_offset"]
+                        p = raddr
                         value -= ((p & ~0x3) + 4)
                         assert value & 0x3 == 0
                         value = value >> 2
@@ -322,11 +323,11 @@ def load_sections(aspace, elffile):
                     # l32r
                     pass
             elif reloc["r_info_type"] == R_XTENSA_ASM_EXPAND:
-                aspace.set_comment(addr + reloc["r_offset"], "R_XTENSA_ASM_EXPAND: %s" % (symname))
+                aspace.set_comment(raddr, "R_XTENSA_ASM_EXPAND: %s" % (symname))
             elif reloc["r_info_type"] == R_XTENSA_DIFF32:
-                aspace.set_comment(addr + reloc["r_offset"], "R_XTENSA_DIFF32: %s" % (symname))
+                aspace.set_comment(raddr, "R_XTENSA_DIFF32: %s" % (symname))
             elif reloc["r_info_type"] == R_XTENSA_NONE:
-                aspace.set_comment(addr + reloc["r_offset"], "R_XTENSA_NONE: %s" % (symname))
+                aspace.set_comment(raddr, "R_XTENSA_NONE: %s" % (symname))
             else:
                 assert False, "Unknown reloc type: %d" % reloc["r_info_type"]
 #        break
