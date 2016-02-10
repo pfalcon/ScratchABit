@@ -119,4 +119,5 @@ A: Install Linux in an emulator/VM on your system and rejoice.
 > Q: Mandatory screenshot?
 
 A: Sure:
+
 ![screenshot](https://raw.githubusercontent.com/pfalcon/ScratchABit/master/docs/scratchabit.png)
