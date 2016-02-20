@@ -272,15 +272,14 @@ def load_sections(aspace, elffile):
             symname = str(sym.name, "utf-8")
             if reloc["r_addend"] != 0:
                 symname += "+0x%x" % reloc["r_addend"]
+
             value = None
             sym_sec, sym_sec_addr = None, None
             if sym.entry["st_shndx"] != "SHN_UNDEF":
-                if sym.entry["st_shndx"] == "SHN_ABS":
-                    value = sym.entry["st_value"] + reloc["r_addend"]
-                else:
-                    sym_sec, sym_sec_addr = sec_map[sym.entry["st_shndx"]]
-                    value = sym.entry["st_value"] + reloc["r_addend"]
+                value = sym.entry["st_value"] + reloc["r_addend"]
+                if sym.entry["st_shndx"] != "SHN_ABS":
                     if not is_exe:
+                        sym_sec, sym_sec_addr = sec_map[sym.entry["st_shndx"]]
                         value += sym_sec_addr
 
 
