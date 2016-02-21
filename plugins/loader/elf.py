@@ -260,9 +260,9 @@ def load_sections(aspace, elffile):
         # If it's linked executable, then reloc's r_offset fields are already
         # absolute (i.e. have section start added).
         if is_exe:
-            addr = 0
+            target_sec_addr = 0
         else:
-            target_sec, addr = sec_map[rel_sec["sh_info"]]
+            target_sec, target_sec_addr = sec_map[rel_sec["sh_info"]]
 
         #print(rel_sec.header, target_sec.name)
         for reloc in rel_sec.iter_relocations():
@@ -283,7 +283,7 @@ def load_sections(aspace, elffile):
                         value += sym_sec_addr
 
 
-            raddr = addr + reloc["r_offset"]
+            raddr = target_sec_addr + reloc["r_offset"]
             rel_type = RELOC_TYPES[reloc["r_info_type"]]
 
             aspace.set_comment(raddr, "%s: %s" % (rel_type, symname))
