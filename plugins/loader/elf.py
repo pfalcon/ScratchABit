@@ -1,4 +1,5 @@
 import logging as log
+import struct
 
 from pyelftools.elftools.elf.elffile import ELFFile
 from pyelftools.elftools.elf.relocation import Relocation
@@ -13,6 +14,11 @@ MACH_MAP = {
     "EM_X86_64": "x86",
     "EM_XTENSA": "xtensa",
 }
+
+XTENSA_PROP_LITERAL            = 0x00000001
+XTENSA_PROP_INSN               = 0x00000002
+XTENSA_PROP_DATA               = 0x00000004
+XTENSA_PROP_UNREACHABLE        = 0x00000008
 
 def detect(fname):
     f = open(fname, "rb")
@@ -325,6 +331,52 @@ def load_sections(aspace, elffile):
                     # l32r
                     pass
 #        break
+
+    def load_xt_prop(elffile, symtab):
+        sec = elffile.get_section_by_name(b".xt.prop")
+        print(sec)
+        sec.stream.seek(sec['sh_offset'])
+        prop_arr = [0] * (sec["sh_size"] // 4)
+        for i in range(len(prop_arr)):
+            val = sec.stream.read(4)
+            prop_arr[i] = struct.unpack("<I", val)[0]
+        #print(prop_arr)
+
+        rel_sec = elffile.get_section_by_name(b".rela.xt.prop")
+        for reloc in rel_sec.iter_relocations():
+            sym = symtab[reloc['r_info_sym']]
+            symname = str(sym.name, "utf-8")
+            #print(reloc, symname)
+            value = sym.entry["st_value"] + reloc["r_addend"]
+            if sym.entry["st_shndx"] != "SHN_ABS":
+                if not is_exe:
+                    sym_sec, sym_sec_addr = sec_map[sym.entry["st_shndx"]]
+                    value += sym_sec_addr
+            #print(hex(value))
+            if not is_exe:
+                prop_arr[reloc["r_offset"] // 4] += value
+
+        # Process entries in reverse order, as they will be pushed to stack,
+        # so will be processed reversed again.
+        for i in range(len(prop_arr) - 3, -1, -3):
+            start, size, flags = prop_arr[i:i+3]
+            print("%08x(%x) %x" % (start, size, flags))
+            if flags & XTENSA_PROP_INSN:
+                aspace.analisys_stack_push(start, is_call=False)
+            if flags & XTENSA_PROP_DATA:
+                c = aspace.get_comment(start)
+                if c:
+                    c += " ; "
+                else:
+                    c = ""
+                if size != 0 or "XTENSA_PROP_DATA" not in c:
+                    c += "XTENSA_PROP_DATA (%d)" % size
+                    if not size:
+                        size = 1
+                    aspace.make_data_array(start, 1, size)
+                    aspace.set_comment(start, c)
+
+    load_xt_prop(elffile, symtab)
 
     if is_exe:
         return elffile["e_entry"]
