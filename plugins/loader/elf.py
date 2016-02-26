@@ -375,6 +375,11 @@ def load_sections(aspace, elffile):
                         size = 1
                     aspace.make_data_array(start, 1, size)
                     aspace.set_comment(start, c)
+            if flags & XTENSA_PROP_LITERAL:
+                while size:
+                    aspace.make_data(start, wordsz)
+                    start += 4
+                    size -= 4
 
     load_xt_prop(elffile, symtab)
 
