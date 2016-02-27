@@ -371,10 +371,15 @@ def load_sections(aspace, elffile):
                     c = ""
                 if size != 0 or "XTENSA_PROP_DATA" not in c:
                     c += "XTENSA_PROP_DATA (%d)" % size
-                    if not size:
-                        size = 1
-                    aspace.make_data_array(start, 1, size)
                     aspace.set_comment(start, c)
+                    # Don't trust XTENSA_PROP_DATA with size=0
+                    # For linked exe, there were cases when such
+                    # pointed straight into the code and broke all
+                    # the fun.
+                    #if not size:
+                    #    size = 1
+                    if size:
+                        aspace.make_data_array(start, 1, size)
             if flags & XTENSA_PROP_LITERAL:
                 while size:
                     aspace.make_data(start, wordsz)
