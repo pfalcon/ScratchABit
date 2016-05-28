@@ -8,9 +8,9 @@ show bytes 4
 
 # This defines memory area at the given address of the given size
 # and permissions (all of read/write/execute in this case)
-0x600000(0x1000) rwx
+area .bin 0x600000(0x1000) rwx
 # Alternatively, end address (inclusive) can be specified:
-#0x600000-0x600fff rwx
+#area .bin 0x600000-0x600fff rwx
 
 # Load binary code to disassemble to the defined memory area
 load example.bin 0x600000
