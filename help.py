@@ -15,14 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 HELP = """\
-Global commands (for letter commands, case matters):
+Global commands ("letter" commands are case-sensitive, e.g. Shift+a
+is actually "capital A", so make sure Caps Lock is right):
 
 g - Goto address
 Esc - Return to address from previous Enter cmd (as stack)
-S - Save database
-W - Write disassembly listing to file 'out.lst'
-Ctrl+q - Show problems list
+Shift+s - Save database
 q - Quit
+
+Shift+w - Write complete disassembly listing to file 'out.lst'
+Ctrl+q - Show problems list
 
 Current address commands:
 
@@ -33,16 +35,19 @@ a - Make ASCII string
 n - (Re)name address (make label)
 i - Info
 Ctrl+w - Write current function to a file
-/ - Search thru listing starting from current addr (Shift+/ - continue)
+/ - Search thru listing starting from current addr
+Shift+/ - Continue search
 
-Current selected argument commands (ok to work on current command
-if only 1 suitable arg):
+Current selected argument commands (require cursor to be on this
+argument, but if an instruction has only one argument, will work
+with cursor anywhere in the line):
 
 Enter - Goto address in operand
 h - Decimal/hex number (TODO)
 o - Make an offset/address
 
-Cross-reference type key (xref: <addr> <type>):
+Key to cross-reference types as appears in the listing
+("xref: <addr> <type>"):
 c - call from <addr>
 j - jump from <addr>
 r - read at <addr>
