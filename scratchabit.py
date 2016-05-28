@@ -589,21 +589,25 @@ def parse_disasm_def(fname):
             elif l.startswith("show bytes "):
                 args = l.split()
                 show_bytes = int(args[2])
-            else:
-                if "(" in l:
-                    m = re.match(r"(.+?)\s*\(\s*(.+?)\s*\)\s+(.+)", l)
+            elif l.startswith("area "):
+                args = l.split()
+                assert len(args) == 4
+
+                if "(" in args[2]:
+                    m = re.match(r"(.+?)\s*\(\s*(.+?)\s*\)", args[2])
                     #print(m.groups())
                     start = int(m.group(1), 0)
                     end = start + int(m.group(2), 0) - 1
-                    props = m.group(3)
                 else:
-                    m = re.match(r"(.+?)\s*-\s*(.+?)\s+(.+)", l)
+                    m = re.match(r"(.+?)\s*-\s*(.+?)", args[2])
                     #print(m.groups())
                     start = int(m.group(1), 0)
                     end = int(m.group(2), 0)
-                    props = m.group(3)
-                a = engine.ADDRESS_SPACE.add_area(start, end, {"access": props.upper()})
+
+                a = engine.ADDRESS_SPACE.add_area(start, end, {"name": args[1], "access": args[3].upper()})
                 print("Adding area: %s" % engine.str_area(a))
+            else:
+                assert 0, "Unknown directive: " + l
 
 
 if __name__ == "__main__":
