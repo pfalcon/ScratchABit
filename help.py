@@ -60,9 +60,9 @@ For each byte, type is shown:
 . - unknown
 F - first byte of instruction, the instruction belonging
     to a known function
+f - continuation byte of function's instruction
 C - first byte of instruction, not belonging to a function.
-c - continuation byte of instruction (whether belonging to
-    a function or not)
+c - continuation byte of non-function instruction
 D - first byte of a data item
 d - continuation byte of a data item
 X - conflicting flags (e.g. both code and data)
