@@ -23,6 +23,7 @@ Esc - Return to address from previous Enter cmd (as stack)
 Shift+s - Save database
 q - Quit
 
+Shift+i - Show memory map (see key below)
 Shift+w - Write complete disassembly listing to file 'out.lst'
 Ctrl+q - Show problems list
 
@@ -53,6 +54,18 @@ j - jump from <addr>
 r - read at <addr>
 w - write at <addr>
 o - offset/address taken at <addr>
+
+Key to memory map (Shift+i):
+For each byte, type is shown:
+. - unknown
+F - first byte of instruction, the instruction belonging
+    to a known function
+C - first byte of instruction, not belonging to a function.
+c - continuation byte of instruction (whether belonging to
+    a function or not)
+D - first byte of a data item
+d - continuation byte of a data item
+X - conflicting flags (e.g. both code and data)
 """
 
 from picotui.editorext import Viewer
