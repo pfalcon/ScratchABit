@@ -190,7 +190,8 @@ def load_sections(aspace, elffile):
     log.info("Processing ELF sections")
     wordsz = elffile.elfclass // 8
     is_exe = elffile["e_type"] == "ET_EXEC"
-    addr_cnt = 0x10000
+    # Use pretty weird address to help distinuish addresses from literal numbers
+    addr_cnt = 0x55ab0000
     sec_map = {}
 
     # As section order may be arbitrary, make sure to allocate allocatable sections first
