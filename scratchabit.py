@@ -601,16 +601,18 @@ def parse_disasm_def(fname):
                 args = l.split()
                 assert len(args) == 4
 
+                # Allow undescores to separate digit groups
+                def str2int(s):
+                    return int(s.replace("_", ""), 0)
+
                 if "(" in args[2]:
                     m = re.match(r"(.+?)\s*\(\s*(.+?)\s*\)", args[2])
-                    #print(m.groups())
-                    start = int(m.group(1), 0)
-                    end = start + int(m.group(2), 0) - 1
+                    start = str2int(m.group(1))
+                    end = start + str2int(m.group(2)) - 1
                 else:
-                    m = re.match(r"(.+?)\s*-\s*(.+?)", args[2])
-                    #print(m.groups())
-                    start = int(m.group(1), 0)
-                    end = int(m.group(2), 0)
+                    m = re.match(r"(.+)\s*-\s*(.+)", args[2])
+                    start = str2int(m.group(1))
+                    end = str2int(m.group(2))
 
                 a = engine.ADDRESS_SPACE.add_area(start, end, {"name": args[1], "access": args[3].upper()})
                 print("Adding area: %s" % engine.str_area(a))
