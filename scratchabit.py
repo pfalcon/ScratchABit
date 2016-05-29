@@ -30,7 +30,7 @@ import idaapi
 import curses
 from picotui.widgets import *
 from pyedit import editorext as editor
-from pyedit.editorext import Viewer
+from picotui.editorext import Viewer
 import utils
 import help
 import saveload
