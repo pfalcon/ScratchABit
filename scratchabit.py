@@ -154,7 +154,10 @@ class Editor(editor.EditorExt):
         self.update_screen()
 
     def handle_cursor_keys(self, key):
+        cl = self.cur_line
         if super().handle_cursor_keys(key):
+            if self.cur_line == cl:
+                return True
             #log.debug("handle_cursor_keys: cur: %d, total: %d", self.cur_line, self.total_lines)
             if self.cur_line <= HEIGHT or self.total_lines - self.cur_line <= HEIGHT:
                 log.debug("handle_cursor_keys: triggering update")
