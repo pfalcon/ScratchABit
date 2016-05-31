@@ -335,7 +335,7 @@ def load_sections(aspace, elffile):
 
     def load_xt_prop(elffile, symtab):
         sec = elffile.get_section_by_name(b".xt.prop")
-        print(sec)
+        print("Loading Xtensa properties from section:", sec.name.decode("utf-8"))
         sec.stream.seek(sec['sh_offset'])
         prop_arr = [0] * (sec["sh_size"] // 4)
         for i in range(len(prop_arr)):
@@ -344,6 +344,7 @@ def load_sections(aspace, elffile):
         #print(prop_arr)
 
         rel_sec = elffile.get_section_by_name(b".rela.xt.prop")
+        print("Loading Xtensa properties from section:", rel_sec.name.decode("utf-8"))
         for reloc in rel_sec.iter_relocations():
             sym = symtab[reloc['r_info_sym']]
             symname = str(sym.name, "utf-8")
@@ -361,7 +362,7 @@ def load_sections(aspace, elffile):
         # so will be processed reversed again.
         for i in range(len(prop_arr) - 3, -1, -3):
             start, size, flags = prop_arr[i:i+3]
-            print("%08x(%x) %x" % (start, size, flags))
+            #print("Xtensa prop entry: %08x(%x) %x" % (start, size, flags))
             if flags & XTENSA_PROP_INSN:
                 aspace.analisys_stack_push(start, is_call=False)
             if flags & XTENSA_PROP_DATA:
