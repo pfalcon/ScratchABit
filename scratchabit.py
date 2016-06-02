@@ -591,6 +591,7 @@ def parse_disasm_def(fname):
                     engine.ADDRESS_SPACE.load_content(open(args[1], "rb"), addr)
                     print("Loading %s @0x%x" % (args[1], addr))
                 else:
+                    print("Loading %s (%s plugin)" % (args[1], args[2]))
                     loader = __import__(args[2])
                     load_target_file(loader, args[1])
             elif l.startswith("cpu "):
