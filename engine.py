@@ -52,7 +52,8 @@ def area_props(area):
 
 class InvalidAddrException(Exception):
     "Thrown when dereferencing address which doesn't exist in AddressSpace."
-    pass
+    def __init__(self, addr):
+        self.args = (addr, hex(addr))
 
 
 class Function:
