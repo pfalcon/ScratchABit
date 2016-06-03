@@ -588,8 +588,8 @@ def parse_disasm_def(fname):
                 args = l.split()
                 if args[2][0] in string.digits:
                     addr = int(args[2], 0)
-                    engine.ADDRESS_SPACE.load_content(open(args[1], "rb"), addr)
                     print("Loading %s @0x%x" % (args[1], addr))
+                    engine.ADDRESS_SPACE.load_content(open(args[1], "rb"), addr)
                 else:
                     print("Loading %s (%s plugin)" % (args[1], args[2]))
                     loader = __import__(args[2])
