@@ -44,7 +44,7 @@ argument, but if an instruction has only one argument, will work
 with cursor anywhere in the line):
 
 Enter - Goto address in operand
-h - Decimal/hex number (TODO)
+h - Decimal/hex number
 o - Make an offset/address
 
 Key to cross-reference types as appears in the listing
