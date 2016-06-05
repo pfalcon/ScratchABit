@@ -29,7 +29,7 @@ import idaapi
 
 import curses
 from picotui.widgets import *
-from pyedit import editorext as editor
+from picotui import editorext as editor
 from picotui.editorext import Viewer
 import utils
 import help
@@ -74,7 +74,7 @@ class Editor(editor.EditorExt):
         # after set_model().
         self.top_line = sys.maxsize
 
-    def show_line(self, l):
+    def show_line(self, l, i):
         global show_bytes
         if not isinstance(l, str):
             res = "%08x " % l.ea
@@ -87,7 +87,7 @@ class Editor(editor.EditorExt):
                         bin += "+"
                 res += idaapi.fillstr(bin, show_bytes * 2 + 1)
             res += l.indent + l.render()
-        super().show_line(res)
+        super().show_line(res, i)
 
     def goto_addr(self, to_addr, from_addr=None):
         if to_addr is None:
@@ -127,7 +127,7 @@ class Editor(editor.EditorExt):
                 self.addr_stack.append(from_addr)
             if not self.goto_line(no):
                 # Need to redraw always, because we changed underlying model
-                self.update_screen()
+                self.redraw()
         else:
             self.show_status("Unknown address: %x" % to_addr)
 
@@ -151,7 +151,7 @@ class Editor(editor.EditorExt):
             self.cur_line = model.target_addr_lineno
         self.top_line = self.cur_line - self.row
         #log.debug("update_model: addr=%x, row=%d, cur_line=%d, top_line=%d" % (addr, self.row, self.cur_line, self.top_line))
-        self.update_screen()
+        self.redraw()
 
     def handle_cursor_keys(self, key):
         cl = self.cur_line
@@ -205,7 +205,7 @@ class Editor(editor.EditorExt):
             return outfile
 
 
-    def handle_key(self, key):
+    def handle_edit_key(self, key):
         try:
             return self.handle_key_unprotected(key)
         except Exception as e:
@@ -227,7 +227,7 @@ class Editor(editor.EditorExt):
                 "",
             ] + traceback.format_exc().splitlines())
             v.loop()
-            self.update_screen()
+            self.redraw()
 
 
     def handle_key_unprotected(self, key):
@@ -334,7 +334,7 @@ class Editor(editor.EditorExt):
                         engine.IMM_UDEC: engine.IMM_UHEX,
                     }
                     self.model.AS.set_arg_prop(addr, op_no, "subtype", next_subtype[subtype])
-                    self.update_screen()
+                    self.redraw()
                     self.show_status("Changed arg #%d to %s" % (op_no, next_subtype[subtype]))
         elif key == b"o":
             addr = self.cur_addr()
@@ -360,7 +360,7 @@ class Editor(editor.EditorExt):
                 self.model.AS.set_comment(addr, res)
                 self.update_model()
             else:
-                self.update_screen()
+                self.redraw()
         elif key == b"n":
             addr = self.cur_addr()
             label = self.model.AS.get_label(addr)
@@ -383,7 +383,7 @@ class Editor(editor.EditorExt):
                     self.update_model()
                     return
                 break
-            self.update_screen()
+            self.redraw()
         elif key == b"g":
             d = Dialog(4, 4, title="Go to")
             d.add(1, 1, WLabel("Label/addr:"))
@@ -393,7 +393,7 @@ class Editor(editor.EditorExt):
             d.add(13, 1, entry)
             d.add(1, 2, WLabel("Press Down to auto-complete"))
             res = d.loop()
-            self.update_screen()
+            self.redraw()
 
             if res == ACTION_OK:
                 value = entry.get_text()
@@ -405,7 +405,7 @@ class Editor(editor.EditorExt):
 
         elif key == editor.KEY_F1:
             help.help(self)
-            self.update_screen()
+            self.redraw()
         elif key == b"S":
             saveload.save_state(project_dir)
             self.show_status("Saved.")
@@ -418,7 +418,7 @@ class Editor(editor.EditorExt):
             lw.finish_dialog = ACTION_OK
             d.add(1, 1, lw)
             res = d.loop()
-            self.update_screen()
+            self.redraw()
             if res == ACTION_OK:
                 val = lw.get_cur_line()
                 if val:
@@ -463,7 +463,7 @@ class Editor(editor.EditorExt):
                     lines.append(l)
             v.set_lines(lines)
             v.loop()
-            self.update_screen()
+            self.redraw()
         elif key == b"W":
             out_fname = "out.lst"
             with open(out_fname, "w") as f:
@@ -494,7 +494,7 @@ class Editor(editor.EditorExt):
                 entry.finish_dialog = ACTION_OK
                 d.add(13, 1, entry)
                 res = d.loop()
-                self.update_screen()
+                self.redraw()
                 self.search_str = entry.get_text()
                 if res != ACTION_OK or not self.search_str:
                     return
