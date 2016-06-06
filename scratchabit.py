@@ -473,6 +473,15 @@ class Editor(editor.EditorExt):
             outfile = self.write_func(self.cur_addr())
             if outfile:
                 self.show_status("Wrote file: %s" % outfile)
+        elif key == b"\x15":  # Ctrl+U
+            # Next undefined
+            addr = self.next_addr()
+            while True:
+                flags = self.model.AS.get_flags(addr)
+                if flags == self.model.AS.UNK:
+                    self.goto_addr(addr, from_addr=self.cur_addr())
+                    break
+                addr += 1
         elif key in (b"/", b"?"):  # "/" and Shift+"/"
             class FoundException(Exception): pass
             class TextSearchModel:
