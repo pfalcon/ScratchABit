@@ -171,9 +171,24 @@ class Editor(editor.EditorExt):
         line = self.get_cur_line()
         return line.ea
 
-    def next_addr(self):
+    # Address of the next line. It may be the same address as the
+    # current line, as several lines may "belong" to the same address,
+    # (virtual lines like headers, etc.)
+    def next_line_addr(self):
         try:
             return self.content[self.cur_line + 1].ea
+        except:
+            return None
+
+    # Return next address following the current line. May need to skip
+    # few virtual lines.
+    def next_addr(self):
+        addr = self.cur_addr()
+        n = self.cur_line + 1
+        try:
+            while self.content[n].ea == addr:
+                n += 1
+            return self.content[n].ea
         except:
             return None
 
@@ -509,7 +524,7 @@ class Editor(editor.EditorExt):
                     return
                 addr = self.cur_addr()
             else:
-                addr = self.next_addr()
+                addr = self.next_line_addr()
 
             try:
                 engine.render_from(TextSearchModel(self.search_str, self), addr, 10000000)
