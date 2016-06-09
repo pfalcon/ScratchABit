@@ -152,6 +152,16 @@ class AddressSpace:
     def max_addr(self):
         return self.area_list[-1][END]
 
+    # Return next address in the address space, or None
+    def next_addr(self, addr):
+        offset, area = self.addr2area(addr)
+        if addr != area[END]:
+            return addr + 1
+        i = self.area_no(area) + 1
+        if i == len(self.area_list):
+            return None
+        return self.area_list[i][START]
+
     def is_exec(self, addr):
         off, area = self.addr2area(addr)
         if not area:
