@@ -490,13 +490,32 @@ class Editor(editor.EditorExt):
                 self.show_status("Wrote file: %s" % outfile)
         elif key == b"\x15":  # Ctrl+U
             # Next undefined
-            addr = self.next_addr()
-            while True:
-                flags = self.model.AS.get_flags(addr)
-                if flags == self.model.AS.UNK:
-                    self.goto_addr(addr, from_addr=self.cur_addr())
-                    break
-                addr += 1
+            addr = self.cur_addr()
+            flags = self.model.AS.get_flags(addr)
+            if flags == self.model.AS.UNK:
+                # If already on undefined, skip the current stride of them,
+                # as they indeed go in batches.
+                while True:
+                    flags = self.model.AS.get_flags(addr)
+                    if flags != self.model.AS.UNK:
+                        break
+                    addr = self.model.AS.next_addr(addr)
+                    if addr is None:
+                        break
+
+            if addr is not None:
+                while True:
+                    flags = self.model.AS.get_flags(addr)
+                    if flags == self.model.AS.UNK:
+                        self.goto_addr(addr, from_addr=self.cur_addr())
+                        break
+                    addr = self.model.AS.next_addr(addr)
+                    if addr is None:
+                        break
+
+            if addr is None:
+                self.show_status("There're no further undefined strides")
+
         elif key in (b"/", b"?"):  # "/" and Shift+"/"
             class FoundException(Exception): pass
             class TextSearchModel:
