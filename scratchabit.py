@@ -207,6 +207,12 @@ class Editor(editor.EditorExt):
     def analyze_status(self, cnt):
         self.show_status("Analyzing (%d insts so far)" % cnt)
 
+    def expect_flags(self, fl, allowed_flags):
+        if fl not in allowed_flags:
+            self.show_status("Undefine first (u key)")
+            return False
+        return True
+
     def write_func(self, addr):
         func = self.model.AS.lookup_func(addr)
         if func:
@@ -294,8 +300,7 @@ class Editor(editor.EditorExt):
         elif key == b"d":
             addr = self.cur_addr()
             fl = self.model.AS.get_flags(addr)
-            if fl not in (self.model.AS.DATA, self.model.AS.UNK):
-                self.show_status("Undefine first")
+            if not self.expect_flags(fl, (self.model.AS.DATA, self.model.AS.UNK)):
                 return
             if fl == self.model.AS.UNK:
                 self.model.AS.set_flags(addr, 1, self.model.AS.DATA, self.model.AS.DATA_CONT)
@@ -309,8 +314,7 @@ class Editor(editor.EditorExt):
         elif key == b"a":
             addr = self.cur_addr()
             fl = self.model.AS.get_flags(addr)
-            if fl not in (self.model.AS.UNK, self.model.AS.DATA):
-                self.show_status("Undefine first")
+            if not self.expect_flags(fl, (self.model.AS.DATA, self.model.AS.UNK)):
                 return
             sz = 0
             label = "s_"
