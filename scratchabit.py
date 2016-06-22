@@ -337,6 +337,27 @@ class Editor(editor.EditorExt):
                 self.model.AS.set_flags(self.cur_addr(), sz, self.model.AS.STR, self.model.AS.DATA_CONT)
                 self.model.AS.make_unique_label(self.cur_addr(), label)
                 self.update_model()
+        elif key == b"f":
+            addr = self.cur_addr()
+            fl = self.model.AS.get_flags(addr)
+            if not self.expect_flags(fl, (self.model.AS.UNK,)):
+                return
+
+            sz = 0
+            while True:
+                b = self.model.AS.get_byte(addr)
+                fl = self.model.AS.get_flags(addr)
+                if b not in (0, 0xff):
+                    self.show_status("Filler must consist of 0x00 or 0xff")
+                    return
+                if fl != self.model.AS.UNK:
+                    break
+                sz += 1
+                addr += 1
+            if sz > 0:
+                self.model.AS.set_flags(self.cur_addr(), sz, self.model.AS.FILL, self.model.AS.FILL)
+                self.update_model()
+
         elif key == b"u":
             addr = self.cur_addr()
             self.model.undefine_unit(addr)

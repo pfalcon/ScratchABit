@@ -91,6 +91,7 @@ class AddressSpace:
     DATA = 0x04
     DATA_CONT = 0x08
     STR = 0x10  # Continuation is DATA_CONT
+    FILL = 0x40  # Filler/alignment bytes
     FUNC = 0x80  # Can appear with CODE, meaning this instruction belongs to a function
 
     def __init__(self):
@@ -233,6 +234,8 @@ class AddressSpace:
             f = self.CODE_CONT
         elif flags[off] in (self.DATA, self.STR):
             f = self.DATA_CONT
+        elif flags[off] == self.FILL:
+            f = self.FILL
         else:
             return 1
         off += 1
@@ -954,6 +957,17 @@ class String(DisasmObj):
         return s
 
 
+class Fill(DisasmObj):
+
+    def __init__(self, ea, sz):
+        self.ea = ea
+        self.sz = sz
+        self.cache = idaapi.fillstr(".fill", idaapi.DEFAULT_WIDTH) + str(sz)
+
+    def render(self):
+        return self.cache
+
+
 class Unknown(DisasmObj):
 
     virtual = False
@@ -1132,6 +1146,14 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
                     j += 1
                 out = String(addr, sz, str)
                 i += sz
+            elif f == AddressSpace.FILL:
+                sz = 1
+                j = i + 1
+                while j < areasize and flags[j] == AddressSpace.FILL:
+                    sz += 1
+                    j += 1
+                out = Fill(addr, sz)
+                i += sz
             elif f == AddressSpace.CODE:
                 out = Instruction(addr)
                 _processor.cmd = out
@@ -1186,6 +1208,8 @@ def flag2char(f):
         return "D"
     elif f == AddressSpace.DATA_CONT:
         return "d"
+    elif f == AddressSpace.FILL:
+        return "-"
     else:
         return "X"
 
