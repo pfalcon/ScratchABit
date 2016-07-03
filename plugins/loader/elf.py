@@ -15,10 +15,21 @@ MACH_MAP = {
     "EM_XTENSA": "xtensa",
 }
 
+RELOC_TYPES = {}
+
+RELOC_TYPES["EM_XTENSA"] = {
+    0: "R_XTENSA_NONE",
+    1: "R_XTENSA_32",
+    11: "R_XTENSA_ASM_EXPAND",
+    19: "R_XTENSA_DIFF32",
+    20: "R_XTENSA_SLOT0_OP",
+}
+
 XTENSA_PROP_LITERAL            = 0x00000001
 XTENSA_PROP_INSN               = 0x00000002
 XTENSA_PROP_DATA               = 0x00000004
 XTENSA_PROP_UNREACHABLE        = 0x00000008
+
 
 def detect(fname):
     f = open(fname, "rb")
@@ -247,13 +258,10 @@ def load_sections(aspace, elffile):
                 if sym["st_info"]["type"] == "STT_OBJECT":
                     aspace.make_data_array(sym["st_value"] + sec_start, 1, sym["st_size"])
 
-    RELOC_TYPES = {
-        0: "R_XTENSA_NONE",
-        1: "R_XTENSA_32",
-        11: "R_XTENSA_ASM_EXPAND",
-        19: "R_XTENSA_DIFF32",
-        20: "R_XTENSA_SLOT0_OP",
-    }
+
+    # Process relocations - using relocations allows to tag various data types
+
+    reloc_types = RELOC_TYPES.get(elffile["e_machine"], {})
 
     for rel_sec in elffile.iter_sections():
         if not isinstance(rel_sec, RelocationSection):
@@ -293,7 +301,7 @@ def load_sections(aspace, elffile):
 
 
             raddr = target_sec_addr + reloc["r_offset"]
-            rel_type = RELOC_TYPES[reloc["r_info_type"]]
+            rel_type = reloc_types.get(reloc["r_info_type"], "reltype%d" % reloc["r_info_type"])
 
             aspace.set_comment(raddr, "%s: %s" % (rel_type, symname))
 
@@ -337,6 +345,8 @@ def load_sections(aspace, elffile):
 
     def load_xt_prop(elffile, symtab):
         sec = elffile.get_section_by_name(b".xt.prop")
+        if not sec:
+            return
         print("Loading Xtensa properties from section:", sec.name.decode("utf-8"))
         sec.stream.seek(sec['sh_offset'])
         prop_arr = [0] * (sec["sh_size"] // 4)
