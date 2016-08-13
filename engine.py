@@ -959,9 +959,11 @@ class String(DisasmObj):
 
 class Fill(DisasmObj):
 
+    virtual = False
+
     def __init__(self, ea, sz):
         self.ea = ea
-        self.sz = sz
+        self.size = sz
         self.cache = idaapi.fillstr(".fill", idaapi.DEFAULT_WIDTH) + str(sz)
 
     def render(self):
