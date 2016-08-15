@@ -33,11 +33,13 @@ u - Undefine
 c - Make code
 d - Make/Cycle data
 a - Make ASCII string
+f - Make filler (ignored bytes, to avoid leaving them undefined)
 n - (Re)name address (make label)
 i - Info
 Ctrl+w - Write current function to a file
 / - Search thru listing starting from current addr
 Shift+/ - Continue search
+Ctrl+u - Search next undefined
 
 Current selected argument commands (require cursor to be on this
 argument, but if an instruction has only one argument, will work
