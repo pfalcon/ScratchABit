@@ -345,13 +345,13 @@ class Editor(editor.EditorExt):
 
             sz = 0
             while True:
-                b = self.model.AS.get_byte(addr)
                 fl = self.model.AS.get_flags(addr)
+                if fl != self.model.AS.UNK:
+                    break
+                b = self.model.AS.get_byte(addr)
                 if b not in (0, 0xff):
                     self.show_status("Filler must consist of 0x00 or 0xff")
                     return
-                if fl != self.model.AS.UNK:
-                    break
                 sz += 1
                 addr += 1
             if sz > 0:
