@@ -447,6 +447,7 @@ class Editor(editor.EditorExt):
             help.help(self)
             self.redraw()
         elif key == b"S":
+            self.show_status("Saving...")
             saveload.save_state(project_dir)
             self.show_status("Saved.")
         elif key == b"\x11":  # ^Q
