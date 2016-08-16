@@ -47,7 +47,7 @@ should be compliant, like Linux/BSD/etc, see also FAQ).
 
 Clone the code using:
 
-    git clone --recursive
+    git clone --recursive https://github.com/pfalcon/ScratchABit
 
 If you cloned code without `--recursive`, run `git submodule update --init`.
 
