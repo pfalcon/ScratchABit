@@ -34,6 +34,11 @@ def GetSegmentAttr(ea, attr):
         ret |= idaapi.SEGPERM_EXEC
 
 
+# Make filler
+def MakeAlign(ea, cnt, align):
+    ADDRESS_SPACE.make_filler(ea, cnt)
+
+
 ADDRESS_SPACE = None
 
 def set_address_space(aspace):

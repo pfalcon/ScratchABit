@@ -297,6 +297,9 @@ class AddressSpace:
             self.make_data(addr, sz)
             addr += sz
 
+    def make_filler(self, addr, sz):
+        self.set_flags(addr, sz, self.FILL, self.FILL)
+
     # Address properties API
 
     def set_addr_prop(self, addr, prop, val):

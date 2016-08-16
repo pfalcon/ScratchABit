@@ -355,7 +355,7 @@ class Editor(editor.EditorExt):
                 sz += 1
                 addr += 1
             if sz > 0:
-                self.model.AS.set_flags(self.cur_addr(), sz, self.model.AS.FILL, self.model.AS.FILL)
+                self.model.AS.make_filler(self.cur_addr(), sz)
                 self.update_model()
 
         elif key == b"u":
