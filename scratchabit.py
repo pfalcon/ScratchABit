@@ -23,6 +23,7 @@ import re
 import string
 import binascii
 import logging as log
+import argparse
 
 import engine
 import idaapi
@@ -694,6 +695,12 @@ def parse_disasm_def(fname):
 
 
 if __name__ == "__main__":
+
+    argp = argparse.ArgumentParser(description="ScratchABit interactive disassembler")
+    argp.add_argument("file", help="Input file (binary or disassembly .def)")
+    argp.add_argument("--script", help="Apply script from file instead of starting UI")
+    args = argp.parse_args()
+
     # Plugin dirs are relative to the dir where scratchabit.py resides.
     # sys.path[0] below provide absolute path of this dir, resolved for
     # symlinks.
@@ -703,25 +710,25 @@ if __name__ == "__main__":
     log.basicConfig(filename="scratchabit.log", format='%(asctime)s %(message)s', level=log.DEBUG)
     log.info("Started")
 
-    if sys.argv[1].endswith(".def"):
-        parse_disasm_def(sys.argv[1])
-        project_name = sys.argv[1].rsplit(".", 1)[0]
+    if args.file.endswith(".def"):
+        parse_disasm_def(args.file)
+        project_name = args.file.rsplit(".", 1)[0]
     else:
         import default_plugins
         for loader_id in default_plugins.loaders:
             loader = __import__(loader_id)
-            arch_id = loader.detect(sys.argv[1])
+            arch_id = loader.detect(args.file)
             if arch_id:
                 break
         if not arch_id:
-            print("Error: file '%s' not recognized by default loaders" % sys.argv[1])
+            print("Error: file '%s' not recognized by default loaders" % args.file)
             sys.exit(1)
         if arch_id not in default_plugins.cpus:
-            print("Error: no plugin for CPU '%s' as detected for file '%s'" % (arch_id, sys.argv[1]))
+            print("Error: no plugin for CPU '%s' as detected for file '%s'" % (arch_id, args.file))
             sys.exit(1)
-        load_target_file(loader, sys.argv[1])
+        load_target_file(loader, args.file)
         CPU_PLUGIN = __import__(default_plugins.cpus[arch_id])
-        project_name = sys.argv[1]
+        project_name = args.file
 
     p = CPU_PLUGIN.PROCESSOR_ENTRY()
     engine.set_processor(p)
