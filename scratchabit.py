@@ -698,7 +698,8 @@ if __name__ == "__main__":
 
     argp = argparse.ArgumentParser(description="ScratchABit interactive disassembler")
     argp.add_argument("file", help="Input file (binary or disassembly .def)")
-    argp.add_argument("--script", help="Apply script from file instead of starting UI")
+    argp.add_argument("--script", action="append", help="Run script from file after loading environment")
+    argp.add_argument("--save", action="store_true", help="Save after --script and quit; don't show UI")
     args = argp.parse_args()
 
     # Plugin dirs are relative to the dir where scratchabit.py resides.
@@ -755,6 +756,13 @@ if __name__ == "__main__":
         print()
 
     #engine.print_address_map()
+
+    if args.script:
+        for script in args.script:
+            mod = __import__(script)
+        if args.save:
+            saveload.save_state(project_dir)
+            sys.exit()
 
     addr_stack = []
     if os.path.exists(project_dir + "/session.addr_stack"):
