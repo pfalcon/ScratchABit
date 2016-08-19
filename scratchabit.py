@@ -88,6 +88,7 @@ class Editor(editor.EditorExt):
 
     def show_line(self, l, i):
         global show_bytes
+        res = l
         if not isinstance(l, str):
             res = "%08x " % l.ea
             if show_bytes > 0:
