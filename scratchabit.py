@@ -810,6 +810,7 @@ if __name__ == "__main__":
         log.exception("Unhandled exception")
         raise
     finally:
+        Screen.goto(0, main_screen.screen_size[1])
         Screen.cursor(True)
         Screen.deinit_tty()
         Screen.wr("\n\n")
