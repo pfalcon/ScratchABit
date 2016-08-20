@@ -31,6 +31,7 @@ import idaapi
 import curses
 from picotui.widgets import *
 from picotui import editorext as editor
+from picotui.screen import Screen
 from picotui.editorext import Viewer
 import utils
 import help
@@ -794,12 +795,12 @@ if __name__ == "__main__":
     #print(_model.lines())
     #sys.exit()
 
-    Editor.init_tty()
+    Screen.init_tty()
     try:
-        screen_size = Editor.screen_size()
+        Screen.cls()
+        Screen.enable_mouse()
+        screen_size = Screen.screen_size()
         e = Editor(1, 1, screen_size[0] - 2, screen_size[1] - 3)
-        e.cls()
-        e.enable_mouse()
         e.draw_box(0, 0, screen_size[0], screen_size[1] - 1)
         e.set_model(_model)
         e.addr_stack = addr_stack
@@ -809,7 +810,7 @@ if __name__ == "__main__":
         log.exception("Unhandled exception")
         raise
     finally:
-        e.cursor(True)
-        e.deinit_tty()
-        e.wr("\n\n")
+        Screen.cursor(True)
+        Screen.deinit_tty()
+        Screen.wr("\n\n")
         saveload.save_session(project_dir, e)
