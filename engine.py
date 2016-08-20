@@ -1103,7 +1103,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
         if start:
             i = offset
             start = False
-        else:
+        if i == 0:
             model.add_line(a[START], Literal(a[START], "; Start of 0x%x area (%s)" % (a[START], a[PROPS].get("name", "noname"))))
         bytes = a[BYTES]
         flags = a[FLAGS]
