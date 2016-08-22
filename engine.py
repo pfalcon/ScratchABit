@@ -1216,6 +1216,8 @@ def flag2char(f):
         return "D"
     elif f == AddressSpace.DATA_CONT:
         return "d"
+    elif f == AddressSpace.STR:
+        return "A"
     elif f == AddressSpace.FILL:
         return "-"
     else:
