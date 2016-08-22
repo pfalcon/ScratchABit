@@ -103,7 +103,7 @@ class Editor(editor.EditorExt):
             res += l.indent + l.render()
         super().show_line(res, i)
 
-    def goto_addr(self, to_addr, from_addr=None):
+    def goto_addr(self, to_addr, col=None, from_addr=None):
         if to_addr is None:
             self.show_status("No address-like value to go to")
             return
@@ -121,7 +121,7 @@ class Editor(editor.EditorExt):
         no = self.model.addr2line_no(to_addr, subno)
         if no is not None:
             if self.line_visible(no):
-                self.goto_line(no)
+                self.goto_line(no, col=col)
                 if from_addr is not None:
                     self.addr_stack.append(from_addr)
                 return
@@ -139,7 +139,7 @@ class Editor(editor.EditorExt):
         if no is not None:
             if from_addr is not None:
                 self.addr_stack.append(from_addr)
-            if not self.goto_line(no):
+            if not self.goto_line(no, col=col):
                 # Need to redraw always, because we changed underlying model
                 self.redraw()
         else:
@@ -569,8 +569,9 @@ class Editor(editor.EditorExt):
                 def add_line(self, addr, line):
                     super().add_line(addr, line)
                     txt = line.render()
-                    if self.search in txt:
-                        raise FoundException((addr, line.subno))
+                    idx = txt.find(self.search)
+                    if idx != -1:
+                        raise FoundException((addr, line.subno), idx + line.LEADER_SIZE + len(line.indent))
                     if self.cnt % 256 == 0:
                         self.ctrl.show_status("Searching: 0x%x" % addr)
                     self.cnt += 1
@@ -596,7 +597,7 @@ class Editor(editor.EditorExt):
             try:
                 engine.render_from(TextSearchModel(self.search_str, self), addr, 10000000)
             except FoundException as res:
-                self.goto_addr(res.args[0], from_addr=self.cur_addr())
+                self.goto_addr(res.args[0], col=res.args[1], from_addr=self.cur_addr())
             else:
                 self.show_status("Not found: " + self.search_str)
 
