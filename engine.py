@@ -248,14 +248,19 @@ class AddressSpace:
     @classmethod
     def adjust_offset_reverse(cls, off, area):
         flags = area[FLAGS]
-        org_flags = flags[off]
+        if flags[off] == cls.FILL:
+            while off > 0:
+                if flags[off] != cls.FILL:
+                    off += 1
+                    break
+                off -= 1
+            return off
+
         while off > 0:
-            if flags[off] in (cls.CODE_CONT, cls.DATA_CONT, cls.FILL):
+            if flags[off] in (cls.CODE_CONT, cls.DATA_CONT):
                 off -= 1
             else:
                 break
-        if org_flags == cls.FILL and off > 0:
-            off += 1
         return off
 
     def adjust_addr_reverse(self, addr):
