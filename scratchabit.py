@@ -359,7 +359,10 @@ class Editor(editor.EditorExt):
 
             sz = 0
             while True:
-                fl = self.model.AS.get_flags(addr)
+                try:
+                    fl = self.model.AS.get_flags(addr)
+                except engine.InvalidAddrException:
+                    break
                 if fl != self.model.AS.UNK:
                     break
                 b = self.model.AS.get_byte(addr)
