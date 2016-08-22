@@ -557,19 +557,27 @@ class Editor(editor.EditorExt):
                 self.show_status("There're no further undefined strides")
 
         elif key in (b"/", b"?"):  # "/" and Shift+"/"
+
             class FoundException(Exception): pass
-            class TextSearchModel:
+
+            class TextSearchModel(engine.Model):
                 def __init__(self, substr, ctrl):
+                    super().__init__()
                     self.search = substr
                     self.ctrl = ctrl
                     self.cnt = 0
                 def add_line(self, addr, line):
-                    line = line.render()
-                    if self.search in line:
-                        raise FoundException(addr)
+                    super().add_line(addr, line)
+                    txt = line.render()
+                    if self.search in txt:
+                        raise FoundException((addr, line.subno))
                     if self.cnt % 256 == 0:
                         self.ctrl.show_status("Searching: 0x%x" % addr)
                     self.cnt += 1
+                    # Don't accumulate lines
+                    self._lines = []
+                    self._addr2line = {}
+
             if key == b"/":
                 d = Dialog(4, 4, title="Text Search")
                 d.add(1, 1, WLabel("Search for:"))
