@@ -136,9 +136,17 @@ class insn_t:
     def __getitem__(self, i):
         return self._operands[i]
 
+    # ScratchABit extension
+    def num_operands(self):
+        for i, op in enumerate(self._operands):
+            if op.type == o_void:
+                return i
+        return UA_MAXOP
+
     def __repr__(self):
-        #return str(self.__dict__)
-        return "insn_t(ea=%x, sz=%d, id=%d, %s, %s)" % (self.ea, self.size, self.itype, self.disasm, self._operands)
+        #return "insn_t(ea=%x, sz=%d, id=%d, %r, %s)" % (self.ea, self.size, self.itype, self.disasm, self._operands)
+        used_operands = self._operands[0:self.num_operands()]
+        return "insn_t(ea=%x, sz=%d, id=%d, %r, %s)" % (self.ea, self.size, self.itype, self.disasm, used_operands)
 
 
 class processor_t:

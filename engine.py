@@ -915,12 +915,6 @@ class Instruction(idaapi.insn_t, DisasmObj):
             return mem
         return imm
 
-    def num_operands(self):
-        for i, op in self._operands:
-            if op.type == o_void:
-                return i + 1
-        return UA_MAXOP
-
 
 class Data(DisasmObj):
 
