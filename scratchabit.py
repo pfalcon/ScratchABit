@@ -188,9 +188,10 @@ class Editor(editor.EditorExt):
     # Address of the next line. It may be the same address as the
     # current line, as several lines may "belong" to the same address,
     # (virtual lines like headers, etc.)
-    def next_line_addr(self):
+    def next_line_addr_subno(self):
         try:
-            return self.content[self.cur_line + 1].ea
+            l = self.content[self.cur_line + 1]
+            return (l.ea, l.subno)
         except:
             return None
 
@@ -564,13 +565,18 @@ class Editor(editor.EditorExt):
             class FoundException(Exception): pass
 
             class TextSearchModel(engine.Model):
-                def __init__(self, substr, ctrl):
+                def __init__(self, substr, ctrl, this_addr, this_subno):
                     super().__init__()
                     self.search = substr
                     self.ctrl = ctrl
+                    self.this_addr = this_addr
+                    self.this_subno = this_subno
                     self.cnt = 0
                 def add_line(self, addr, line):
                     super().add_line(addr, line)
+                    # Skip virtual lines before the line from which we started
+                    if addr == self.this_addr and line.subno < self.this_subno:
+                        return
                     txt = line.render()
                     idx = txt.find(self.search)
                     if idx != -1:
@@ -593,12 +599,12 @@ class Editor(editor.EditorExt):
                 self.search_str = entry.get_text()
                 if res != ACTION_OK or not self.search_str:
                     return
-                addr = self.cur_addr()
+                addr, subno = self.cur_addr_subno()
             else:
-                addr = self.next_line_addr()
+                addr, subno = self.next_line_addr_subno()
 
             try:
-                engine.render_from(TextSearchModel(self.search_str, self), addr, 10000000)
+                engine.render_from(TextSearchModel(self.search_str, self, addr, subno), addr, 10000000)
             except FoundException as res:
                 self.goto_addr(res.args[0], col=res.args[1], from_addr=self.cur_addr())
             else:
