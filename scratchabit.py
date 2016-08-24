@@ -725,6 +725,20 @@ def parse_disasm_def(fname):
                 assert 0, "Unknown directive: " + l
 
 
+class MainScreen:
+
+    def __init__(self):
+        self.screen_size = Screen.screen_size()
+        self.e = Editor(1, 1, self.screen_size[0] - 2, self.screen_size[1] - 3)
+
+    def redraw(self):
+        self.e.draw_box(0, 0, self.screen_size[0], self.screen_size[1] - 1)
+        self.e.redraw()
+
+    def loop(self):
+        self.e.loop()
+
+
 if __name__ == "__main__":
 
     argp = argparse.ArgumentParser(description="ScratchABit interactive disassembler")
@@ -817,13 +831,12 @@ if __name__ == "__main__":
     try:
         Screen.cls()
         Screen.enable_mouse()
-        screen_size = Screen.screen_size()
-        e = Editor(1, 1, screen_size[0] - 2, screen_size[1] - 3)
-        e.draw_box(0, 0, screen_size[0], screen_size[1] - 1)
-        e.set_model(_model)
-        e.addr_stack = addr_stack
-        e.goto_addr(show_addr)
-        e.loop()
+        main_screen = MainScreen()
+        main_screen.e.set_model(_model)
+        main_screen.e.addr_stack = addr_stack
+        main_screen.e.goto_addr(show_addr)
+        main_screen.redraw()
+        main_screen.loop()
     except:
         log.exception("Unhandled exception")
         raise
@@ -832,4 +845,4 @@ if __name__ == "__main__":
         Screen.cursor(True)
         Screen.deinit_tty()
         Screen.wr("\n\n")
-        saveload.save_session(project_dir, e)
+        saveload.save_session(project_dir, main_screen.e)
