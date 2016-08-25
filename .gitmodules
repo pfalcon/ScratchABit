@@ -1,6 +1,3 @@
-[submodule "pyedit"]
-	path = pyedit
-	url = https://github.com/pfalcon/pyedit
 [submodule "plugins/cpu/pymsasid3"]
 	path = plugins/cpu/pymsasid3
 	url = https://github.com/pfalcon/pymsasid3
