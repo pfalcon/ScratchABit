@@ -34,6 +34,7 @@ from picotui import editorext as editor
 from picotui.screen import Screen
 from picotui.editorext import Viewer
 from picotui.menu import *
+from picotui.dialogs import *
 import utils
 import help
 import saveload
@@ -414,8 +415,9 @@ class Editor(editor.EditorExt):
         elif key == b";":
             addr = self.cur_addr()
             comment = self.model.AS.get_comment(addr) or ""
-            res = dialog_edit_line(comment, title="Comment:", width=60)
-            if res is not None:
+            res = DMultiEntry(60, 5, comment.split("\n"), title="Comment:").result()
+            if res != ACTION_CANCEL:
+                res = "\n".join(res).rstrip("\n")
                 self.model.AS.set_comment(addr, res)
                 self.update_model()
             else:

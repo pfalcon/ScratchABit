@@ -618,7 +618,7 @@ class AddressSpace:
                     props["label"] = val
                     self.labels_rev[val] = addr
                 elif key == "cmnt":
-                    props["comm"] = val[1:-1]
+                    props["comm"] = val[1:-1].replace("\\n", "\n")
                 elif key == "fn_end":
                     if val == "'?'":
                         end = None
@@ -1176,13 +1176,13 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             comm = props.get("comm")
             if comm:
                 comm_indent = " " * (out.content_len() + len(out.indent) + 2)
-                out.comment = "  ; " + comm.split("|", 1)[0]
+                out.comment = "  ; " + comm.split("\n", 1)[0]
 
             model.add_line(addr, out)
             #sys.stdout.write(out + "\n")
 
             if comm:
-                for comm_l in comm.split("|")[1:]:
+                for comm_l in comm.split("\n")[1:]:
                     comm_obj = Literal(addr, "; " + comm_l)
                     comm_obj.indent = comm_indent
                     model.add_line(addr, comm_obj)
