@@ -33,6 +33,7 @@ from picotui.widgets import *
 from picotui import editorext as editor
 from picotui.screen import Screen
 from picotui.editorext import Viewer
+from picotui.menu import *
 import utils
 import help
 import saveload
@@ -729,14 +730,65 @@ class MainScreen:
 
     def __init__(self):
         self.screen_size = Screen.screen_size()
-        self.e = Editor(1, 1, self.screen_size[0] - 2, self.screen_size[1] - 3)
+        self.e = Editor(1, 2, self.screen_size[0] - 2, self.screen_size[1] - 4)
+
+        menu_file = WMenuBox([
+            ("Save (Shift+s)", b"S"), ("Write disasm (Shift+w)", b"W"),
+            ("Write function (Ctrl+w)", b"\x17"),
+            ("Quit (q)", b"q")
+        ])
+        menu_goto = WMenuBox([
+            ("Follow (Enter)", KEY_ENTER), ("Return (Esc)", KEY_ESC),
+            ("Goto... (g)", b"g"), ("Search disasm... (/)", b"/"),
+            ("Search next (Shift+/)", b"?"), ("Next undefined (Ctrl+u)", b"\x15"),
+        ])
+        menu_edit = WMenuBox([
+            ("Undefined (u)", b"u"), ("Code (c)", b"c"), ("Data (d)", b"d"),
+            ("ASCII String (a)", b"a"), ("Filler (f)", b"f"), ("Make label (n)", b"n"),
+            ("Number/Address (o)", b"o"), ("Hex/dec (h)", b"h"),
+        ])
+        menu_analysis = WMenuBox([
+            ("Info (whereami) (i)", b"i"), ("Memory map (Shift+i)", b"I"),
+        ])
+        menu_help = WMenuBox([
+            ("Help (F1)", KEY_F1), ("About...", "about"),
+        ])
+        self.menu_bar = WMenuBar([
+            ("File", menu_file), ("Goto", menu_goto), ("Edit", menu_edit),
+            ("Analysis", menu_analysis), ("Help", menu_help)
+        ])
+        self.menu_bar.permanent = True
 
     def redraw(self):
-        self.e.draw_box(0, 0, self.screen_size[0], self.screen_size[1] - 1)
+        self.menu_bar.redraw()
+        self.e.draw_box(0, 1, self.screen_size[0], self.screen_size[1] - 2)
         self.e.redraw()
 
     def loop(self):
-        self.e.loop()
+        while 1:
+            key = self.e.get_input()
+            if isinstance(key, list):
+                x, y = key
+                if self.menu_bar.inside(x, y):
+                    self.menu_bar.focus = True
+
+            if self.menu_bar.focus:
+                res = self.menu_bar.handle_input(key)
+                if res == ACTION_CANCEL:
+                    self.menu_bar.focus = False
+                elif res is not None and res is not True:
+
+                    res = self.e.handle_input(res)
+                    if res is not None and res is not True:
+                        return res
+            else:
+                if key == KEY_F9:
+                    self.menu_bar.focus = True
+                    self.menu_bar.redraw()
+                    continue
+                res = self.e.handle_input(key)
+                if res is not None and res is not True:
+                    return res
 
 
 if __name__ == "__main__":
@@ -835,6 +887,7 @@ if __name__ == "__main__":
         main_screen.e.set_model(_model)
         main_screen.e.addr_stack = addr_stack
         main_screen.e.goto_addr(show_addr)
+        Screen.set_screen_redraw(main_screen.redraw)
         main_screen.redraw()
         main_screen.loop()
     except:
