@@ -887,6 +887,7 @@ if __name__ == "__main__":
     finally:
         Screen.goto(0, main_screen.screen_size[1])
         Screen.cursor(True)
+        Screen.disable_mouse()
         Screen.deinit_tty()
         Screen.wr("\n\n")
         saveload.save_session(project_dir, main_screen.e)
