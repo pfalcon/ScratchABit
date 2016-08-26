@@ -63,17 +63,6 @@ class TextSaveModel:
         self.cnt += 1
 
 
-def dialog_edit_line(l, title="", width=30):
-    d = Dialog(4, 4, title=title)
-    entry = WTextEntry(width, l)
-    entry.finish_dialog = ACTION_OK
-    d.add(1, 1, entry)
-    res = d.loop()
-    if res == ACTION_OK:
-        return entry.get_text()
-    return None
-
-
 class Editor(editor.EditorExt):
 
     def __init__(self, *args):
@@ -428,7 +417,7 @@ class Editor(editor.EditorExt):
             def_label = self.model.AS.get_default_label(addr)
             s = label or def_label
             while True:
-                res = dialog_edit_line(s, title="New label:")
+                res = DTextEntry(30, s, title="New label:").result()
                 if not res:
                     break
                 if res == def_label:
