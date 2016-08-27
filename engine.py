@@ -530,18 +530,22 @@ class AddressSpace:
 
     # Persistence API
 
+    def save_area(self, stream, area):
+        stream.write("%08x %08x\n" % (area[START], area[END]))
+        flags = area[FLAGS]
+        i = 0
+        while True:
+            chunk = flags[i:i + 32]
+            if not chunk:
+                break
+            stream.write(str(binascii.hexlify(chunk), 'utf-8') + "\n")
+            i += 32
+        stream.write("\n")
+
+
     def save_areas(self, stream):
         for a in self.area_list:
-            stream.write("%08x %08x\n" % (a[START], a[END]))
-            flags = a[FLAGS]
-            i = 0
-            while True:
-                chunk = flags[i:i + 32]
-                if not chunk:
-                    break
-                stream.write(str(binascii.hexlify(chunk), 'utf-8') + "\n")
-                i += 32
-            stream.write("\n")
+            self.save_area(stream, a)
 
 
     def save_addr_props(self, stream):
@@ -672,20 +676,23 @@ class AddressSpace:
 
             self.addr_map[addr] = props
 
+    def load_area(self, stream, area):
+        l = stream.readline()
+        vals = [int(v, 16) for v in l.split()]
+        assert area[START] == vals[0] and area[END] == vals[1]
+        flags = area[FLAGS]
+        i = 0
+        while True:
+            l = stream.readline().rstrip()
+            if not l:
+                break
+            l = binascii.unhexlify(l)
+            flags[i:i + len(l)] = l
+            i += len(l)
+
     def load_areas(self, stream):
         for a in self.area_list:
-            l = stream.readline()
-            vals = [int(v, 16) for v in l.split()]
-            assert a[START] == vals[0] and a[END] == vals[1]
-            flags = a[FLAGS]
-            i = 0
-            while True:
-                l = stream.readline().rstrip()
-                if not l:
-                    break
-                l = binascii.unhexlify(l)
-                flags[i:i + len(l)] = l
-                i += len(l)
+            self.load_area(stream, a)
 
 
     # Hack for idaapi interfacing
