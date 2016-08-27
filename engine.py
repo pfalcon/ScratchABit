@@ -548,10 +548,25 @@ class AddressSpace:
             self.save_area(stream, a)
 
 
-    def save_addr_props(self, stream):
+    def save_addr_props(self, prefix):
+        areas = self.area_list
+        area_i = 0
+        stream = open(prefix + ".%08x" % areas[area_i][START], "w")
+        area_end = areas[area_i][END]
         stream.write("header:\n")
         stream.write(" version: 1.0\n")
         for addr, props in sorted(self.addr_map.items()):
+                    if addr > area_end:
+                        stream.close()
+                        area_i += 1
+                        while addr > areas[area_i][END]:
+                            area_i += 1
+                        assert addr >= areas[area_i][START]
+                        stream = open(prefix + ".%08x" % areas[area_i][START], "w")
+                        #stream.write("addr=%x area_end=%x\n" % (addr, area_end))
+                        area_end = areas[area_i][END]
+                        stream.write("header:\n")
+                        stream.write(" version: 1.0\n")
                     # If entry has just fun_e data, skip it
                     if len(props) == 1 and "fun_e" in props:
                         continue
