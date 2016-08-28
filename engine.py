@@ -1140,7 +1140,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             props = ADDRESS_SPACE.get_addr_prop_dict(addr)
             func = props.get("fun_s")
             if func:
-                model.add_line(addr, Literal(addr, "; Start of '%s' function" % ADDRESS_SPACE.get_label(func.start)))
+                model.add_line(addr, Literal(addr, "; Start of function '%s'" % ADDRESS_SPACE.get_label(func.start)))
 
             xrefs = props.get("xrefs")
             if xrefs:
@@ -1213,7 +1213,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             next_props = ADDRESS_SPACE.get_addr_prop_dict(next_addr)
             func_end = next_props.get("fun_e")
             if func_end:
-                model.add_line(addr, Literal(addr, "; End of '%s' function (%s)" % (
+                model.add_line(addr, Literal(addr, "; End of function '%s' (%s)" % (
                     ADDRESS_SPACE.get_label(func_end.start), func_end.get_end_method()
                 )))
 
