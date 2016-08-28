@@ -412,6 +412,12 @@ class AddressSpace:
     def set_comment(self, ea, comm):
         self.set_addr_prop(ea, "comm", comm)
 
+    def append_comment(self, ea, comm):
+        existing = self.get_comment(ea)
+        if existing is not None:
+            comm = existing + "\n" + comm
+        self.set_addr_prop(ea, "comm", comm)
+
     # (Pseudo)instruction Argument Properties API
 
     def set_arg_prop(self, ea, arg_no, prop, prop_val):
