@@ -121,11 +121,11 @@ def load_segments(aspace, elffile):
 
                     aspace.set_label(d_ptr + wordsz, "ELF.CUR_OBJ")
                     aspace.make_data(d_ptr + wordsz, wordsz)
-                    aspace.set_comment(d_ptr + wordsz, "Identifier of this ELF object")
+                    aspace.append_comment(d_ptr + wordsz, "Identifier of this ELF object")
 
                     aspace.set_label(d_ptr + wordsz * 2, "ELF.SYM_LOOKUP")
                     aspace.make_data(d_ptr + wordsz * 2, wordsz)
-                    aspace.set_comment(d_ptr + wordsz * 2, "Dynamic linker routine for symbol lookup")
+                    aspace.append_comment(d_ptr + wordsz * 2, "Dynamic linker routine for symbol lookup")
 
                 elif tag['d_tag'] == 'DT_JMPREL':
                     aspace.set_label(d_ptr, "ELF.JMPREL")
@@ -176,7 +176,7 @@ def load_segments(aspace, elffile):
                     sym = symtab[reloc['r_info_sym']]
                     #print(reloc, sym.name, sym.entry)
                     symname = str(sym.name, "utf-8")
-                    aspace.set_comment(pltrel, symname + ".plt")
+                    aspace.append_comment(pltrel, symname + ".plt")
                     aspace.make_arg_offset(pltrel, 0, aspace.get_data(pltrel, wordsz))
 
                     got_addr = reloc["r_offset"]
@@ -303,7 +303,7 @@ def load_sections(aspace, elffile):
             raddr = target_sec_addr + reloc["r_offset"]
             rel_type = reloc_types.get(reloc["r_info_type"], "reltype%d" % reloc["r_info_type"])
 
-            aspace.set_comment(raddr, "%s: %s" % (rel_type, symname))
+            aspace.append_comment(raddr, "%s: %s" % (rel_type, symname))
 
             if rel_type == "R_XTENSA_32":
                 aspace.make_data(raddr, wordsz)
@@ -378,14 +378,9 @@ def load_sections(aspace, elffile):
             if flags & XTENSA_PROP_INSN:
                 aspace.analisys_stack_push(start, is_call=False)
             if flags & XTENSA_PROP_DATA:
-                c = aspace.get_comment(start)
-                if c:
-                    c += " ; "
-                else:
-                    c = ""
+                c = aspace.get_comment(start) or ""
                 if size != 0 or "XTENSA_PROP_DATA" not in c:
-                    c += "XTENSA_PROP_DATA (%d)" % size
-                    aspace.set_comment(start, c)
+                    aspace.append_comment(start, "XTENSA_PROP_DATA (%d)" % size)
                     # Don't trust XTENSA_PROP_DATA with size=0
                     # For linked exe, there were cases when such
                     # pointed straight into the code and broke all
