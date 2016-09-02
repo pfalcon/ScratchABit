@@ -651,8 +651,9 @@ class AddressSpace:
                         end = int(val, 0)
                     f = Function(addr, end)
                     props["fun_s"] = f
-                    if end is not None:
-                        self.addr_map[end] = {"fun_e": f}
+                    # Handled by finish_func() below
+                    #if end is not None:
+                    #    self.addr_map[end] = {"fun_e": f}
                 elif key == "fn_ranges":
                     if val != "[]":
                         assert val.startswith("[[") and val.endswith("]]"), val
@@ -661,6 +662,9 @@ class AddressSpace:
                         for r in val.split("], ["):
                             r = [int(x, 0) for x in r.split(",")]
                             f.add_range(*r)
+                        # Now, call finish func to set func end address, either from
+                        # fn_end or fn_ranges
+                        finish_func(f)
 
                 elif key == "args":
                     arg_props = {}
