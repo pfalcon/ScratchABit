@@ -294,10 +294,10 @@ class AddressSpace:
         for i in range(sz - 1):
             area_byte_flags[off + 1 + i] |= self.DATA_CONT
 
-    def make_data_array(self, addr, sz, num_items):
+    def make_data_array(self, addr, sz, num_items, prefix=""):
         # Make a data array. First-class arrays are not supported so far,
         # so just mark data units sequentially
-        self.append_comment(addr, "Array, num %s: %d" % ("bytes" if sz == 1 else "items", num_items))
+        self.append_comment(addr, "%sArray, num %s: %d" % (prefix, "bytes" if sz == 1 else "items", num_items))
         for i in range(num_items):
             self.make_data(addr, sz)
             addr += sz
