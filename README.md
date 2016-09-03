@@ -43,7 +43,7 @@ Quick start
 
 To use ScratchABit, you need Python3 installed and VT100 (minimum) or
 XTerm (recommended) terminal or terminal emulator (any Unix system
-should be compliant, like Linux/BSD/etc, see also FAQ).
+should be compliant, like Linux/BSD/etc., see FAQ below for more).
 
 Clone the code using:
 
@@ -59,12 +59,14 @@ includes `example-elf` (x86 32bit) for quick start:
 
 Alternatively, if you want to disassemble a raw binary file, you need
 to create a .def (definition) file, to specify what memory areas are
-defined for the code, where to load binary file, etc. The repository
-includes a simple x86_64 raw binary code, and corresponding .def file:
+defined for the code, at which address to load binary file, etc. The
+repository includes a simple x86_64 raw binary code, and the corresponding
+.def file:
 
     python3 scratchabit.py example.def
 
-Press F1 if in doubt what to do next.
+Press F1 if in doubt what to do next. Press F9 to access menus (mouse
+works too in XTerm-compatible terminals).
 
 Using Plugins
 -------------
@@ -74,7 +76,7 @@ module path. Alternatively, you can symlink the plugin .py file into
 the plugins/cpu subdirectory.
 
 After the plugin is made available, create a new definition file based
-on example.def that sets the plugin module name in the 'cpu xxx' line.
+on example.def that sets the plugin module name in the `cpu xxx` line.
 
 For a very simple example that uses an external plugin, see this
 [esp8266.def file](https://gist.github.com/projectgus/f898d5798e3e44240796)
