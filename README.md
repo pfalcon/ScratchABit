@@ -58,7 +58,7 @@ includes `example-elf` (x86 32bit) for quick start:
     python3 scratchabit.py example-elf
 
 Alternatively, if you want to disassemble a raw binary file, you need
-to creat a .def (definition) file, to specify what memory areas are
+to create a .def (definition) file, to specify what memory areas are
 defined for the code, where to load binary file, etc. The repository
 includes a simple x86_64 raw binary code, and corresponding .def file:
 
