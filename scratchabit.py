@@ -42,6 +42,13 @@ import saveload
 
 HEIGHT = 21
 
+
+class AppClass:
+    pass
+
+APP = AppClass()
+
+
 def disasm_one(p):
     insnsz = p.ana()
     p.out()
@@ -820,9 +827,13 @@ if __name__ == "__main__":
         project_name = args.file
 
     p = CPU_PLUGIN.PROCESSOR_ENTRY()
+    if hasattr(p, "config"):
+        p.config()
     engine.set_processor(p)
     if hasattr(p, "help_text"):
         help.set_cpu_help(p.help_text)
+    APP.cpu_plugin = p
+    APP.aspace = engine.ADDRESS_SPACE
 
     engine.DisasmObj.LEADER_SIZE = 8 + 1
     if show_bytes:
@@ -875,6 +886,7 @@ if __name__ == "__main__":
         Screen.cls()
         Screen.enable_mouse()
         main_screen = MainScreen()
+        APP.main_screen = main_screen
         main_screen.e.set_model(_model)
         main_screen.e.addr_stack = addr_stack
         main_screen.e.goto_addr(show_addr)
