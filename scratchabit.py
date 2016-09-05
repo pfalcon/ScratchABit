@@ -38,9 +38,12 @@ from picotui.dialogs import *
 import utils
 import help
 import saveload
+import uiprefs
 
 
 HEIGHT = 21
+
+MENU_PREFS = 2000
 
 
 class AppClass:
@@ -609,6 +612,9 @@ class Editor(editor.EditorExt):
             else:
                 self.show_status("Not found: " + self.search_str)
 
+        elif key == MENU_PREFS:
+            uiprefs.handle(APP)
+
         else:
             self.show_status("Unbound key: " + repr(key))
 
@@ -747,6 +753,7 @@ class MainScreen:
         ])
         menu_analysis = WMenuBox([
             ("Info (whereami) (i)", b"i"), ("Memory map (Shift+i)", b"I"),
+            ("Preferences...", MENU_PREFS),
         ])
         menu_help = WMenuBox([
             ("Help (F1)", KEY_F1), ("About...", "about"),
