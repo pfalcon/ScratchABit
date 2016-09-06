@@ -858,6 +858,7 @@ if __name__ == "__main__":
         help.set_cpu_help(p.help_text)
     APP.cpu_plugin = p
     APP.aspace = engine.ADDRESS_SPACE
+    APP.is_ui = False
 
     engine.DisasmObj.LEADER_SIZE = 8 + 1
     if show_bytes:
@@ -911,6 +912,7 @@ if __name__ == "__main__":
         Screen.enable_mouse()
         main_screen = MainScreen()
         APP.main_screen = main_screen
+        APP.is_ui = True
         main_screen.e.set_model(_model)
         main_screen.e.addr_stack = addr_stack
         main_screen.e.goto_addr(show_addr)
