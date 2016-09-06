@@ -619,7 +619,7 @@ class Editor(editor.EditorExt):
         elif key == MENU_SCRIPT:
             res = DTextEntry(30, "", title="Script module name:").result()
             if res:
-                mod = __import__(res)
+                call_script(res)
                 self.show_status("Script '%s' run successfully" % res)
                 self.update_model()
             else:
@@ -806,6 +806,13 @@ class MainScreen:
                     return res
 
 
+def call_script(script):
+    mod = __import__(script)
+    main_f = getattr(mod, "main", None)
+    if main_f:
+        main_f(APP)
+
+
 if __name__ == "__main__":
 
     argp = argparse.ArgumentParser(description="ScratchABit interactive disassembler")
@@ -875,7 +882,7 @@ if __name__ == "__main__":
 
     if args.script:
         for script in args.script:
-            mod = __import__(script)
+            call_script(script)
         if args.save:
             saveload.save_state(project_dir)
             sys.exit()
