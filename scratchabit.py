@@ -44,7 +44,7 @@ import uiprefs
 HEIGHT = 21
 
 MENU_PREFS = 2000
-MENU_SCRIPT = 2001
+MENU_PLUGIN = 2001
 
 
 class AppClass:
@@ -616,14 +616,14 @@ class Editor(editor.EditorExt):
         elif key == MENU_PREFS:
             uiprefs.handle(APP)
 
-        elif key == MENU_SCRIPT:
-            res = DTextEntry(30, "", title="Script module name:").result()
+        elif key == MENU_PLUGIN:
+            res = DTextEntry(30, "", title="Plugin module name:").result()
+            self.redraw()
             if res:
+                self.show_status("Running '%s' plugin..." % res)
                 call_script(res)
-                self.show_status("Script '%s' run successfully" % res)
                 self.update_model()
-            else:
-                self.redraw()
+                self.show_status("Plugin '%s' ran successfully" % res)
         else:
             self.show_status("Unbound key: " + repr(key))
 
@@ -762,7 +762,7 @@ class MainScreen:
         ])
         menu_analysis = WMenuBox([
             ("Info (whereami) (i)", b"i"), ("Memory map (Shift+i)", b"I"),
-            ("Run script...", MENU_SCRIPT),
+            ("Run plugin...", MENU_PLUGIN),
             ("Preferences...", MENU_PREFS),
         ])
         menu_help = WMenuBox([
