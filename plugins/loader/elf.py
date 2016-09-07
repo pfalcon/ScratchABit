@@ -9,6 +9,11 @@ from pyelftools.elftools.elf.sections import SymbolTableSection
 from pyelftools.elftools.elf.relocation import RelocationSection
 from pyelftools.elftools.common.exceptions import ELFError
 
+
+# Whether to add comments of relocs pointing to addresses.
+# Useful for debugging loader, but mostly a noise afterwards.
+RELOC_COMMENTS = False
+
 MACH_MAP = {
     "EM_386": "x86",
     "EM_X86_64": "x86",
@@ -303,7 +308,8 @@ def load_sections(aspace, elffile):
             raddr = target_sec_addr + reloc["r_offset"]
             rel_type = reloc_types.get(reloc["r_info_type"], "reltype%d" % reloc["r_info_type"])
 
-            aspace.append_comment(raddr, "%s: %s" % (rel_type, symname))
+            if RELOC_COMMENTS:
+                aspace.append_comment(raddr, "%s: %s" % (rel_type, symname))
 
             if rel_type == "R_XTENSA_32":
                 aspace.make_data(raddr, wordsz)
@@ -380,7 +386,8 @@ def load_sections(aspace, elffile):
             if flags & XTENSA_PROP_DATA:
                 c = aspace.get_comment(start) or ""
                 if size != 0 or "XTENSA_PROP_DATA" not in c:
-                    aspace.append_comment(start, "XTENSA_PROP_DATA (%d)" % size)
+                    if RELOC_COMMENTS:
+                        aspace.append_comment(start, "XTENSA_PROP_DATA (%d)" % size)
                     # Don't trust XTENSA_PROP_DATA with size=0
                     # For linked exe, there were cases when such
                     # pointed straight into the code and broke all
@@ -388,7 +395,7 @@ def load_sections(aspace, elffile):
                     #if not size:
                     #    size = 1
                     if size:
-                        aspace.make_data_array(start, 1, size)
+                        aspace.make_data_array(start, 1, size, prefix="xtensa: ")
             if flags & XTENSA_PROP_LITERAL:
                 while size:
                     aspace.make_data(start, wordsz)
