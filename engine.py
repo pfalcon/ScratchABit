@@ -370,6 +370,11 @@ class AddressSpace:
         off, area = self.addr2area(ea)
         if area is None:
             self.add_area(ea, ea, {"name": "autocreated to host %s label" % label})
+        existing = self.get_addr_prop(ea, "label")
+        if existing is not None and not isinstance(existing, int):
+            log.warn("Duplicate label for %x: %s (existing: %s)" % (ea, label, existing))
+            self.append_comment(ea, "Another label: " + label)
+            return
         self.set_addr_prop(ea, "label", label)
         self.labels_rev[label] = ea
 
