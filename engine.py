@@ -116,6 +116,10 @@ class AddressSpace:
         self.issues = {}
         # Cached last accessed area
         self.last_area = None
+        # Cached function start addresses
+        self.func_starts = None
+        # Map from func_starts's indexes to function objects
+        self.func_starts_arr = []
 
     # Memory Area API
 
@@ -502,6 +506,8 @@ class AddressSpace:
 
         if to_ea_excl is not None:
             self.set_addr_prop(to_ea_excl, "fun_e", f)
+        # Reset cache
+        self.func_starts = None
         return f
 
     def is_func(self, ea):
@@ -521,12 +527,22 @@ class AddressSpace:
     # Look up function containing address
     def lookup_func(self, ea):
         # TODO: cache func ranges, use binary search instead
-        for start, props in self.addr_map.items():
-            func = props.get("fun_s")
-            if func and ea >= start:
-                end = func.get_end()
-                if end is not None and ea < end:
-                    return func
+        if self.func_starts is None:
+            self.func_starts = []
+            self.func_starts_arr = []
+            for start, props in sorted(self.addr_map.items()):
+                func = props.get("fun_s")
+                if func:
+                    self.func_starts.append(start)
+                    self.func_starts_arr.append(func)
+
+        i = bisect.bisect_right(self.func_starts, ea)
+        if i:
+            func = self.func_starts_arr[i - 1]
+            end = func.get_end()
+            if end and func.start <= ea < end:
+                return func
+        return None
 
     # Issues API
 
