@@ -1071,7 +1071,15 @@ class Xref(DisasmObj):
         self.type = type
 
     def render(self):
-        s = (" " * idaapi.DEFAULT_XREF_INDENT) + "; xref: 0x%x %s" % (self.from_addr, self.type)
+        func = ADDRESS_SPACE.lookup_func(self.from_addr)
+        extra = ""
+        if func:
+            extra = ADDRESS_SPACE.get_label(func.start)
+            off = self.from_addr - func.start
+            if off != 0:
+                extra += "+0x%x" % off
+            extra = " (%s)" % extra
+        s = (" " * idaapi.DEFAULT_XREF_INDENT) + "; xref: %s 0x%x" % (self.type, self.from_addr) + extra
         self.cache = s
         return s
 
