@@ -1,6 +1,13 @@
 import string
 
 
+def bidict(d):
+    for k in list(d.keys()):
+        v = d[k]
+        d[v] = k
+    return d
+
+
 def get_word_at_pos(str, pos):
     if pos < 0:
         return None
