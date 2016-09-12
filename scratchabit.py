@@ -268,6 +268,24 @@ class Editor(editor.EditorExt):
             self.redraw()
 
 
+    def resolve_expr(self, expr):
+        if expr:
+            if expr[0].isdigit():
+                return int(expr, 0)
+            else:
+                words = expr.split("+", 1)
+                addend = 0
+                if len(words) > 1:
+                    try:
+                        addend = int(words[1], 0)
+                    except:
+                        pass
+                to_addr = self.model.AS.resolve_label(words[0])
+                if to_addr is None:
+                    return
+                return to_addr + addend
+
+
     def handle_key_unprotected(self, key):
         line = self.get_cur_line()
         if key == editor.KEY_ENTER:
@@ -289,14 +307,11 @@ class Editor(editor.EditorExt):
             if to_addr is None:
                 pos = self.col - line.LEADER_SIZE - len(line.indent)
                 word = utils.get_word_at_pos(line.cache, pos)
-                if word:
-                    if word[0].isdigit():
-                        to_addr = int(word, 0)
-                    else:
-                        to_addr = self.model.AS.resolve_label(word)
-                        if to_addr is None:
-                            self.show_status("Unknown address: %s" % word)
-                            return
+                self.show_status("Enter pressed: %s, %s, %s" % (self.col, op_no, word))
+                to_addr = self.resolve_expr(word)
+                if to_addr is None:
+                    self.show_status("Unknown address: %s" % word)
+                    return
             self.goto_addr(to_addr, from_addr=self.cur_addr_subno())
         elif key == editor.KEY_ESC:
             if self.addr_stack:
