@@ -120,6 +120,8 @@ class AddressSpace:
         self.func_starts = None
         # Map from func_starts's indexes to function objects
         self.func_starts_arr = []
+        # True during loading stage, False during UI interaction stage
+        self.is_loading = False
 
     # Memory Area API
 
@@ -393,6 +395,8 @@ class AddressSpace:
                 l += "__%d" % cnt
             if l not in self.labels_rev:
                 self.set_label(ea, l)
+                if self.is_loading and cnt > 0:
+                    self.append_comment(ea, "Original label: " + label)
                 return l
             cnt += 1
 

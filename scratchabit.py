@@ -874,6 +874,7 @@ if __name__ == "__main__":
     APP.cpu_plugin = p
     APP.aspace = engine.ADDRESS_SPACE
     APP.is_ui = False
+    engine.ADDRESS_SPACE.is_loading = True
 
     engine.DisasmObj.LEADER_SIZE = 8 + 1
     if show_bytes:
@@ -921,6 +922,7 @@ if __name__ == "__main__":
     #print(_model.lines())
     #sys.exit()
 
+    engine.ADDRESS_SPACE.is_loading = False
     Screen.init_tty()
     try:
         Screen.cls()
