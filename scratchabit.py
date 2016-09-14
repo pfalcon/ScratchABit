@@ -243,29 +243,26 @@ class Editor(editor.EditorExt):
             return outfile
 
 
-    def handle_edit_key(self, key):
-        try:
-            return self.handle_key_unprotected(key)
-        except Exception as e:
-            log.exception("Exception processing user command")
-            L = 5
-            T = 2
-            W = 70
-            H = 20
-            self.dialog_box(L, T, W, H)
-            v = Viewer(L + 1, T + 1, W - 2, H - 2)
-            import traceback
-            v.set_lines([
-                "Exception occured processing the command. Press Esc to continue.",
-                "Recommended action is saving database, quitting and comparing",
-                "database files with backup copies for possibility of data loss",
-                "or corruption. The exception was also logged to scratchabit.log.",
-                "Please report way to reproduce it to",
-                "https://github.com/pfalcon/ScratchABit/issues",
-                "",
-            ] + traceback.format_exc().splitlines())
-            v.loop()
-            self.redraw()
+    def show_exception(self, e):
+        log.exception("Exception processing user command")
+        L = 5
+        T = 2
+        W = 70
+        H = 20
+        self.dialog_box(L, T, W, H)
+        v = Viewer(L + 1, T + 1, W - 2, H - 2)
+        import traceback
+        v.set_lines([
+            "Exception occured processing the command. Press Esc to continue.",
+            "Recommended action is saving database, quitting and comparing",
+            "database files with backup copies for possibility of data loss",
+            "or corruption. The exception was also logged to scratchabit.log.",
+            "Please report way to reproduce it to",
+            "https://github.com/pfalcon/ScratchABit/issues",
+            "",
+        ] + traceback.format_exc().splitlines())
+        v.loop()
+        self.redraw()
 
 
     def resolve_expr(self, expr):
@@ -286,7 +283,7 @@ class Editor(editor.EditorExt):
                 return to_addr + addend
 
 
-    def handle_key_unprotected(self, key):
+    def handle_edit_key(self, key):
         line = self.get_cur_line()
         if key == editor.KEY_ENTER:
             line = self.get_cur_line()
@@ -816,7 +813,13 @@ class MainScreen:
                     self.menu_bar.focus = True
                     self.menu_bar.redraw()
                     continue
-                res = self.e.handle_input(key)
+
+                try:
+                    res = self.e.handle_input(key)
+                except Exception as ex:
+                    self.e.show_exception(ex)
+                    res = None
+
                 if res is not None and res is not True:
                     return res
 
