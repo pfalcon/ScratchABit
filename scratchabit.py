@@ -795,6 +795,7 @@ class MainScreen:
             ("Follow (Enter)", KEY_ENTER), ("Return (Esc)", KEY_ESC),
             ("Goto... (g)", b"g"), ("Search disasm... (/)", b"/"),
             ("Search next (Shift+/)", b"?"), ("Next undefined (Ctrl+u)", b"\x15"),
+            ("Next non-function code (Ctrl+f)", b"\x06"),
         ])
         menu_edit = WMenuBox([
             ("Undefined (u)", b"u"), ("Code (c)", b"c"), ("Data (d)", b"d"),
