@@ -575,6 +575,35 @@ class Editor(editor.EditorExt):
             if addr is None:
                 self.show_status("There're no further undefined strides")
 
+        elif key == b"\x06":  # Ctrl+F
+            # Next non-function
+            addr = self.cur_addr()
+            flags = self.model.AS.get_flags(addr, 0xff)
+            if flags == self.model.AS.CODE:
+                # If already on non-func code, skip the current stride of it,
+                # as it indeed go in batches.
+                while True:
+                    flags = self.model.AS.get_flags(addr, 0xff)
+                    self.show_status("fl=%x" % flags)
+                    if flags not in (self.model.AS.CODE, self.model.AS.CODE_CONT):
+                        break
+                    addr = self.model.AS.next_addr(addr)
+                    if addr is None:
+                        break
+
+            if addr is not None:
+                while True:
+                    flags = self.model.AS.get_flags(addr, 0xff)
+                    if flags == self.model.AS.CODE:
+                        self.goto_addr(addr, from_addr=self.cur_addr())
+                        break
+                    addr = self.model.AS.next_addr(addr)
+                    if addr is None:
+                        break
+
+            if addr is None:
+                self.show_status("There're no further non-function code strides")
+
         elif key in (b"/", b"?"):  # "/" and Shift+"/"
 
             class FoundException(Exception): pass
