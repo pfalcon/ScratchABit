@@ -17,6 +17,7 @@
 import sys
 import binascii
 import json
+import bisect
 import logging as log
 
 from rangeset import RangeSet
@@ -96,6 +97,9 @@ class AddressSpace:
 
     def __init__(self):
         self.area_list = []
+        # List of subareas and bianry search index for it
+        self.subarea_list = []
+        self.subarea_search = []
         # Map from referenced addresses to their properties. Among them:
         # "args":
         # Properties of instruction's args; at the very least, this should
@@ -547,6 +551,27 @@ class AddressSpace:
             end = func.get_end()
             if end and func.start <= ea < end:
                 return func
+        return None
+
+    # Memory Subarea API
+
+    def add_subarea(self, start, end, name):
+        log.debug("add_subarea(%x, %x, %s)", start, end, name)
+        self.subarea_list.append((start, end, name))
+        self.subarea_search.append(start)
+
+    # Call this once all add_subarea() calls were made
+    def finish_subareas(self):
+        self.subarea_list.sort()
+        self.subarea_search.sort()
+
+    # Look up subarea containing address
+    def lookup_subarea(self, ea):
+        i = bisect.bisect_right(self.subarea_search, ea)
+        if i:
+            area = self.subarea_list[i - 1]
+            if area[0] <= ea <= area[1]:
+                return area
         return None
 
     # Issues API

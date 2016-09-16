@@ -504,9 +504,13 @@ class Editor(editor.EditorExt):
             percent = 100 * off / (area[engine.END] - area[engine.START] + 1)
             func = self.model.AS.lookup_func(self.cur_addr())
             func = self.model.AS.get_label(func.start) if func else None
-            self.show_status("Area: 0x%x %s (%s): %.1f%%, func: %s" % (
+            status = "Area: 0x%x %s (%s): %.1f%%, func: %s" % (
                 area[engine.START], props.get("name", "noname"), props["access"], percent, func
-            ))
+            )
+            subarea = self.model.AS.lookup_subarea(self.cur_addr())
+            if subarea:
+                status += ", subarea: " + subarea[2]
+            self.show_status(status)
         elif key == b"I":
             L = 5
             T = 2
@@ -691,6 +695,26 @@ def load_symbols(fname):
             else:
                 print("Warning: cannot parse entrypoint info from: %r" % l)
 
+
+# Allow undescores to separate digit groups
+def str2int(s):
+    return int(s.replace("_", ""), 0)
+
+
+def parse_range(arg):
+    # name start(len)
+    # name start-end
+    if "(" in arg:
+        m = re.match(r"(.+?)\s*\(\s*(.+?)\s*\)", arg)
+        start = str2int(m.group(1))
+        end = start + str2int(m.group(2)) - 1
+    else:
+        m = re.match(r"(.+)\s*-\s*(.+)", arg)
+        start = str2int(m.group(1))
+        end = str2int(m.group(2))
+    return start, end
+
+
 def parse_entrypoints(f):
     for l in f:
         l = filter_config_line(l)
@@ -704,6 +728,22 @@ def parse_entrypoints(f):
         else:
             label, addr = [v.strip() for v in l.split("=")]
             ENTRYPOINTS.append((label, int(addr, 0)))
+    return ""
+
+def parse_subareas(f):
+    subareas = []
+    for l in f:
+        l = filter_config_line(l)
+        if not l:
+            continue
+        if l[0] == "[":
+            return l
+
+        args = l.split()
+        assert len(args) == 2
+        start, end = parse_range(args[1])
+        engine.ADDRESS_SPACE.add_subarea(start, end, args[0])
+    engine.ADDRESS_SPACE.finish_subareas()
     return ""
 
 
@@ -732,6 +772,8 @@ def parse_disasm_def(fname):
                     print("Processing section: %s" % section)
                     if section == "entrypoints":
                         l = parse_entrypoints(f)
+                    elif section == "subareas":
+                        l = parse_subareas(f)
                     else:
                         assert 0, "Unknown section: " + section
                 else:
@@ -760,20 +802,7 @@ def parse_disasm_def(fname):
             elif l.startswith("area "):
                 args = l.split()
                 assert len(args) == 4
-
-                # Allow undescores to separate digit groups
-                def str2int(s):
-                    return int(s.replace("_", ""), 0)
-
-                if "(" in args[2]:
-                    m = re.match(r"(.+?)\s*\(\s*(.+?)\s*\)", args[2])
-                    start = str2int(m.group(1))
-                    end = start + str2int(m.group(2)) - 1
-                else:
-                    m = re.match(r"(.+)\s*-\s*(.+)", args[2])
-                    start = str2int(m.group(1))
-                    end = str2int(m.group(2))
-
+                start, end = parse_range(args[2])
                 a = engine.ADDRESS_SPACE.add_area(start, end, {"name": args[1], "access": args[3].upper()})
                 print("Adding area: %s" % engine.str_area(a))
             else:
