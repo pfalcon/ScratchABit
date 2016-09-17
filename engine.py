@@ -830,6 +830,7 @@ def analyze(callback=lambda cnt:None):
                     continue
         elif analisys_stack_calls:
             finish_func(current_func)
+            current_func = None
             ea = analisys_stack_calls.pop()
             fun = ADDRESS_SPACE.get_func_start(ea)
             if fun.get_ranges():
