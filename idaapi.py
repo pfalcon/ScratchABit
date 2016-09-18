@@ -300,6 +300,10 @@ def ua_add_cref(opoff, ea, flags):
     elif flags == fl_CN:
         ADDRESS_SPACE.make_label("fun_", ea)
         ADDRESS_SPACE.add_xref(_processor.cmd.ea, ea, "c")
+        fl = ADDRESS_SPACE.get_flags(ea, 0xff)
+        if fl & ADDRESS_SPACE.FUNC:
+            if not ADDRESS_SPACE.is_func(ea):
+                log.warn("Address 0x%x calls inside another function: 0x%x", _processor.cmd.ea, ea)
         ADDRESS_SPACE.make_func(ea, None)
 
 
