@@ -821,6 +821,12 @@ def analyze(callback=lambda cnt:None):
         if analisys_stack_branches:
             ea = analisys_stack_branches.pop()
             fl = ADDRESS_SPACE.get_flags(ea, 0xff)
+
+            if fl == ADDRESS_SPACE.CODE | ADDRESS_SPACE.FUNC:
+                fun = ADDRESS_SPACE.get_func_start(ea)
+                if fun:
+                    log.warn("Jump to (or flow into) a function at 0x%x detected" % ea)
+
             if current_func:
                 if fl == ADDRESS_SPACE.CODE | ADDRESS_SPACE.FUNC:
                     continue
