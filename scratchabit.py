@@ -326,6 +326,23 @@ class Editor(editor.EditorExt):
             engine.add_entrypoint(addr, False)
             engine.analyze(self.analyze_status)
             self.update_model()
+
+        elif key == b"F":
+            addr = self.cur_addr()
+            fl = self.model.AS.get_flags(addr, 0xff)
+            if fl & 0x7f != self.model.AS.CODE:
+                self.show_status("Code required")
+                return
+            if fl & self.model.AS.FUNC:
+                self.show_status("Already a function")
+                return
+            self.show_status("Retracing as a function...")
+            self.model.AS.make_label("fun_", addr)
+            engine.add_entrypoint(addr, True)
+            engine.analyze(self.analyze_status)
+            self.update_model()
+            self.show_status("Retraced as a function")
+
         elif key == b"d":
             addr = self.cur_addr()
             fl = self.model.AS.get_flags(addr)
