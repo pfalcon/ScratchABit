@@ -487,6 +487,9 @@ class AddressSpace:
         if not self.get_xrefs(ref_addr):
             self.del_auto_label(ref_addr)
 
+    def is_arg_offset(self, insn_addr, arg_no):
+        old_subtype = self.get_arg_prop(insn_addr, arg_no, "subtype")
+        return old_subtype == IMM_ADDR
 
     # Xref API
 
