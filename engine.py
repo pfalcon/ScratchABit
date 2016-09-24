@@ -556,6 +556,13 @@ class AddressSpace:
                 return func
         return None
 
+    # Get all functions
+    def get_funcs(self):
+        for addr, props in self.addr_map.items():
+            func = props.get("fun_s")
+            if func:
+                yield (addr, func)
+
     # Memory Subarea API
 
     def add_subarea(self, start, end, name):
