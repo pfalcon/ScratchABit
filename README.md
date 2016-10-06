@@ -80,8 +80,8 @@ on example.def that sets the plugin module name in the `cpu xxx` line.
 
 For a very simple example that uses an external plugin, see this
 [esp8266.def file](https://gist.github.com/projectgus/f898d5798e3e44240796)
-that works with the xtensa.py file from the
-[ida-xtensa repository](https://github.com/pfalcon/ida-xtensa).
+that works with the xtensa.py plugin from the
+[ida-xtensa2 repository](https://github.com/pfalcon/ida-xtensa2).
 
 TODO/Things to decide
 ---------------------
