@@ -82,7 +82,11 @@ class Function:
 
     def get_end_method(self):
         if self.end is not None:
-            return "as set by loader (detected: 0x%x)" % (self.ranges.bounds()[1] - 1)
+            bounds = self.ranges.bounds()
+            addr = "?"
+            if bounds:
+                addr = "0x%x" % (self.ranges.bounds()[1] - 1)
+            return "as set by loader (detected: %s)" % addr
         return "as detected"
 
 class AddressSpace:
