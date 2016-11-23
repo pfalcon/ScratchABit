@@ -382,7 +382,7 @@ def load_sections(aspace, elffile):
             start, size, flags = prop_arr[i:i+3]
             #print("Xtensa prop entry: %08x(%x) %x" % (start, size, flags))
             if flags & XTENSA_PROP_INSN:
-                aspace.analisys_stack_push(start, is_call=False)
+                aspace.analisys_stack_push(start)
             if flags & XTENSA_PROP_DATA:
                 c = aspace.get_comment(start) or ""
                 if size != 0 or "XTENSA_PROP_DATA" not in c:
