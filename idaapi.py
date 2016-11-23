@@ -88,6 +88,15 @@ CF_JUMP = 4  # Not just a jump, indirect jump (or call)!
 fl_CN = 1  # "call near"
 fl_JN = 2  # "jump near"
 fl_F = 3   # "ordinary flow"
+# ScratchABit extensions:
+# Return address from a call. Next instruction from a call, whenever possible,
+# Should use this flag instead of fl_F. This is because there's no guarantee
+# that a call will return, so such code paths need to be treated with different
+# priority than "next instruction" and "jump" code paths.
+fl_RET_FROM_CALL = 10
+# Sane names
+fl_CALL = fl_CN
+fl_JUMP = fl_JN
 
 # Data references
 dr_R = "r"
@@ -293,7 +302,7 @@ def get_full_val(ea, val_sz):
     return ADDRESS_SPACE.get_data(ea, val_sz)
 
 def ua_add_cref(opoff, ea, flags):
-    ADDRESS_SPACE.analisys_stack_push(ea, flags == fl_CN)
+    ADDRESS_SPACE.analisys_stack_push(ea, flags)
     if flags == fl_JN:
         ADDRESS_SPACE.make_auto_label(ea)
         ADDRESS_SPACE.add_xref(_processor.cmd.ea, ea, "j")

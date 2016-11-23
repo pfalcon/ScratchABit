@@ -787,11 +787,13 @@ class AddressSpace:
 
     # Hack for idaapi interfacing
     # TODO: should go to "Analysis" object
-    def analisys_stack_push(self, ea, is_call=True):
+    def analisys_stack_push(self, ea, flow_flag=idaapi.fl_JN):
         global analisys_stack_branches, analisys_stack_calls
         # If we know something is func (e.g. from loader), jump
         # to it means tail-call.
-        if is_call or self.is_func(ea):
+        if flow_flag == idaapi.fl_RET_FROM_CALL:
+            analisys_stack_returns.append(ea)
+        elif flow_flag == idaapi.fl_CN or self.is_func(ea):
             analisys_stack_calls.append(ea)
         else:
             analisys_stack_branches.append(ea)
@@ -806,6 +808,7 @@ def set_processor(p):
 
 
 analisys_stack_calls = []
+analisys_stack_returns = []
 analisys_stack_branches = []
 
 def add_entrypoint(ea, as_func=True):
@@ -857,6 +860,11 @@ def analyze(callback=lambda cnt:None):
                 continue
             log.info("Starting analysis of function 0x%x" % ea)
             current_func = ADDRESS_SPACE.make_func(ea)
+        elif analisys_stack_returns:
+            ea = analisys_stack_returns.pop()
+            #log.debug("Restarting analysis of call return at 0x%x (fl=%x)", ea, ADDRESS_SPACE.get_flags(ea, 0xff))
+            analisys_stack_branches.append(ea)
+            continue
         else:
             finish_func(current_func)
             break
