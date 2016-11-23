@@ -9,6 +9,8 @@ from pyelftools.elftools.elf.sections import SymbolTableSection
 from pyelftools.elftools.elf.relocation import RelocationSection
 from pyelftools.elftools.common.exceptions import ELFError
 
+import idaapi
+
 
 # Whether to add comments of relocs pointing to addresses.
 # Useful for debugging loader, but mostly a noise afterwards.
@@ -108,7 +110,7 @@ def load_segments(aspace, elffile):
                     aspace.make_unique_label(s["st_value"], str(s.name, "utf-8"))
 
                     if s["st_info"]["type"] == "STT_FUNC":
-                        aspace.analisys_stack_push(s["st_value"])
+                        aspace.analisys_stack_push(s["st_value"], idaapi.fl_CALL)
                     if s["st_info"]["type"] == "STT_OBJECT":
                         # TODO: Set as data of given s["st_size"]
                         pass
@@ -255,7 +257,7 @@ def load_sections(aspace, elffile):
                 aspace.make_unique_label(sym["st_value"] + sec_start, symname)
 
                 if sym["st_info"]["type"] == "STT_FUNC":
-                    aspace.analisys_stack_push(sym["st_value"] + sec_start)
+                    aspace.analisys_stack_push(sym["st_value"] + sec_start, idaapi.fl_CALL)
                     if sym["st_size"]:
                         aspace.make_func(sym["st_value"] + sec_start, sym["st_value"] + sec_start + sym["st_size"])
                     else:
