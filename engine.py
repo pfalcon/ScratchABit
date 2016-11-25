@@ -789,10 +789,11 @@ class AddressSpace:
     # TODO: should go to "Analysis" object
     def analisys_stack_push(self, ea, flow_flag=idaapi.fl_JN):
         global analisys_stack_branches, analisys_stack_calls
+        global analisys_stack_returns, analysis_current_func
         # If we know something is func (e.g. from loader), jump
         # to it means tail-call.
         if flow_flag == idaapi.fl_RET_FROM_CALL:
-            analisys_stack_returns.append(ea)
+            analisys_stack_returns.append((ea, analysis_current_func))
         elif flow_flag == idaapi.fl_CN or self.is_func(ea):
             analisys_stack_calls.append(ea)
         else:
@@ -810,6 +811,7 @@ def set_processor(p):
 analisys_stack_calls = []
 analisys_stack_returns = []
 analisys_stack_branches = []
+analysis_current_func = None
 
 def add_entrypoint(ea, as_func=True):
     if as_func:
@@ -831,9 +833,10 @@ def finish_func(f):
             ADDRESS_SPACE.set_func_end(f, end)
 
 def analyze(callback=lambda cnt:None):
+    global analysis_current_func
     cnt = 0
     limit = 1000000
-    current_func = None
+    analysis_current_func = None
     while limit:
         if analisys_stack_branches:
             ea = analisys_stack_branches.pop()
@@ -844,7 +847,7 @@ def analyze(callback=lambda cnt:None):
                 if fun:
                     log.warn("Jump to (or flow into) a function at 0x%x detected" % ea)
 
-            if current_func:
+            if analysis_current_func:
                 if fl == ADDRESS_SPACE.CODE | ADDRESS_SPACE.FUNC:
                     continue
                 assert fl in (ADDRESS_SPACE.CODE, ADDRESS_SPACE.UNK)
@@ -852,21 +855,21 @@ def analyze(callback=lambda cnt:None):
                 if fl != ADDRESS_SPACE.UNK:
                     continue
         elif analisys_stack_calls:
-            finish_func(current_func)
-            current_func = None
+            finish_func(analysis_current_func)
+            analysis_current_func = None
             ea = analisys_stack_calls.pop()
             fun = ADDRESS_SPACE.get_func_start(ea)
             if fun.get_ranges():
                 continue
             log.info("Starting analysis of function 0x%x" % ea)
-            current_func = ADDRESS_SPACE.make_func(ea)
+            analysis_current_func = ADDRESS_SPACE.make_func(ea)
         elif analisys_stack_returns:
-            ea = analisys_stack_returns.pop()
+            ea, analysis_current_func = analisys_stack_returns.pop()
             #log.debug("Restarting analysis of call return at 0x%x (fl=%x)", ea, ADDRESS_SPACE.get_flags(ea, 0xff))
             analisys_stack_branches.append(ea)
             continue
         else:
-            finish_func(current_func)
+            finish_func(analysis_current_func)
             break
         init_cmd(ea)
         try:
@@ -879,8 +882,8 @@ def analyze(callback=lambda cnt:None):
         if insn_sz:
             if not _processor.emu():
                 assert False
-            if current_func:
-                current_func.add_insn(ea, insn_sz)
+            if analysis_current_func:
+                analysis_current_func.add_insn(ea, insn_sz)
                 ADDRESS_SPACE.make_code(ea, insn_sz, ADDRESS_SPACE.FUNC)
             else:
                 ADDRESS_SPACE.make_code(ea, insn_sz)
