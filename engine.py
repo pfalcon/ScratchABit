@@ -850,9 +850,14 @@ def analyze(callback=lambda cnt:None):
             if analysis_current_func:
                 if fl == ADDRESS_SPACE.CODE | ADDRESS_SPACE.FUNC:
                     continue
-                assert fl in (ADDRESS_SPACE.CODE, ADDRESS_SPACE.UNK)
+                if fl not in (ADDRESS_SPACE.CODE, ADDRESS_SPACE.UNK):
+                    log.warn("Unexpected flags 0x%x at 0x%x while tracing code branch, skipping it", fl, ea)
+                    ADDRESS_SPACE.add_issue(ea, "Jump/flow into non-code")
+                    continue
             else:
                 if fl != ADDRESS_SPACE.UNK:
+                    if fl != ADDRESS_SPACE.CODE:
+                        ADDRESS_SPACE.add_issue(ea, "Jump/flow into non-code")
                     continue
         elif analisys_stack_calls:
             finish_func(analysis_current_func)
