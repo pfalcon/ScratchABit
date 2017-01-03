@@ -822,6 +822,7 @@ class MainScreen:
         menu_edit = WMenuBox([
             ("Undefined (u)", b"u"), ("Code (c)", b"c"), ("Data (d)", b"d"),
             ("ASCII String (a)", b"a"), ("Filler (f)", b"f"), ("Make label (n)", b"n"),
+            ("Mark function start (F)", b"F"),
             ("Number/Address (o)", b"o"), ("Hex/dec (h)", b"h"),
         ])
         menu_analysis = WMenuBox([

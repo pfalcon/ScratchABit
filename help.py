@@ -34,6 +34,7 @@ c - Make code
 d - Make/Cycle data
 a - Make ASCII string
 f - Make filler (ignored bytes, to avoid leaving them undefined)
+F - Mark function start
 n - (Re)name address (make label)
 i - Info
 Ctrl+w - Write current function to a file
