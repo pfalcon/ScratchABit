@@ -232,6 +232,14 @@ class AddressSpace:
             area[BYTES][off + i] = data & 0xff
             data >>= 8
 
+    # Convenience function for plugins
+    def memcpy(self, dst, src, sz):
+        for i in range(sz):
+            b = self.get_byte(src)
+            self.set_byte(dst, b)
+            src += 1
+            dst += 1
+
     # Binary Data Flags API
 
     def get_flags(self, addr, mask=0x7f):
