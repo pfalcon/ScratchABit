@@ -52,10 +52,10 @@ Clone the code using:
 If you cloned code without `--recursive`, run `git submodule update --init`.
 
 If you want to disassemble a file in self-describing executable format
-(like ELF), just pass it as an argument to `scratchabit.py`. The repository
+(like ELF), just pass it as an argument to `ScratchABit.py`. The repository
 includes `example-elf` (x86 32bit) for quick start:
 
-    python3 scratchabit.py example-elf
+    python3 ScratchABit.py example-elf
 
 Alternatively, if you want to disassemble a raw binary file, you need
 to create a .def (definition) file, to specify what memory areas are
@@ -63,7 +63,7 @@ defined for the code, at which address to load binary file, etc. (Note:
 a .def file may be useful for .elf and similar files too.) The repository
 includes a simple x86_64 raw binary code, and the corresponding .def file:
 
-    python3 scratchabit.py example.def
+    python3 ScratchABit.py example.def
 
 Press F1 if in doubt what to do next (ScratchABit works similarly to other
 interactive dissamblers; some previous experience or background reading may
@@ -74,7 +74,7 @@ Using Plugins
 -------------
 
 IDAPython processor plugins can be loaded from anywhere on the Python
-module path. Alternatively, you can symlink the plugin .py file into
+module path. Alternatively, you can symlink the plugin `.py` file into
 the `plugins/cpu/` subdirectory.
 
 After the plugin is made available, create a new definition file based
