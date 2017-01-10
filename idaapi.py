@@ -18,7 +18,7 @@ import sys
 from io import StringIO
 import logging as log
 
-import engine
+from scratchabit import defs
 
 
 # Data types
@@ -244,9 +244,9 @@ def OutValue(op, flags):
         u_line.write(val)
         return
     subtype = op.props.get("subtype")
-    if subtype == engine.IMM_ADDR:
+    if subtype == defs.IMM_ADDR:
         out_name_expr(op, val, BADADDR)
-    elif subtype == engine.IMM_UDEC:
+    elif subtype == defs.IMM_UDEC:
         u_line.write(str(val))
     else:
         u_line.write(hex(val))
@@ -349,7 +349,7 @@ def op_offset(ea, op_no, reftype, ref_addr):
     ADDRESS_SPACE.make_arg_offset(ea, op_no, ref_addr)
 
 def is_offset(ea, op_no):
-    return ADDRESS_SPACE.get_arg_prop(ea, op_no, "subtype") == engine.IMM_ADDR
+    return ADDRESS_SPACE.get_arg_prop(ea, op_no, "subtype") == defs.IMM_ADDR
 
 
 #

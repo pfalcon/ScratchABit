@@ -23,7 +23,6 @@ import logging as log
 from rangeset import RangeSet
 
 import idaapi
-import idc
 
 #
 # ScratchABit API and code
@@ -35,12 +34,8 @@ PROPS = 2
 BYTES = 3
 FLAGS = 4
 
-IMM_UHEX = None
-IMM_SHEX = "shex"
-IMM_UDEC = "udec"
-IMM_SDEC = "sdec"
-IMM_CHAR = "chr"
-IMM_ADDR = "addr"
+from .defs import *
+
 
 def str_area(area):
     if not area:
@@ -1369,4 +1364,3 @@ def print_address_map():
 
 
 idaapi.set_address_space(ADDRESS_SPACE)
-idc.set_address_space(ADDRESS_SPACE)

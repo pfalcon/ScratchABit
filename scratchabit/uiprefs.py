@@ -1,6 +1,6 @@
 from picotui.widgets import *
 from picotui.dialogs import add_ok_cancel_buttons
-from utils import bidict
+from .utils import bidict
 
 
 class DPreferences(Dialog):

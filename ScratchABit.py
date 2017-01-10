@@ -25,7 +25,7 @@ import binascii
 import logging as log
 import argparse
 
-import engine
+from scratchabit import engine
 import idaapi
 
 from picotui.widgets import *
@@ -34,11 +34,12 @@ from picotui.screen import Screen
 from picotui.editorext import Viewer
 from picotui.menu import *
 from picotui.dialogs import *
-import utils
-import help
-import saveload
-import actions
-import uiprefs
+
+from scratchabit import utils
+from scratchabit import help
+from scratchabit import saveload
+from scratchabit import actions
+from scratchabit import uiprefs
 
 
 HEIGHT = 21

@@ -2,7 +2,7 @@ import sys
 import os
 import glob
 
-import engine
+from . import engine
 
 
 def save_exists(project_dir):
