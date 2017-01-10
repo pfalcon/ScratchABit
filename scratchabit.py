@@ -28,7 +28,6 @@ import argparse
 import engine
 import idaapi
 
-import curses
 from picotui.widgets import *
 from picotui import editorext as editor
 from picotui.screen import Screen
