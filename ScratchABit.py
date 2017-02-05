@@ -991,6 +991,7 @@ if __name__ == "__main__":
         main_screen.e.goto_addr(show_addr)
         Screen.set_screen_redraw(main_screen.redraw)
         main_screen.redraw()
+        main_screen.e.show_status("Press F1 for help, F9 for menus")
         main_screen.loop()
     except:
         log.exception("Unhandled exception")
