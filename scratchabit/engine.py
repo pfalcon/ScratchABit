@@ -630,6 +630,13 @@ class AddressSpace:
         stream.write("header:\n")
         stream.write(" version: 1.0\n")
         for addr, props in sorted(self.addr_map.items()):
+                    # If entry has just fun_e data, skip it. As fun_e is set
+                    # on an address past the last byte of func, this address
+                    # also may not belong to any section, so skipping it
+                    # to start with is helpful.
+                    if len(props) == 1 and "fun_e" in props:
+                        continue
+
                     if addr > area_end:
                         stream.close()
                         area_i += 1
@@ -641,9 +648,6 @@ class AddressSpace:
                         area_end = areas[area_i][END]
                         stream.write("header:\n")
                         stream.write(" version: 1.0\n")
-                    # If entry has just fun_e data, skip it
-                    if len(props) == 1 and "fun_e" in props:
-                        continue
                     stream.write("0x%08x:\n" % addr)
                     fl = self.get_flags(addr)
                     stream.write(" f: %s %02x\n" % (flag2char(fl), fl))
