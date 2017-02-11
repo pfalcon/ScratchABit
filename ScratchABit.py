@@ -93,6 +93,14 @@ class Editor(editor.EditorExt):
             res += l.indent + l.render()
         super().show_line(res, i)
 
+    def handle_input(self, key):
+        try:
+            return super().handle_input(key)
+        except Exception as ex:
+            self.show_exception(ex)
+            return None
+
+
     def goto_addr(self, to_addr, col=None, from_addr=None):
         if to_addr is None:
             self.show_status("No address-like value to go to")
@@ -844,11 +852,7 @@ class MainScreen:
                     self.menu_bar.redraw()
                     continue
 
-                try:
-                    res = self.e.handle_input(key)
-                except Exception as ex:
-                    self.e.show_exception(ex)
-                    res = None
+                res = self.e.handle_input(key)
 
                 if res is not None and res is not True:
                     return res
