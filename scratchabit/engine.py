@@ -256,10 +256,16 @@ class AddressSpace:
         else:
             return 1
         off += 1
-        while flags[off] == f:
-            off += 1
-            sz += 1
+
+        try:
+            while flags[off] == f:
+                off += 1
+                sz += 1
+        except IndexError:
+            pass
+
         return sz
+
 
     # Taking an offset inside unit, return offset to the beginning of unit
     @classmethod
