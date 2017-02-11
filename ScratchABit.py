@@ -365,8 +365,11 @@ class Editor(editor.EditorExt):
             if not self.expect_flags(fl, (self.model.AS.UNK,)):
                 return
 
+            off, area = self.model.AS.addr2area(self.cur_addr())
+            # Don't cross area boundaries with filler
+            remaining = area[engine.END] - addr + 1
             sz = 0
-            while True:
+            while remaining:
                 try:
                     fl = self.model.AS.get_flags(addr)
                 except engine.InvalidAddrException:
@@ -379,6 +382,7 @@ class Editor(editor.EditorExt):
                     return
                 sz += 1
                 addr += 1
+                remaining -= 1
             if sz > 0:
                 self.model.AS.make_filler(self.cur_addr(), sz)
                 self.update_model()
