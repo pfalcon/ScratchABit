@@ -50,6 +50,6 @@ def show(AS, cur_addr):
     v.set_lines(lines)
 
     i = bisect.bisect_right(addr_list, cur_addr)
-    v.goto_line(i - 1)
+    v.goto_line(i - 1, cur_addr - addr_list[i - 1])
 
     v.loop()
