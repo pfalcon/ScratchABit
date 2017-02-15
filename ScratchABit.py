@@ -518,7 +518,9 @@ class Editor(editor.EditorExt):
             self.show_status(status)
         elif key == b"I":
             from scratchabit import memmap
-            memmap.show(self.model.AS, self.cur_addr())
+            addr = memmap.show(self.model.AS, self.cur_addr())
+            if addr is not None:
+                self.goto_addr(addr, from_addr=self.cur_addr())
             self.redraw()
         elif key == b"W":
             out_fname = "out.lst"

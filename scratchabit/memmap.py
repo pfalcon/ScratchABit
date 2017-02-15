@@ -1,6 +1,7 @@
 import bisect
 
 from picotui.editorext import EditorExt, Viewer
+from picotui.screen import KEY_ENTER
 from . import engine
 
 
@@ -52,4 +53,5 @@ def show(AS, cur_addr):
     i = bisect.bisect_right(addr_list, cur_addr)
     v.goto_line(i - 1, cur_addr - addr_list[i - 1])
 
-    v.loop()
+    if v.loop() == KEY_ENTER:
+        return addr_list[v.cur_line] + v.col
