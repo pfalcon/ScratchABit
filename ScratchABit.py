@@ -826,10 +826,12 @@ class MainScreen:
         ])
         self.menu_bar.permanent = True
 
-    def redraw(self):
+    def redraw(self, allow_cursor=True):
         self.menu_bar.redraw()
         self.e.draw_box(0, 1, self.screen_size[0], self.screen_size[1] - 2)
         self.e.redraw()
+        if allow_cursor:
+            self.e.cursor(True)
 
     def loop(self):
         while 1:
