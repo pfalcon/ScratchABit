@@ -570,7 +570,7 @@ class AddressSpace:
         return None
 
     # Get all functions
-    def get_funcs(self):
+    def iter_funcs(self):
         for addr, props in self.addr_map.items():
             func = props.get("fun_s")
             if func:
