@@ -576,6 +576,9 @@ class AddressSpace:
             if func:
                 yield (addr, func)
 
+    def get_func_list(self):
+        return sorted([self.get_label(addr) for addr, f in self.iter_funcs()])
+
     # Memory Subarea API
 
     def add_subarea(self, start, end, name):
