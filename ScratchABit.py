@@ -267,6 +267,16 @@ class Editor(editor.EditorExt):
                 return to_addr + addend
 
 
+    def require_non_func(self, fl):
+        if fl & 0x7f != self.model.AS.CODE:
+            self.show_status("Code required")
+            return False
+        if fl & self.model.AS.FUNC:
+            self.show_status("Already a function")
+            return False
+        return True
+
+
     def handle_edit_key(self, key):
         line = self.get_cur_line()
         if key == editor.KEY_ENTER:
@@ -314,11 +324,7 @@ class Editor(editor.EditorExt):
         elif key == b"F":
             addr = self.cur_addr()
             fl = self.model.AS.get_flags(addr, 0xff)
-            if fl & 0x7f != self.model.AS.CODE:
-                self.show_status("Code required")
-                return
-            if fl & self.model.AS.FUNC:
-                self.show_status("Already a function")
+            if not self.require_non_func(fl):
                 return
             self.show_status("Retracing as a function...")
             self.model.AS.make_label("fun_", addr)
