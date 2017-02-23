@@ -310,6 +310,17 @@ class AddressSpace:
         for i in range(sz - 1):
             area_byte_flags[off + 1 + i] |= self.CODE_CONT
 
+    # Mark instructions in given range as belonging to function
+    def mark_func_bytes(self, addr, sz):
+        self.changed = True
+        off, area = self.addr2area(addr)
+        area_byte_flags = area[FLAGS]
+        for i in range(sz):
+            fl = area_byte_flags[off + i]
+            assert fl in (self.CODE, self.CODE_CONT)
+            if fl == self.CODE:
+                area_byte_flags[off + i] |= self.FUNC
+
     def make_data(self, addr, sz):
         off, area = self.addr2area(addr)
         area_byte_flags = area[FLAGS]

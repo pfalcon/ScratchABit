@@ -46,6 +46,7 @@ HEIGHT = 21
 
 MENU_PREFS = 2000
 MENU_PLUGIN = 2001
+MENU_ADD_TO_FUNC = 2002
 
 
 class AppClass:
@@ -332,6 +333,11 @@ class Editor(editor.EditorExt):
             engine.analyze(self.analyze_status)
             self.update_model()
             self.show_status("Retraced as a function")
+
+        elif key == MENU_ADD_TO_FUNC:
+            addr = self.cur_addr()
+            if actions.add_code_to_func(APP, addr):
+                self.update_model()
 
         elif key == b"d":
             addr = self.cur_addr()
@@ -815,7 +821,7 @@ class MainScreen:
         menu_edit = WMenuBox([
             ("Undefined (u)", b"u"), ("Code (c)", b"c"), ("Data (d)", b"d"),
             ("ASCII String (a)", b"a"), ("Filler (f)", b"f"), ("Make label (n)", b"n"),
-            ("Mark function start (F)", b"F"),
+            ("Mark function start (F)", b"F"), ("Add code to function", MENU_ADD_TO_FUNC),
             ("Number/Address (o)", b"o"), ("Hex/dec (h)", b"h"),
         ])
         menu_analysis = WMenuBox([
