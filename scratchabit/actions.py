@@ -16,16 +16,21 @@ class TextSaveModel:
             self.ctrl.show_status("Writing: 0x%x" % addr)
         self.cnt += 1
 
-def write_func(APP, addr, prefix="", feedback_obj=None):
+
+def write_func_stream(APP, func, stream, feedback_obj=None):
+    model = TextSaveModel(stream, feedback_obj)
+    for start, end in func.get_ranges():
+        while start < end:
+            start = engine.render_from(model, start, 1)
+
+
+def write_func_by_addr(APP, addr, prefix="", feedback_obj=None):
     func = APP.aspace.lookup_func(addr)
     if func:
         funcname = APP.aspace.get_label(func.start)
         outfile = prefix + funcname + ".lst"
         with open(outfile, "w") as f:
-            model = TextSaveModel(f, feedback_obj)
-            for start, end in func.get_ranges():
-                while start < end:
-                    start = engine.render_from(model, start, 1)
+            write_func_stream(APP, func, f, feedback_obj)
         return outfile
 
 

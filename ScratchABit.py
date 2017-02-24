@@ -540,7 +540,7 @@ class Editor(editor.EditorExt):
                 engine.render_partial(actions.TextSaveModel(f, self), 0, 0, 10000000)
             self.show_status("Disassembly listing written: " + out_fname)
         elif key == b"\x17":  # Ctrl+W
-            outfile = actions.write_func(APP, self.cur_addr(), feedback_obj=self)
+            outfile = actions.write_func_by_addr(APP, self.cur_addr(), feedback_obj=self)
             if outfile:
                 self.show_status("Wrote file: %s" % outfile)
         elif key == b"\x15":  # Ctrl+U
