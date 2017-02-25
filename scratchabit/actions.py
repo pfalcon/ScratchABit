@@ -5,20 +5,26 @@ from . import engine
 
 
 class TextSaveModel:
-    def __init__(self, f, ctrl=None):
+    def __init__(self, f, ctrl=None, comments=True):
         self.f = f
         self.ctrl = ctrl
         self.cnt = 0
+        self.comments = comments
     def add_line(self, addr, line):
-        line = ("%08x " % addr) + line.indent + line.render() + "\n"
+        txt = line.render()
+        if not self.comments and ";" in txt:
+            txt = txt.rsplit(";", 1)[0].rstrip()
+            if not txt.strip():
+                return
+        line = ("%08x " % addr) + line.indent + txt + "\n"
         self.f.write(line)
         if self.ctrl and self.cnt % 256 == 0:
             self.ctrl.show_status("Writing: 0x%x" % addr)
         self.cnt += 1
 
 
-def write_func_stream(APP, func, stream, feedback_obj=None):
-    model = TextSaveModel(stream, feedback_obj)
+def write_func_stream(APP, func, stream, feedback_obj=None, comments=True):
+    model = TextSaveModel(stream, feedback_obj, comments=comments)
     for start, end in func.get_ranges():
         while start < end:
             start = engine.render_from(model, start, 1)
