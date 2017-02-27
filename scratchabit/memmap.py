@@ -1,7 +1,8 @@
 import bisect
 
-from picotui.editorext import EditorExt, Viewer
-from picotui.screen import KEY_ENTER
+from picotui.editorext import EditorExt, CharColorViewer
+# Keys and colors
+from picotui.screen import *
 from . import engine
 
 
@@ -12,12 +13,13 @@ H = 20
 
 
 # EditorExt with Viewer's key handling
-class MemMapViewer(EditorExt, Viewer):
+class MemMapViewer(EditorExt, CharColorViewer):
     pass
 
 
 def show(AS, cur_addr):
     v = MemMapViewer(L + 1, T + 1, W - 2, H - 2)
+    v.attr_color(C_B_WHITE, C_BLUE)
     v.dialog_box(L, T, W, H)
     lines = []
     addr_list = []
@@ -26,7 +28,10 @@ def show(AS, cur_addr):
         flags = area[engine.FLAGS]
         addr = area[engine.START]
         last_capital = None
-        lines.append("%08x-%08x %s:" % (addr, area[engine.END], props.get("name", "noname")))
+        lines.append([
+            ("%08x-%08x %s:" % (addr, area[engine.END], props.get("name", "noname")),
+                C_PAIR(C_B_YELLOW, C_BLUE))
+        ])
         addr_list.append(addr)
 
         l = ""
@@ -49,6 +54,7 @@ def show(AS, cur_addr):
             addr_list.append(addr)
 
     v.set_lines(lines)
+    v.set_def_color(C_PAIR(C_CYAN, C_BLUE))
 
     i = bisect.bisect_right(addr_list, cur_addr)
     v.goto_line(i - 1, cur_addr - addr_list[i - 1])
