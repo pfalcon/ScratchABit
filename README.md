@@ -20,7 +20,7 @@ ScratchABit is released under the terms of GNU General Public License v3
 Requirements/manifesto
 ----------------------
 
-1. Should not be written in an obfuscated language. These includes languages
+1. Should not be written in an obfuscated language. These include languages
 which are too low-level, which allow to access non-initialized variables,
 which don't differentiate between variables and functions/procedures, which
 start array indexes from arbitrary numbers, etc., etc. ScratchABit is
