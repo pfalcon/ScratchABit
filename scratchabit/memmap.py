@@ -12,10 +12,12 @@ W = 66
 H = 20
 
 COLOR_MAP = {
-    "F": C_PAIR(C_GREEN, C_BLUE),
+    "C": C_PAIR(C_B_CYAN, C_BLUE),
+    "F": C_PAIR(C_B_GREEN, C_BLUE),
     "f": C_PAIR(C_GREEN, C_BLUE),
     "-": C_PAIR(C_GRAY, C_BLUE),
-    "D": C_PAIR(C_MAGENTA, C_BLUE),
+    "D": C_PAIR(C_B_MAGENTA, C_BLUE),
+    "A": C_PAIR(C_B_MAGENTA, C_BLUE),
     "d": C_PAIR(C_MAGENTA, C_BLUE),
     "X": C_PAIR(C_B_RED, C_BLUE),
 }
