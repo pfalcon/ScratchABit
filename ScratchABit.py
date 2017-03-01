@@ -70,6 +70,7 @@ class Editor(editor.EditorExt):
         self.model = None
         self.addr_stack = []
         self.search_str = ""
+        self.def_color = C_PAIR(C_CYAN, C_BLUE)
 
     def set_model(self, model):
         self.model = model
@@ -92,7 +93,17 @@ class Editor(editor.EditorExt):
                         bin += "+"
                 res += idaapi.fillstr(bin, show_bytes * 2 + 1)
             res += l.indent + l.render()
+
+        COLOR_MAP = {
+            engine.Label: C_PAIR(C_GREEN, C_BLUE),
+            engine.Literal: C_PAIR(C_B_YELLOW, C_BLUE),
+            engine.Xref: C_PAIR(C_MAGENTA, C_BLUE),
+        }
+        c = COLOR_MAP.get(type(l), self.def_color)
+        self.attr_color(c)
         super().show_line(res, i)
+        self.attr_reset()
+
 
     def handle_input(self, key):
         try:
@@ -840,7 +851,9 @@ class MainScreen:
 
     def redraw(self, allow_cursor=True):
         self.menu_bar.redraw()
+        self.e.attr_color(C_B_WHITE, C_BLUE)
         self.e.draw_box(0, 1, self.screen_size[0], self.screen_size[1] - 2)
+        self.e.attr_reset()
         self.e.redraw()
         if allow_cursor:
             self.e.cursor(True)
