@@ -1195,6 +1195,15 @@ class Literal(DisasmObj):
         return self.cache
 
 
+# Separate types to differentiate content
+class AreaWrapper(Literal):
+    pass
+
+# Separate types to differentiate content
+class FunctionWrapper(Literal):
+    pass
+
+
 def render():
     model = Model()
     render_partial(model, 0, 0, 1000000)
@@ -1258,7 +1267,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             i = offset
             start = False
         if i == 0:
-            model.add_line(a[START], Literal(a[START], "; Start of 0x%x area (%s)" % (a[START], a[PROPS].get("name", "noname"))))
+            model.add_line(a[START], AreaWrapper(a[START], "; Start of 0x%x area (%s)" % (a[START], a[PROPS].get("name", "noname"))))
         bytes = a[BYTES]
         flags = a[FLAGS]
         areasize = len(bytes)
@@ -1273,7 +1282,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             props = ADDRESS_SPACE.get_addr_prop_dict(addr)
             func = props.get("fun_s")
             if func:
-                model.add_line(addr, Literal(addr, "; Start of function '%s'" % ADDRESS_SPACE.get_label(func.start)))
+                model.add_line(addr, FunctionWrapper(addr, "; Start of function '%s'" % ADDRESS_SPACE.get_label(func.start)))
 
             xrefs = props.get("xrefs")
             if xrefs:
@@ -1346,7 +1355,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             next_props = ADDRESS_SPACE.get_addr_prop_dict(next_addr)
             func_end = next_props.get("fun_e")
             if func_end:
-                model.add_line(addr, Literal(addr, "; End of function '%s' (%s)" % (
+                model.add_line(addr, FunctionWrapper(addr, "; End of function '%s' (%s)" % (
                     ADDRESS_SPACE.get_label(func_end.start), func_end.get_end_method()
                 )))
 
@@ -1354,7 +1363,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             if not num_lines:
                 return next_addr
 
-        model.add_line(a[END], Literal(a[END], "; End of 0x%x area (%s)" % (a[START], a[PROPS].get("name", "noname"))))
+        model.add_line(a[END], AreaWrapper(a[END], "; End of 0x%x area (%s)" % (a[START], a[PROPS].get("name", "noname"))))
 
 
 def flag2char(f):

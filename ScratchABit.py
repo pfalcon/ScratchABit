@@ -96,7 +96,8 @@ class Editor(editor.EditorExt):
 
         COLOR_MAP = {
             engine.Label: C_PAIR(C_GREEN, C_BLUE),
-            engine.Literal: C_PAIR(C_B_YELLOW, C_BLUE),
+            engine.AreaWrapper: C_PAIR(C_YELLOW, C_BLUE),
+            engine.FunctionWrapper: C_PAIR(C_B_YELLOW, C_BLUE),
             engine.Xref: C_PAIR(C_MAGENTA, C_BLUE),
         }
         c = COLOR_MAP.get(type(l), self.def_color)
