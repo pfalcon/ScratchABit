@@ -99,6 +99,10 @@ class Editor(editor.EditorExt):
             engine.AreaWrapper: C_PAIR(C_YELLOW, C_BLUE),
             engine.FunctionWrapper: C_PAIR(C_B_YELLOW, C_BLUE),
             engine.Xref: C_PAIR(C_MAGENTA, C_BLUE),
+            engine.Unknown: C_PAIR(C_WHITE, C_BLUE),
+            engine.Data: C_PAIR(C_MAGENTA, C_BLUE),
+            engine.String: C_PAIR(C_B_MAGENTA, C_BLUE),
+            engine.Fill: C_PAIR(C_B_BLUE, C_BLUE),
         }
         c = COLOR_MAP.get(type(l), self.def_color)
         self.attr_color(c)
