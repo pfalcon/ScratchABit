@@ -90,7 +90,7 @@ TODO/Things to decide
 
 * ~~Currently uses multiple files for "database", each storing particular
   type of information. Switch to a single YAML file instead?~~
-* Add color (low priority, (unbloated!) patches welcome).
+* ~~Add color (low priority, (unbloated!) patches welcome).~~
 * ~~Few important UI commands to implement yet for comfortable work.~~ (
   All the most important commands should be there, other functionality is
   expected to be implemented using plugins).
