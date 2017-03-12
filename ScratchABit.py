@@ -326,7 +326,12 @@ class Editor(editor.EditorExt):
                 self.show_status("Returning")
                 self.goto_addr(self.addr_stack.pop())
         elif key == b"q":
-            return editor.KEY_QUIT
+            res = ACTION_OK
+            if self.model.AS.changed:
+                res = DConfirmation("There're unsaved changes. Quit?").result()
+            if res == ACTION_OK:
+                return editor.KEY_QUIT
+            self.redraw()
         elif key == b"\x1b[5;5~":  # Ctrl+PgUp
             self.goto_addr(self.model.AS.min_addr(), from_addr=line.ea)
         elif key == b"\x1b[6;5~":  # Ctrl+PgDn
@@ -515,6 +520,7 @@ class Editor(editor.EditorExt):
         elif key == b"S":
             self.show_status("Saving...")
             saveload.save_state(project_dir)
+            self.model.AS.changed = False
             self.show_status("Saved.")
         elif key == b"\x11":  # ^Q
             class IssueList(WListBox):
@@ -994,6 +1000,7 @@ if __name__ == "__main__":
     #sys.exit()
 
     engine.ADDRESS_SPACE.is_loading = False
+    engine.ADDRESS_SPACE.changed = False
     Screen.init_tty()
     try:
         Screen.cls()

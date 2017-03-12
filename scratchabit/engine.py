@@ -125,6 +125,8 @@ class AddressSpace:
         self.func_starts_arr = []
         # True during loading stage, False during UI interaction stage
         self.is_loading = False
+        # Was area flags/content changed (and thus require saving)?
+        self.changed = False
 
     # Memory Area API
 
@@ -196,6 +198,7 @@ class AddressSpace:
         return area[BYTES][off]
 
     def set_byte(self, addr, val):
+        self.changed = True
         off, area = self.addr2area(addr)
         if area is None:
             raise InvalidAddrException(addr)
@@ -221,6 +224,7 @@ class AddressSpace:
         return val
 
     def set_data(self, addr, data, sz):
+        self.changed = True
         off, area = self.addr2area(addr)
         val = 0
         for i in range(sz):
@@ -293,6 +297,7 @@ class AddressSpace:
         return self.adjust_offset_reverse(off, area) + area[START]
 
     def set_flags(self, addr, sz, head_fl, rest_fl=0):
+        self.changed = True
         off, area = self.addr2area(addr)
         flags = area[FLAGS]
         flags[off] = head_fl
@@ -304,6 +309,7 @@ class AddressSpace:
         self.set_flags(addr, sz, self.UNK, self.UNK)
 
     def make_code(self, addr, sz, extra_flags=0):
+        self.changed = True
         off, area = self.addr2area(addr)
         area_byte_flags = area[FLAGS]
         area_byte_flags[off] |= self.CODE | extra_flags
@@ -322,6 +328,7 @@ class AddressSpace:
                 area_byte_flags[off + i] |= self.FUNC
 
     def make_data(self, addr, sz):
+        self.changed = True
         off, area = self.addr2area(addr)
         area_byte_flags = area[FLAGS]
         area_byte_flags[off] |= self.DATA
@@ -342,6 +349,7 @@ class AddressSpace:
     # Address properties API
 
     def set_addr_prop(self, addr, prop, val):
+        self.changed = True
         self.addr_map.setdefault(addr, {})[prop] = val
 
     def get_addr_prop(self, addr, prop, default=None):
