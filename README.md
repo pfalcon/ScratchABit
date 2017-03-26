@@ -94,7 +94,7 @@ TODO/Things to decide
 * ~~Few important UI commands to implement yet for comfortable work.~~ (
   All the most important commands should be there, other functionality is
   expected to be implemented using plugins).
-* Offer to save DB on quit if modified.
+* ~~Offer to save DB on quit if modified.~~
 * Git integration for DB saving.
 * ~~Improve robustness (add exception handler at the main loop level, don't
   abort the application, show to user/log and continue).~~
