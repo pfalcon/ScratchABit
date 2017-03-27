@@ -293,8 +293,34 @@ class DisasmViewer(editor.EditorExt):
             return False
         return True
 
+    #
+    # UI action handlers
+    #
+
+    def action_goto(self):
+        d = Dialog(4, 4, title="Go to")
+        d.add(1, 1, WLabel("Label/addr:"))
+        entry = WAutoComplete(20, "", self.model.AS.get_label_list())
+        entry.popup_h = 12
+        entry.finish_dialog = ACTION_OK
+        d.add(13, 1, entry)
+        d.add(1, 2, WLabel("Press Down to auto-complete"))
+        res = d.loop()
+        self.redraw()
+
+        if res == ACTION_OK:
+            value = entry.get_text()
+            if '0' <= value[0] <= '9':
+                addr = int(value, 0)
+            else:
+                addr = self.model.AS.resolve_label(value)
+            self.goto_addr(addr, from_addr=self.cur_addr())
+
 
     def handle_edit_key(self, key):
+        if key in ACTION_MAP:
+            return ACTION_MAP[key](self)
+
         line = self.get_cur_line()
         if key == editor.KEY_ENTER:
             line = self.get_cur_line()
@@ -495,24 +521,6 @@ class DisasmViewer(editor.EditorExt):
                     return
                 break
             self.redraw()
-        elif key == b"g":
-            d = Dialog(4, 4, title="Go to")
-            d.add(1, 1, WLabel("Label/addr:"))
-            entry = WAutoComplete(20, "", self.model.AS.get_label_list())
-            entry.popup_h = 12
-            entry.finish_dialog = ACTION_OK
-            d.add(13, 1, entry)
-            d.add(1, 2, WLabel("Press Down to auto-complete"))
-            res = d.loop()
-            self.redraw()
-
-            if res == ACTION_OK:
-                value = entry.get_text()
-                if '0' <= value[0] <= '9':
-                    addr = int(value, 0)
-                else:
-                    addr = self.model.AS.resolve_label(value)
-                self.goto_addr(addr, from_addr=self.cur_addr())
 
         elif key == editor.KEY_F1:
             help.help(self)
@@ -685,6 +693,11 @@ class DisasmViewer(editor.EditorExt):
                 self.show_status("Plugin '%s' ran successfully" % res)
         else:
             self.show_status("Unbound key: " + repr(key))
+
+
+ACTION_MAP = {
+    b"g": DisasmViewer.action_goto,
+}
 
 
 CPU_PLUGIN = None
