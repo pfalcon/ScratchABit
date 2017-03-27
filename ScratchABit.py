@@ -63,7 +63,7 @@ def disasm_one(p):
     p.cmd.size = 0
 
 
-class Editor(editor.EditorExt):
+class DisasmViewer(editor.EditorExt):
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -827,7 +827,7 @@ class MainScreen:
 
     def __init__(self):
         self.screen_size = Screen.screen_size()
-        self.e = Editor(1, 2, self.screen_size[0] - 2, self.screen_size[1] - 4)
+        self.e = DisasmViewer(1, 2, self.screen_size[0] - 2, self.screen_size[1] - 4)
 
         menu_file = WMenuBox([
             ("Save (Shift+s)", b"S"), ("Write disasm (Shift+w)", b"W"),
