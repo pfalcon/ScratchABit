@@ -28,10 +28,9 @@ written in Python (modern version, Python3) for your pleasure and sanity.
 
 2. User interface framework should allow user interaction of the needed
 level, not add dependencies, bloat, issues, and incompatibilities between
-framework's versions. ScratchABit currently uses simple (no color even)
-full-screen text user interface, using ANSI/VT100 terminal escape sequences
-(yes, even curses library was deemed too bloat a dependency to force upon
-users).
+framework's versions. ScratchABit currently uses simple full-screen text
+user interface, using ANSI/VT100 terminal escape sequences (yes, even
+curses library was deemed too bloat a dependency to force upon users).
 
 3. Should leverage easy to use text formats to store "database", to
 facilitate easy reuse and tool writing, and storage in version control
