@@ -317,6 +317,34 @@ class DisasmViewer(editor.EditorExt):
             self.goto_addr(addr, from_addr=self.cur_addr())
 
 
+    def action_make_ascii(self):
+        addr = self.cur_addr()
+        fl = self.model.AS.get_flags(addr)
+        if not self.expect_flags(fl, (self.model.AS.DATA, self.model.AS.UNK)):
+            return
+        sz = 0
+        label = "s_"
+        while True:
+            b = self.model.AS.get_byte(addr)
+            fl = self.model.AS.get_flags(addr)
+            if not (0x20 <= b <= 0x7e or b in (0x0a, 0x0d)):
+                if b == 0:
+                    sz += 1
+                break
+            if fl not in (self.model.AS.UNK, self.model.AS.DATA, self.model.AS.DATA_CONT):
+                break
+            c = chr(b)
+            if c < '0' or c in string.punctuation:
+                c = '_'
+            label += c
+            addr += 1
+            sz += 1
+        if sz > 0:
+            self.model.AS.set_flags(self.cur_addr(), sz, self.model.AS.STR, self.model.AS.DATA_CONT)
+            self.model.AS.make_unique_label(self.cur_addr(), label)
+            self.update_model()
+
+
     def handle_edit_key(self, key):
         if key in ACTION_MAP:
             return ACTION_MAP[key](self)
@@ -400,32 +428,6 @@ class DisasmViewer(editor.EditorExt):
                 if sz > 4: sz = 1
                 self.model.AS.set_flags(addr, sz, self.model.AS.DATA, self.model.AS.DATA_CONT)
             self.update_model()
-        elif key == b"a":
-            addr = self.cur_addr()
-            fl = self.model.AS.get_flags(addr)
-            if not self.expect_flags(fl, (self.model.AS.DATA, self.model.AS.UNK)):
-                return
-            sz = 0
-            label = "s_"
-            while True:
-                b = self.model.AS.get_byte(addr)
-                fl = self.model.AS.get_flags(addr)
-                if not (0x20 <= b <= 0x7e or b in (0x0a, 0x0d)):
-                    if b == 0:
-                        sz += 1
-                    break
-                if fl not in (self.model.AS.UNK, self.model.AS.DATA, self.model.AS.DATA_CONT):
-                    break
-                c = chr(b)
-                if c < '0' or c in string.punctuation:
-                    c = '_'
-                label += c
-                addr += 1
-                sz += 1
-            if sz > 0:
-                self.model.AS.set_flags(self.cur_addr(), sz, self.model.AS.STR, self.model.AS.DATA_CONT)
-                self.model.AS.make_unique_label(self.cur_addr(), label)
-                self.update_model()
         elif key == b"f":
             addr = self.cur_addr()
             fl = self.model.AS.get_flags(addr)
@@ -697,6 +699,7 @@ class DisasmViewer(editor.EditorExt):
 
 ACTION_MAP = {
     b"g": DisasmViewer.action_goto,
+    b"a": DisasmViewer.action_make_ascii,
 }
 
 
