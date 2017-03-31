@@ -30,11 +30,16 @@ class DPreferences(Dialog):
 
 def handle(app):
     d = DPreferences()
-    d.set_listing(app.cpu_plugin.mnem_type)
+    if hasattr(app.cpu_plugin, "mnem_type"):
+        d.set_listing(app.cpu_plugin.mnem_type)
+
     res = d.result()
     if res == ACTION_CANCEL:
         app.main_screen.e.redraw()
         return
-    app.cpu_plugin.mnem_type = res["listing"]
-    app.cpu_plugin.config()
+
+    if hasattr(app.cpu_plugin, "mnem_type"):
+        app.cpu_plugin.mnem_type = res["listing"]
+        app.cpu_plugin.config()
+
     app.main_screen.e.update_model()
