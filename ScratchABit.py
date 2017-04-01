@@ -705,7 +705,7 @@ ACTION_MAP = {
 
 CPU_PLUGIN = None
 ENTRYPOINTS = []
-show_bytes = 0
+show_bytes = 4
 
 def filter_config_line(l):
     l = re.sub(r"#.*$", "", l)
