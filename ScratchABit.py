@@ -50,7 +50,14 @@ MENU_ADD_TO_FUNC = 2002
 
 
 class AppClass:
-    pass
+
+    def set_show_bytes(self, show_bytes):
+        self.show_bytes = show_bytes
+        sz = 8 + 1
+        if APP.show_bytes:
+            sz += show_bytes * 2 + 1
+        engine.DisasmObj.LEADER_SIZE = sz
+
 
 APP = AppClass()
 
@@ -80,7 +87,7 @@ class DisasmViewer(editor.EditorExt):
         self.top_line = sys.maxsize
 
     def show_line(self, l, i):
-        global show_bytes
+        show_bytes = APP.show_bytes
         res = l
         if not isinstance(l, str):
             res = "%08x " % l.ea
@@ -705,7 +712,7 @@ ACTION_MAP = {
 
 CPU_PLUGIN = None
 ENTRYPOINTS = []
-show_bytes = 4
+APP.show_bytes = 4
 
 def filter_config_line(l):
     l = re.sub(r"#.*$", "", l)
@@ -786,7 +793,6 @@ def load_target_file(loader, fname):
 
 def parse_disasm_def(fname):
     global CPU_PLUGIN
-    global show_bytes
     with open(fname) as f:
         for l in f:
             l = filter_config_line(l)
@@ -828,7 +834,7 @@ def parse_disasm_def(fname):
                 print("Loading CPU plugin %s" % (args[1]))
             elif l.startswith("show bytes "):
                 args = l.split()
-                show_bytes = int(args[2])
+                APP.show_bytes = int(args[2])
             elif l.startswith("area "):
                 args = l.split()
                 assert len(args) == 4
@@ -969,9 +975,8 @@ if __name__ == "__main__":
     APP.is_ui = False
     engine.ADDRESS_SPACE.is_loading = True
 
-    engine.DisasmObj.LEADER_SIZE = 8 + 1
-    if show_bytes:
-        engine.DisasmObj.LEADER_SIZE += show_bytes * 2 + 1
+    # Calc various offset based on show_bytes value
+    APP.set_show_bytes(APP.show_bytes)
 
     # Strip suffix if any from def filename
     project_dir = project_name + ".scratchabit"
