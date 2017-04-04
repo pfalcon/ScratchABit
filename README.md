@@ -118,6 +118,22 @@ available, writing a new plugin is easy. To let users test-drive
 ScratchABit, a very simple (!) X86 processor plugin is included in the
 distribution, using Pymsasid disassembler under the hood.
 
+> Q: Debugger?
+
+A: ScratchABit is dedicated to static analysis and easy support for
+new CPU architectures (just code up an new CPU plugin in Python - you
+can get initial results in few hours). Dynamic analysis wasn't conceived
+to be a core feature and there're no immediate plans to implement it.
+Patches are welcome though.
+
+> Q: Decompiler?
+
+A: There is a related project, called
+[ScratchABlock](https://github.com/pfalcon/ScratchABlock) for deep
+program analysis, transformation and decompilation. It's expected
+that as ScratchABlock matures, some of its functionality will be
+available within ScratchABit (perhaps via plugins).
+
 > Q: I'm not on Linux, how can I run ScratchABit?
 
 A: Install Linux in an emulator/VM on your system and rejoice.
