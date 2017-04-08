@@ -255,16 +255,17 @@ def load_sections(aspace, elffile):
                     sec, sec_start = sec_map[sym["st_shndx"]]
 
                 symname = str(sym.name, "utf-8")
-                aspace.make_unique_label(sym["st_value"] + sec_start, symname)
+                addr = sym["st_value"] + sec_start
+                aspace.make_unique_label(addr, symname)
 
                 if sym["st_info"]["type"] == "STT_FUNC":
-                    aspace.analisys_stack_push(sym["st_value"] + sec_start, idaapi.fl_CALL)
+                    aspace.analisys_stack_push(addr, idaapi.fl_CALL)
                     if sym["st_size"]:
-                        aspace.make_func(sym["st_value"] + sec_start, sym["st_value"] + sec_start + sym["st_size"])
+                        aspace.make_func(addr, addr + sym["st_size"])
                     else:
-                        aspace.make_func(sym["st_value"] + sec_start, None)
+                        aspace.make_func(addr, None)
                 if sym["st_info"]["type"] == "STT_OBJECT":
-                    aspace.make_data_array(sym["st_value"] + sec_start, 1, sym["st_size"])
+                    aspace.make_data_array(addr, 1, sym["st_size"])
 
 
     # Process relocations - using relocations allows to tag various data types
