@@ -25,7 +25,12 @@ class TextSaveModel:
 
 def write_func_stream(APP, func, stream, feedback_obj=None, comments=True):
     model = TextSaveModel(stream, feedback_obj, comments=comments)
+    check_entry = True
     for start, end in func.get_ranges():
+        if check_entry:
+            if start != func.start:
+                stream.write("; Entry point: %s\n" % APP.aspace.get_label(func.start))
+            check_entry = False
         while start < end:
             start = engine.render_from(model, start, 1)
 
