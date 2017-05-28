@@ -12,7 +12,7 @@ class TextSaveModel:
         self.cnt = 0
         self.comments = comments
 
-    def add_line(self, addr, line):
+    def add_object(self, addr, line):
         txt = line.render()
         if not self.comments and ";" in txt:
             txt = txt.rsplit(";", 1)[0].rstrip()

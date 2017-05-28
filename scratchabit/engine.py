@@ -957,7 +957,7 @@ class Model:
     def lines(self):
         return self._lines
 
-    def add_line(self, addr, line):
+    def add_object(self, addr, line):
         if addr != self._last_addr:
             self._last_addr = addr
             self._subcnt = 0
@@ -1275,7 +1275,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             i = offset
             start = False
         if i == 0:
-            model.add_line(a[START], AreaWrapper(a[START], "; Start of 0x%x area (%s)" % (a[START], a[PROPS].get("name", "noname"))))
+            model.add_object(a[START], AreaWrapper(a[START], "; Start of 0x%x area (%s)" % (a[START], a[PROPS].get("name", "noname"))))
         bytes = a[BYTES]
         flags = a[FLAGS]
         areasize = len(bytes)
@@ -1290,16 +1290,16 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             props = ADDRESS_SPACE.get_addr_prop_dict(addr)
             func = props.get("fun_s")
             if func:
-                model.add_line(addr, FunctionWrapper(addr, "; Start of function '%s'" % ADDRESS_SPACE.get_label(func.start)))
+                model.add_object(addr, FunctionWrapper(addr, "; Start of function '%s'" % ADDRESS_SPACE.get_label(func.start)))
 
             xrefs = props.get("xrefs")
             if xrefs:
                 for from_addr in sorted(xrefs.keys()):
-                    model.add_line(addr, Xref(addr, from_addr, xrefs[from_addr]))
+                    model.add_object(addr, Xref(addr, from_addr, xrefs[from_addr]))
 
             label = props.get("label")
             if label:
-                model.add_line(addr, Label(addr))
+                model.add_object(addr, Label(addr))
 
             f = flags[i] & 0x7f
             if f == AddressSpace.UNK:
@@ -1350,20 +1350,20 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
                 comm_indent = " " * (out.content_len() + len(out.indent) + 2)
                 out.comment = "  ; " + comm.split("\n", 1)[0]
 
-            model.add_line(addr, out)
+            model.add_object(addr, out)
             #sys.stdout.write(out + "\n")
 
             if comm:
                 for comm_l in comm.split("\n")[1:]:
                     comm_obj = Literal(addr, "; " + comm_l)
                     comm_obj.indent = comm_indent
-                    model.add_line(addr, comm_obj)
+                    model.add_object(addr, comm_obj)
 
             next_addr = addr + sz
             next_props = ADDRESS_SPACE.get_addr_prop_dict(next_addr)
             func_end = next_props.get("fun_e")
             if func_end:
-                model.add_line(addr, FunctionWrapper(addr, "; End of function '%s' (%s)" % (
+                model.add_object(addr, FunctionWrapper(addr, "; End of function '%s' (%s)" % (
                     ADDRESS_SPACE.get_label(func_end.start), func_end.get_end_method()
                 )))
 
@@ -1371,7 +1371,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
             if not num_lines:
                 return next_addr
 
-        model.add_line(a[END], AreaWrapper(a[END], "; End of 0x%x area (%s)" % (a[START], a[PROPS].get("name", "noname"))))
+        model.add_object(a[END], AreaWrapper(a[END], "; End of 0x%x area (%s)" % (a[START], a[PROPS].get("name", "noname"))))
 
 
 def flag2char(f):

@@ -651,8 +651,8 @@ class DisasmViewer(editor.EditorExt):
                     self.this_addr = this_addr
                     self.this_subno = this_subno
                     self.cnt = 0
-                def add_line(self, addr, line):
-                    super().add_line(addr, line)
+                def add_object(self, addr, line):
+                    super().add_object(addr, line)
                     # Skip virtual lines before the line from which we started
                     if addr == self.this_addr and line.subno < self.this_subno:
                         return
