@@ -5,11 +5,13 @@ from . import engine
 
 
 class TextSaveModel:
+
     def __init__(self, f, ctrl=None, comments=True):
         self.f = f
         self.ctrl = ctrl
         self.cnt = 0
         self.comments = comments
+
     def add_line(self, addr, line):
         txt = line.render()
         if not self.comments and ";" in txt:
