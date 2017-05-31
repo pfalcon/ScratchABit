@@ -1,7 +1,10 @@
+import re
+
 from picotui.widgets import *
 from picotui import dialogs
 
 from . import engine
+from idaapi import o_mem, o_near, o_imm
 
 
 class TextSaveModel:
@@ -19,6 +22,57 @@ class TextSaveModel:
             if not txt.strip():
                 return
         line = ("%08x " % addr) + line.indent + txt + "\n"
+        self.f.write(line)
+        if self.ctrl and self.cnt % 256 == 0:
+            self.ctrl.show_status("Writing: 0x%x" % addr)
+        self.cnt += 1
+
+
+class HTMLSaveModel:
+
+    def __init__(self, f, ctrl=None, comments=True):
+        self.f = f
+        self.ctrl = ctrl
+        self.cnt = 0
+        self.comments = comments
+        self.aspace = None
+
+    def add_object(self, addr, obj):
+        addr_part = "<a name=%08x></a><a href=#%08x>%08x</a> " % (addr, addr, addr)
+
+        if isinstance(obj, engine.Label):
+            lab = self.aspace.get_label(obj.ea)
+            txt = "<a name=%s></a><a href=#%s>%s</a>:" % (lab, lab, lab)
+        elif isinstance(obj, engine.Xref):
+            txt = obj.render()
+            m = re.match(r"(.+; xref: . )(.+)", txt)
+            txt = m.group(1) + "<a href=#%08x>%s</a>" % (obj.from_addr, m.group(2))
+        elif isinstance(obj, engine.Instruction):
+            txt = obj.render()
+            out = ""
+            prev_e = 0
+            e = 0
+            for i in range(len(obj.arg_pos)):
+                s = obj.arg_pos[i][0]
+                e = obj.arg_pos[i][1]
+                if s == e == 0:
+                    continue
+                out += txt[prev_e:s]
+
+                arg = obj[i]
+                subtype = self.aspace.get_arg_prop(obj.ea, i, "subtype")
+                if arg.type in (o_mem, o_near) or (arg.type == o_imm and subtype == engine.IMM_ADDR):
+                    out += "<a href=#%08x>%s</a>" % (arg.get_addr(), txt[s:e])
+                else:
+                    out += txt[s:e]
+                prev_e = e
+
+            out += txt[prev_e:]
+            txt = out #+ " -- " + str(obj.arg_pos)
+        else:
+            txt = obj.render()
+
+        line = addr_part + obj.indent + txt + "\n"
         self.f.write(line)
         if self.ctrl and self.cnt % 256 == 0:
             self.ctrl.show_status("Writing: 0x%x" % addr)
