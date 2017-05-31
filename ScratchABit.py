@@ -47,6 +47,7 @@ HEIGHT = 21
 MENU_PREFS = 2000
 MENU_PLUGIN = 2001
 MENU_ADD_TO_FUNC = 2002
+MENU_WRITE_ALL_HTML = 2003
 
 
 class AppClass:
@@ -578,6 +579,15 @@ class DisasmViewer(editor.EditorExt):
             with open(out_fname, "w") as f:
                 engine.render_partial(actions.TextSaveModel(f, self), 0, 0, 10000000)
             self.show_status("Disassembly listing written: " + out_fname)
+        elif key == MENU_WRITE_ALL_HTML:
+            out_fname = "out.html"
+            with open(out_fname, "w") as f:
+                f.write("<pre>\n")
+                m = actions.HTMLSaveModel(f, self)
+                m.aspace = self.model.AS
+                engine.render_partial(m, 0, 0, 10000000)
+                f.write("</pre>\n")
+            self.show_status("Disassembly HTML listing written: " + out_fname)
         elif key == b"\x17":  # Ctrl+W
             outfile = actions.write_func_by_addr(APP, self.cur_addr(), feedback_obj=self)
             if outfile:
@@ -852,7 +862,9 @@ class MainScreen:
         self.e = DisasmViewer(1, 2, self.screen_size[0] - 2, self.screen_size[1] - 4)
 
         menu_file = WMenuBox([
-            ("Save (Shift+s)", b"S"), ("Write disasm (Shift+w)", b"W"),
+            ("Save (Shift+s)", b"S"),
+            ("Write disasm (Shift+w)", b"W"),
+            ("Write disasm in HTML", MENU_WRITE_ALL_HTML),
             ("Write function (Ctrl+w)", b"\x17"),
             ("Quit (q)", b"q")
         ])
