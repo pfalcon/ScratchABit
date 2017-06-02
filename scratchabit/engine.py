@@ -658,69 +658,69 @@ class AddressSpace:
         stream.write("header:\n")
         stream.write(" version: 1.0\n")
         for addr, props in sorted(self.addr_map.items()):
-                    # If entry has just fun_e data, skip it. As fun_e is set
-                    # on an address past the last byte of func, this address
-                    # also may not belong to any section, so skipping it
-                    # to start with is helpful.
-                    if len(props) == 1 and "fun_e" in props:
-                        continue
+            # If entry has just fun_e data, skip it. As fun_e is set
+            # on an address past the last byte of func, this address
+            # also may not belong to any section, so skipping it
+            # to start with is helpful.
+            if len(props) == 1 and "fun_e" in props:
+                continue
 
-                    if addr > area_end:
-                        stream.close()
-                        area_i += 1
-                        while addr > areas[area_i][END]:
-                            area_i += 1
-                        assert addr >= areas[area_i][START]
-                        stream = open(prefix + ".%08x" % areas[area_i][START], "w")
-                        #stream.write("addr=%x area_end=%x\n" % (addr, area_end))
-                        area_end = areas[area_i][END]
-                        stream.write("header:\n")
-                        stream.write(" version: 1.0\n")
-                    stream.write("0x%08x:\n" % addr)
-                    fl = self.get_flags(addr)
-                    stream.write(" f: %s %02x\n" % (flag2char(fl), fl))
-                    label = props.get("label")
-                    arg_props = props.get("args")
-                    comm = props.get("comm")
-                    xrefs = props.get("xrefs")
-                    func = props.get("fun_s")
-                    if label is not None:
-                        if label == addr:
-                            stream.write(" l:\n")
-                        else:
-                            stream.write(" l: %s\n" % label)
-                    if arg_props is not None:
-                        arg_props_header = False
-                        for arg_no, data in sorted(arg_props.items()):
-                            data = {k: v for k, v in data.items() if v is not None}
-                            if data:
-                                if not arg_props_header:
-                                    stream.write(" args:\n")
-                                    arg_props_header = True
-                                stream.write("  %s: %r\n" % (arg_no, data))
-                            #for k, v in sorted(data.items()):
-                            #    stream.write("   %s: %s\n" % (k, v))
-                    if comm is not None:
-                        stream.write(" cmnt: %r\n" % comm)
+            if addr > area_end:
+                stream.close()
+                area_i += 1
+                while addr > areas[area_i][END]:
+                    area_i += 1
+                assert addr >= areas[area_i][START]
+                stream = open(prefix + ".%08x" % areas[area_i][START], "w")
+                #stream.write("addr=%x area_end=%x\n" % (addr, area_end))
+                area_end = areas[area_i][END]
+                stream.write("header:\n")
+                stream.write(" version: 1.0\n")
+            stream.write("0x%08x:\n" % addr)
+            fl = self.get_flags(addr)
+            stream.write(" f: %s %02x\n" % (flag2char(fl), fl))
+            label = props.get("label")
+            arg_props = props.get("args")
+            comm = props.get("comm")
+            xrefs = props.get("xrefs")
+            func = props.get("fun_s")
+            if label is not None:
+                if label == addr:
+                    stream.write(" l:\n")
+                else:
+                    stream.write(" l: %s\n" % label)
+            if arg_props is not None:
+                arg_props_header = False
+                for arg_no, data in sorted(arg_props.items()):
+                    data = {k: v for k, v in data.items() if v is not None}
+                    if data:
+                        if not arg_props_header:
+                            stream.write(" args:\n")
+                            arg_props_header = True
+                        stream.write("  %s: %r\n" % (arg_no, data))
+                    #for k, v in sorted(data.items()):
+                    #    stream.write("   %s: %s\n" % (k, v))
+            if comm is not None:
+                stream.write(" cmnt: %r\n" % comm)
 
-                    if func is not None:
-                        if func.end is not None:
-                            stream.write(" fn_end: 0x%08x\n" % func.end)
-                        else:
-                            stream.write(" fn_end: '?'\n")
-                        stream.write(" fn_ranges: [")
-                        first = True
-                        for r in func.get_ranges():
-                            if not first:
-                                stream.write(", ")
-                            stream.write("[0x%08x,0x%08x]" % r)
-                            first = False
-                        stream.write("]\n")
+            if func is not None:
+                if func.end is not None:
+                    stream.write(" fn_end: 0x%08x\n" % func.end)
+                else:
+                    stream.write(" fn_end: '?'\n")
+                stream.write(" fn_ranges: [")
+                first = True
+                for r in func.get_ranges():
+                    if not first:
+                        stream.write(", ")
+                    stream.write("[0x%08x,0x%08x]" % r)
+                    first = False
+                stream.write("]\n")
 
-                    if xrefs:
-                        stream.write(" x:\n" % xrefs)
-                        for from_addr in sorted(xrefs.keys()):
-                            stream.write(" - 0x%08x: %s\n" % (from_addr, xrefs[from_addr]))
+            if xrefs:
+                stream.write(" x:\n" % xrefs)
+                for from_addr in sorted(xrefs.keys()):
+                    stream.write(" - 0x%08x: %s\n" % (from_addr, xrefs[from_addr]))
 
     def load_addr_props(self, stream):
         l = stream.readline()
