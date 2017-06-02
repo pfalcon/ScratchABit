@@ -356,6 +356,22 @@ def is_offset(ea, op_no):
 # End of Instruction operands API
 #
 
+#
+# Comment API
+# Note that repeating comments are not supported, so the "repeating" argument
+# is ignored
+#
+
+def set_cmt(ea, cmt, repeating):
+    ADDRESS_SPACE.set_comment(ea, cmt)
+
+def get_cmt(ea, repeating):
+    return ADDRESS_SPACE.get_comment(ea)
+
+#
+# End of Comment API
+#
+
 
 
 # Interfacing
