@@ -1,4 +1,4 @@
-# Supports operations only on non-overlapping, adjucent or fully contained ranges
+# Supports operations only on non-overlapping, adjacent or fully contained ranges
 # i.e. unioning (10, 30) and (20, 40) may not work
 class RangeSet:
 

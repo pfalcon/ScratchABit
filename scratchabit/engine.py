@@ -96,7 +96,7 @@ class AddressSpace:
 
     def __init__(self):
         self.area_list = []
-        # List of subareas and bianry search index for it
+        # List of subareas and binary search index for it
         self.subarea_list = []
         self.subarea_search = []
         # Map from referenced addresses to their properties. Among them:

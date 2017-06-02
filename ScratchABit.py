@@ -262,7 +262,7 @@ class DisasmViewer(editor.EditorExt):
         v = Viewer(L + 1, T + 1, W - 2, H - 2)
         import traceback
         v.set_lines([
-            "Exception occured processing the command. Press Esc to continue.",
+            "Exception occurred processing the command. Press Esc to continue.",
             "Recommended action is saving database, quitting and comparing",
             "database files with backup copies for possibility of data loss",
             "or corruption. The exception was also logged to scratchabit.log.",
