@@ -278,6 +278,9 @@ def out_name_expr(op, ea, offset):
 def out_tagon(tag):
     pass
 
+def out_tagoff(tag):
+    pass
+
 def out_register(reg):
     OutLine(reg)
 
