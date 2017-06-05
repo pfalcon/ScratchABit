@@ -330,10 +330,13 @@ def ua_add_dref(opoff, ea, access):
     pass
 
 Q_jumps = 1
+Q_noName = 2
 
 def QueueMark(type, ea):
     if type == Q_jumps:
         ADDRESS_SPACE.add_issue(ea, "Indirect jump")
+    elif type == Q_noName:
+        ADDRESS_SPACE.add_issue(ea, "Ref to address outside address space")
     else:
         assert 0
 
