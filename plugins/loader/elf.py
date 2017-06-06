@@ -82,8 +82,22 @@ def sh_flags_to_access(x):
     return s
 
 
+def get_code_addr_mask(elffile):
+    code_addr_mask = ~0
+    if elffile["e_machine"] == "EM_ARM":
+        # For ARM code, LSB bit being set means Thumb code,
+        # actual instruction starts at the even address.
+        # TODO FIXME: as the name suggests, this mask should
+        # be applied only to addresses belonging to code
+        # segments!
+        code_addr_mask = ~1
+    return code_addr_mask
+
+
 def load_segments(aspace, elffile):
     log.debug("Loading ELF segments")
+
+    code_addr_mask = get_code_addr_mask(elffile)
 
     wordsz = elffile.elfclass // 8
 
@@ -108,7 +122,7 @@ def load_segments(aspace, elffile):
                 #print(s.name, hex(s["st_value"]), s.entry)
                 symtab[i] = s
                 if s["st_shndx"] != "SHN_UNDEF":
-                    aspace.make_unique_label(s["st_value"], str(s.name, "utf-8"))
+                    aspace.make_unique_label(s["st_value"] & code_addr_mask, str(s.name, "utf-8"))
 
                     if s["st_info"]["type"] == "STT_FUNC":
                         aspace.analisys_stack_push(s["st_value"], idaapi.fl_CALL)
@@ -209,6 +223,7 @@ def load_sections(aspace, elffile):
     log.info("Processing ELF sections")
     wordsz = elffile.elfclass // 8
     is_exe = elffile["e_type"] == "ET_EXEC"
+    code_addr_mask = get_code_addr_mask(elffile)
     # Use pretty weird address to help distinuish addresses from literal numbers
     addr_cnt = 0x55ab0000
     sec_map = {}
@@ -255,7 +270,7 @@ def load_sections(aspace, elffile):
                     sec, sec_start = sec_map[sym["st_shndx"]]
 
                 symname = str(sym.name, "utf-8")
-                addr = sym["st_value"] + sec_start
+                addr = (sym["st_value"] + sec_start) & code_addr_mask
                 aspace.make_unique_label(addr, symname)
 
                 if sym["st_info"]["type"] == "STT_FUNC":
