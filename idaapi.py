@@ -19,6 +19,7 @@ from io import StringIO
 import logging as log
 
 from scratchabit import defs
+from scratchabit.defs import InvalidAddrException
 
 
 # Data types
@@ -268,7 +269,11 @@ def out_name_expr(op, ea, offset):
     global u_line
 #    print(op, ea, offset)
     assert offset == BADADDR
-    label = ADDRESS_SPACE.get_label(ea)
+    try:
+        label = ADDRESS_SPACE.get_label(ea)
+    except InvalidAddrException:
+        log.warn("out_name_expr: Error getting label for 0x%x", ea)
+        return False
     if label:
         u_line.write(label)
     else:
