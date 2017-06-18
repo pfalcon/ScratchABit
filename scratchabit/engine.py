@@ -869,7 +869,11 @@ def analyze(callback=lambda cnt:None):
     while limit:
         if analisys_stack_branches:
             ea = analisys_stack_branches.pop()
-            fl = ADDRESS_SPACE.get_flags(ea, 0xff)
+            try:
+                fl = ADDRESS_SPACE.get_flags(ea, 0xff)
+            except InvalidAddrException:
+                log.warn("Branch outside address space detected: 0x%x" % ea)
+                continue
 
             if fl == ADDRESS_SPACE.CODE | ADDRESS_SPACE.FUNC:
                 fun = ADDRESS_SPACE.get_func_start(ea)
