@@ -1,4 +1,4 @@
-# IDAPython ARM Thumb processor module
+# IDAPython ARM Thumb processor module (Thumb2 not supported)
 #
 # Copyright (C) 2014 Fredrik Ahlberg
 # Copyright (C) 2017 Damien P. George
