@@ -64,10 +64,10 @@ includes a simple x86_64 raw binary code, and the corresponding .def file:
 
     python3 ScratchABit.py example.def
 
-Press F1 if in doubt what to do next (ScratchABit works similarly to other
-interactive dissamblers; some previous experience or background reading may
-be helpful). Press F9 to access menus (mouse works too in XTerm-compatible
-terminals).
+Press F9 to access menus (mouse works too in XTerm-compatible terminals).
+Press F1 to get help about key bindings (most actions are also accessible
+via menu). The workflow of the ScratchABit is similar to other interactive
+dissamblers; some previous experience or background reading may be helpful).
 
 Using Plugins
 -------------
