@@ -52,9 +52,9 @@ If you cloned code without `--recursive`, run `git submodule update --init`.
 
 If you want to disassemble a file in self-describing executable format
 (like ELF), just pass it as an argument to `ScratchABit.py`. The repository
-includes `example-elf` (x86 32bit) for quick start:
+includes `example-x86_32.elf` (x86 32bit) for a quick start:
 
-    python3 ScratchABit.py example-elf
+    python3 ScratchABit.py example-x86_32.elf
 
 Alternatively, if you want to disassemble a raw binary file, you need
 to create a .def (definition) file, to specify what memory areas are
@@ -62,7 +62,7 @@ defined for the code, at which address to load binary file, etc. (Note:
 a .def file may be useful for .elf and similar files too.) The repository
 includes a simple x86_64 raw binary code, and the corresponding .def file:
 
-    python3 ScratchABit.py example.def
+    python3 ScratchABit.py example-x86_64.def
 
 Press F9 to access menus (mouse works too in XTerm-compatible terminals).
 Press F1 to get help about key bindings (most actions are also accessible
