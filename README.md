@@ -60,7 +60,9 @@ Alternatively, if you want to disassemble a raw binary file, you need
 to create a .def (definition) file, to specify what memory areas are
 defined for the code, at which address to load binary file, etc. (Note:
 a .def file may be useful for .elf and similar files too.) The repository
-includes a simple x86_64 raw binary code, and the corresponding .def file:
+includes a simple x86_64 raw binary code, and the corresponding
+[example-x86_64.def](example-x86_64.def) file (looks inside for
+description of available options):
 
     python3 ScratchABit.py example-x86_64.def
 
@@ -77,7 +79,8 @@ module path. Alternatively, you can symlink the plugin `.py` file into
 the `plugins/cpu/` subdirectory.
 
 After the plugin is made available, create a new definition file based
-on `example.def` that sets the plugin module name in the `cpu xxx` line.
+on `example-x86_64.def` that sets the plugin module name in the `cpu xxx`
+line.
 
 For a very simple example that uses an external plugin, see this
 [esp8266.def file](https://gist.github.com/projectgus/f898d5798e3e44240796)
