@@ -306,6 +306,10 @@ def get_full_byte(ea):
     return ADDRESS_SPACE.get_byte(ea)
 
 # Extension
+def get_bytes(ea, sz):
+    return ADDRESS_SPACE.get_bytes(ea, sz)
+
+# Extension
 def get_full_val(ea, val_sz):
     return ADDRESS_SPACE.get_data(ea, val_sz)
 
