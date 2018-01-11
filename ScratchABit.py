@@ -841,6 +841,8 @@ def parse_disasm_def(fname):
             elif l.startswith("cpu "):
                 args = l.split()
                 CPU_PLUGIN = __import__(args[1])
+                if hasattr(CPU_PLUGIN, "arch_id"):
+                    engine.set_arch_id(CPU_PLUGIN.arch_id)
                 print("Loading CPU plugin %s" % (args[1]))
             elif l.startswith("show bytes "):
                 args = l.split()
@@ -972,6 +974,8 @@ if __name__ == "__main__":
         if arch_id not in default_plugins.cpus:
             print("Error: no plugin for CPU '%s' as detected for file '%s'" % (arch_id, args.file))
             sys.exit(1)
+
+        engine.set_arch_id(arch_id)
         load_target_file(loader, args.file)
         CPU_PLUGIN = __import__(default_plugins.cpus[arch_id])
         project_name = args.file
