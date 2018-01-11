@@ -1001,6 +1001,7 @@ if __name__ == "__main__":
         saveload.load_state(project_dir)
     else:
         for label, addr in ENTRYPOINTS:
+            addr &= engine.code_addr_mask
             if engine.ADDRESS_SPACE.is_exec(addr):
                 engine.add_entrypoint(addr)
             engine.ADDRESS_SPACE.make_unique_label(addr, label)
