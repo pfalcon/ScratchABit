@@ -46,6 +46,7 @@ class Processor(processor_t):
 
     def __init__(self, md):
         super().__init__()
+        md.detail = True
         self.md = md
 
     # TODO: factor out
