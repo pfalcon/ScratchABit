@@ -29,7 +29,7 @@ dt_dword = "dt_dword"
 DATA_SIZE = {dt_byte: 1, dt_word: 2, dt_dword: 4}
 
 # IDA standard 6
-UA_MAXOP = 6
+UA_MAXOP = 16
 
 # Operand types
 o_void = "-"
