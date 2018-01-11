@@ -37,6 +37,14 @@ FLAGS = 4
 from .defs import *
 
 
+arch_id = None
+# Some architectures, e.g. ARM uses lowest bit(s) of code address to
+# encode additional information (e.g. Thumb mode for ARM). To get
+# real instruction address from such an encoded address, we nee to
+# AND it with this value.
+code_addr_mask = -1
+
+
 def str_area(area):
     if not area:
         return "Area(None)"
@@ -835,6 +843,13 @@ def set_processor(p):
     global _processor
     _processor = p
     idaapi.set_processor(p)
+
+
+def set_arch_id(id):
+    global arch_id, code_addr_mask
+    arch_id = id
+    if arch_id == "arm_32_thumb":
+        code_addr_mask = -2
 
 
 analisys_stack_calls = []
