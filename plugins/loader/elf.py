@@ -48,8 +48,19 @@ def detect(fname):
 
     #print(elffile.header)
     #print(elffile["e_ident"]["EI_CLASS"])
-    bitness = 32 if elffile["e_ident"]["EI_CLASS"] == "ELFCLASS32" else 64
-    return "%s_%s" % (MACH_MAP[elffile["e_machine"]], bitness)
+    if elffile["e_ident"]["EI_CLASS"] == "ELFCLASS32":
+        variant = 32
+    elif elffile["e_ident"]["EI_CLASS"] == "ELFCLASS64":
+        variant = 64
+    else:
+        assert 0, "Unknown ELF bitness: %s" % elffile["e_ident"]["EI_CLASS"]
+
+    if elffile["e_machine"] == "EM_ARM" and variant == 32:
+        if elffile["e_entry"] & 1:
+            variant = "32_thumb"
+        else:
+            variant = "32_arm"
+    return "%s_%s" % (MACH_MAP[elffile["e_machine"]], variant)
 
 
 # PLT is Procedure Linkage Table, part of (read-only) code
