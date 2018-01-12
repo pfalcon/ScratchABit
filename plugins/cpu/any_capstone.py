@@ -77,6 +77,9 @@ class Processor(processor_t):
         if 1: #ARM
             if inst.mnemonic == "bl":
                 groups.add(CS_GRP_CALL)
+            elif inst.mnemonic.startswith(("ldmia", "pop")) and "pc" in inst.op_str:
+                # LDMIA aka POP on ARM can be used for return
+                groups.add(CS_GRP_RET)
         return groups
 
 
