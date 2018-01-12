@@ -75,7 +75,7 @@ class Processor(processor_t):
         # https://github.com/aquynh/capstone/issues/1072
         groups = set(inst.groups)
         if 1: #ARM
-            if inst.mnemonic == "bl":
+            if inst.mnemonic in ("bl", "blx"):
                 groups.add(CS_GRP_CALL)
             elif inst.mnemonic.startswith(("ldmia", "pop")) and "pc" in inst.op_str:
                 # LDMIA aka POP on ARM can be used for return
