@@ -5,7 +5,8 @@ ScratchABit is an interactive incremental disassembler with data/control
 flow analysis capabilities. ScratchABit is dedicated to the efforts of
 the OpenSource reverse engineering community (reverse engineering to
 produce OpenSource drivers/firmware for hardware not properly supported
-by vendors).
+by vendors, for hardware and software interoperability, for security
+research).
 
 ScratchABit supports well-known in the community IDAPython API to write
 disassembly/extension modules.
