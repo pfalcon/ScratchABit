@@ -1359,7 +1359,8 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
                 out = Literal(addr, "; UNEXPECTED value: %02x flags: %02x" % (bytes[i], f))
                 sz = 1
                 i += 1
-                assert 0, "@%08x flags=%x" % (addr, f)
+                # Uncomment below for fail fast-and-soon
+                #assert 0, "@%08x flags=%x" % (addr, f)
 
             comm = props.get("comm")
             if comm:
