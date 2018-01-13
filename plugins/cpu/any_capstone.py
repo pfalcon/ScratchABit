@@ -18,6 +18,10 @@ from capstone import *
 from idaapi import *
 
 
+# Custom group to extend Capstone's
+CS_GRP_JUMP_UNCOND = -100
+
+
 # Split operand string by commas, taking into account that operands may
 # contain commas too.
 # This works around Capstone's inability to render individual instruction
@@ -77,9 +81,14 @@ class Processor(processor_t):
         if 1: #ARM
             if inst.mnemonic in ("bl", "blx"):
                 groups.add(CS_GRP_CALL)
+            elif inst.mnemonic in ("b", "bx"):
+                groups.add(CS_GRP_JUMP_UNCOND)
             elif inst.mnemonic.startswith(("ldmia", "pop")) and "pc" in inst.op_str:
                 # LDMIA aka POP on ARM can be used for return
                 groups.add(CS_GRP_RET)
+        if 2: # x86
+            if inst.mnemonic == "jmp":
+                groups.add(CS_GRP_JUMP_UNCOND)
         return groups
 
 
@@ -135,6 +144,7 @@ class Processor(processor_t):
     def emu(self):
         inst = self.cmd.inst
         is_jump = CS_GRP_JUMP in self.cmd.inst_groups
+        is_jump_uncond = CS_GRP_JUMP_UNCOND in self.cmd.inst_groups
         is_call = CS_GRP_CALL in self.cmd.inst_groups
         is_ret = CS_GRP_RET in self.cmd.inst_groups or CS_GRP_IRET in self.cmd.inst_groups
 
@@ -148,7 +158,7 @@ class Processor(processor_t):
                 else:
                     ua_add_cref(0, op.addr, fl_JN)
 
-        if inst.mnemonic != "jmp" and not is_ret:
+        if not is_jump_uncond and not is_ret:
             ua_add_cref(0, self.cmd.ea + self.cmd.size, fl_F)
 
         return True
