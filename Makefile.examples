@@ -1,0 +1,35 @@
+# To reproduce builds on Ubuntu 16.04, install following packages:
+# gcc-multilib-arm-linux-gnueabihf
+# gcc-multilib-mips-linux-gnu
+# gcc-multilib-mipsel-linux-gnu
+# gcc-multilib-powerpc-linux-gnu
+# gcc-multilib-powerpc64-linux-gnu
+# gcc-multilib-s390x-linux-gnu
+# gcc-multilib-sparc64-linux-gnu
+
+all: \
+    example-arm_32_arm.elf \
+    example-arm_32_thumb1.elf \
+    example-arm_32_thumb2.elf \
+    example-x86_32.elf \
+    example-x86_64.elf \
+
+CFLAGS = -fno-exceptions -Wl,--build-id=none
+
+example-x86_32.elf: example.c
+	gcc -m32 $(CFLAGS) $^ -o $@
+
+example-x86_64.elf: example.c
+	gcc -m64 $(CFLAGS) $^ -o $@
+
+# Startup code may still be Thumb2, force entry point directly to our main
+example-arm_32_arm.elf: example.c
+	arm-linux-gnueabihf-gcc-5 -marm -march=armv6 -Wl,--entry,main $(CFLAGS) $^ -o $@
+
+# Startup code may still be ARM/Thumb2, force entry point directly to our main
+example-arm_32_thumb1.elf: example.c
+	arm-linux-gnueabihf-gcc-5 -mthumb -march=armv6 -mfloat-abi=soft -Wl,--thumb-entry,main $(CFLAGS) $^ -o $@
+
+# Thumb2 is default
+example-arm_32_thumb2.elf: example.c
+	arm-linux-gnueabihf-gcc-5 $(CFLAGS) $^ -o $@
