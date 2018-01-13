@@ -141,8 +141,14 @@ FAQ
 A: ScratchABit doesn't support any processor architectures on its own,
 it is fully retargettable using IDAPython API plugins. Many plugins are
 available, writing a new plugin is easy. To let users test-drive
-ScratchABit, a very simple (!) X86 processor plugin is included in the
-distribution, using Pymsasid disassembler under the hood.
+ScratchABit, a simple X86 processor plugin is included in the
+distribution, using [Pymsasid](https://github.com/pfalcon/pymsasid3)
+disassembler under the hood.
+
+From version 1.9, [Capstone](http://www.capstone-engine.org/) plugin
+is also included, allowing access to a number of architectures,
+including x86, ARM, MIPS, PowerPC, SPARC, etc. (architecture support
+is enabled gradually based on user testing).
 
 > Q: Debugger?
 
