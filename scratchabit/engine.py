@@ -363,7 +363,10 @@ class AddressSpace:
     # Label API
 
     def get_default_label_prefix(self, ea):
-        fl = self.get_flags(ea)
+        try:
+            fl = self.get_flags(ea)
+        except InvalidAddrException:
+            return "invalid_"
         if fl == self.CODE:
             prefix = "loc_"
         elif fl & self.DATA:
