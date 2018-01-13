@@ -76,7 +76,8 @@ Quick start
 
 If you want to disassemble a file in self-describing executable format
 (like ELF), just pass it as an argument to `ScratchABit.py`. The repository
-includes `example-x86_32.elf` (x86 32bit) for a quick start:
+includes a number of `example-*.elf` files for various architectures for
+a quick start. For example, to try x86 32bit version:
 
     python3 ScratchABit.py example-x86_32.elf
 
