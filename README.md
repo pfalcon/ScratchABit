@@ -37,8 +37,8 @@ facilitate easy reuse and tool writing, and storage in version control
 systems.
 
 
-Quick start
------------
+Installation
+------------
 
 To use ScratchABit, you need Python3 installed and VT100 (minimum) or
 XTerm (recommended) terminal or terminal emulator (any Unix system
@@ -48,7 +48,30 @@ Clone the code using:
 
     git clone --recursive https://github.com/pfalcon/ScratchABit
 
-If you cloned code without `--recursive`, run `git submodule update --init`.
+If you cloned code without `--recursive`, run `git submodule update --init`
+in ScratchABit directory.
+
+ScratchABit now ships with [Capstone Engine](http://www.capstone-engine.org/)
+based CPU plugin(s), which allows access to a number of CPU architectures.
+To use it, a recent Python bindings for Capstone should be installed
+(in the preference to packages shipped by OS distributions, which are often
+outdated). The best way to install it is to use Python
+[virtual environment](https://docs.python.org/3/library/venv.html):
+
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip3 install capstone
+
+Whenever you open a new terminal session to work with ScratchABit,
+run `source .venv/bin/activate` command again to activate the virtual
+environment. An alternative to using venv and activating it every time
+is to install the capstone package system-wide:
+
+    sudo pip3 install --system capstone
+
+
+Quick start
+-----------
 
 If you want to disassemble a file in self-describing executable format
 (like ELF), just pass it as an argument to `ScratchABit.py`. The repository
