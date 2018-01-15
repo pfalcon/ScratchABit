@@ -327,6 +327,9 @@ class AddressSpace:
         for i in range(sz - 1):
             area_byte_flags[off + 1 + i] |= self.CODE_CONT
 
+    def make_alt_code(self, addr):
+        self.update_flags(addr, 0xff, self.ALT_CODE)
+
     # Mark instructions in given range as belonging to function
     def mark_func_bytes(self, addr, sz):
         self.changed = True
