@@ -56,12 +56,18 @@ ScratchABit now ships with [Capstone Engine](http://www.capstone-engine.org/)
 based CPU plugin(s), which allows access to a number of CPU architectures.
 To use it, a recent Python bindings for Capstone should be installed
 (in the preference to packages shipped by OS distributions, which are often
-outdated). The best way to install it is to use Python
-[virtual environment](https://docs.python.org/3/library/venv.html):
+outdated). The easiest way to install it into the Python user packages
+directory:
+
+    pip3 install --no-cache-dir --user capstone
+
+An alternative is to install it to a Python
+[virtual environment](https://docs.python.org/3/library/venv.html) within
+the ScratchABit directory:
 
     python3 -m venv .venv
     source .venv/bin/activate
-    pip3 install capstone
+    pip3 install --no-cache-dir capstone
 
 Whenever you open a new terminal session to work with ScratchABit,
 run `source .venv/bin/activate` command again to activate the virtual
