@@ -93,6 +93,7 @@ class AddressSpace:
     DATA = 0x04
     DATA_CONT = 0x08
     STR = 0x10  # Continuation is DATA_CONT
+    ALT_CODE = 0x20  # Alternative code encoding, e.g. Thumb on ARM, cont. is CODE_CONT
     FILL = 0x40  # Filler/alignment bytes
     FUNC = 0x80  # Can appear with CODE, meaning this instruction belongs to a function
 
@@ -243,7 +244,7 @@ class AddressSpace:
 
     # Binary Data Flags API
 
-    def get_flags(self, addr, mask=0x7f):
+    def get_flags(self, addr, mask=~(FUNC | ALT_CODE)):
         off, area = self.addr2area(addr)
         if area is None:
             raise InvalidAddrException(addr)
@@ -253,7 +254,7 @@ class AddressSpace:
         off, area = self.addr2area(addr)
         flags = area[FLAGS]
         sz = 1
-        if flags[off] & 0x7f == self.CODE:
+        if flags[off] & ~(self.FUNC | self.ALT_CODE) == self.CODE:
             f = self.CODE_CONT
         elif flags[off] in (self.DATA, self.STR):
             f = self.DATA_CONT
@@ -325,7 +326,7 @@ class AddressSpace:
         area_byte_flags = area[FLAGS]
         for i in range(sz):
             fl = area_byte_flags[off + i]
-            assert fl in (self.CODE, self.CODE_CONT)
+            assert fl in (self.CODE, self.CODE | self.ALT_CODE, self.CODE_CONT)
             if fl == self.CODE:
                 area_byte_flags[off + i] |= self.FUNC
 
@@ -888,7 +889,7 @@ def analyze(callback=lambda cnt:None):
         if analisys_stack_branches:
             ea = analisys_stack_branches.pop()
             try:
-                fl = ADDRESS_SPACE.get_flags(ea, 0xff)
+                fl = ADDRESS_SPACE.get_flags(ea, ~ADDRESS_SPACE.ALT_CODE)
             except InvalidAddrException:
                 log.warn("Branch outside address space detected: 0x%x" % ea)
                 continue
@@ -1349,7 +1350,7 @@ def render_partial(model, area_no, offset, num_lines, target_addr=-1):
                     j += 1
                 out = Fill(addr, sz)
                 i += sz
-            elif f == AddressSpace.CODE:
+            elif f & ~AddressSpace.ALT_CODE == AddressSpace.CODE:
                 out = Instruction(addr)
                 _processor.cmd = out
                 sz = _processor.ana()

@@ -293,7 +293,7 @@ class DisasmViewer(editor.EditorExt):
 
 
     def require_non_func(self, fl):
-        if fl & 0x7f != self.model.AS.CODE:
+        if fl & ~(self.model.AS.FUNC | self.model.AS.ALT_CODE) != self.model.AS.CODE:
             self.show_status("Code required")
             return False
         if fl & self.model.AS.FUNC:
@@ -623,12 +623,12 @@ class DisasmViewer(editor.EditorExt):
         elif key == b"\x06":  # Ctrl+F
             # Next non-function
             addr = self.cur_addr()
-            flags = self.model.AS.get_flags(addr, 0xff)
+            flags = self.model.AS.get_flags(addr, ~ADDRESS_SPACE.ALT_CODE)
             if flags == self.model.AS.CODE:
                 # If already on non-func code, skip the current stride of it,
                 # as it indeed go in batches.
                 while True:
-                    flags = self.model.AS.get_flags(addr, 0xff)
+                    flags = self.model.AS.get_flags(addr, ~ADDRESS_SPACE.ALT_CODE)
                     self.show_status("fl=%x" % flags)
                     if flags not in (self.model.AS.CODE, self.model.AS.CODE_CONT):
                         break
@@ -638,7 +638,7 @@ class DisasmViewer(editor.EditorExt):
 
             if addr is not None:
                 while True:
-                    flags = self.model.AS.get_flags(addr, 0xff)
+                    flags = self.model.AS.get_flags(addr, ~ADDRESS_SPACE.ALT_CODE)
                     if flags == self.model.AS.CODE:
                         self.goto_addr(addr, from_addr=self.cur_addr())
                         break

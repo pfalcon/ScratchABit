@@ -109,7 +109,7 @@ def add_code_to_func(APP, addr):
 
     insn_num = 0
     start_addr = addr
-    while AS.get_flags(addr, 0xff) == AS.CODE:
+    while AS.get_flags(addr, ~AS.ALT_CODE) == AS.CODE:
         addr += AS.get_unit_size(addr)
         insn_num += 1
 
