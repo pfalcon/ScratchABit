@@ -93,22 +93,18 @@ def sh_flags_to_access(x):
     return s
 
 
-def get_code_addr_mask(elffile):
-    code_addr_mask = ~0
+def get_thumb_mask(elffile):
     if elffile["e_machine"] == "EM_ARM":
         # For ARM code, LSB bit being set means Thumb code,
         # actual instruction starts at the even address.
-        # TODO FIXME: as the name suggests, this mask should
-        # be applied only to addresses belonging to code
-        # segments!
-        code_addr_mask = ~1
-    return code_addr_mask
+        return 1
+    return 0
 
 
 def load_segments(aspace, elffile):
     log.debug("Loading ELF segments")
 
-    code_addr_mask = get_code_addr_mask(elffile)
+    thumb_mask = get_thumb_mask(elffile)
 
     wordsz = elffile.elfclass // 8
 
@@ -133,13 +129,18 @@ def load_segments(aspace, elffile):
                 #print(s.name, hex(s["st_value"]), s.entry)
                 symtab[i] = s
                 if s["st_shndx"] != "SHN_UNDEF":
-                    aspace.make_unique_label(s["st_value"] & code_addr_mask, str(s.name, "utf-8"))
+                    addr = s["st_value"]
 
                     if s["st_info"]["type"] == "STT_FUNC":
-                        aspace.analisys_stack_push(s["st_value"], idaapi.fl_CALL)
+                        if addr & thumb_mask:
+                            addr &= ~1
+                            aspace.make_alt_code(addr)
+                        aspace.analisys_stack_push(addr, idaapi.fl_CALL)
                     if s["st_info"]["type"] == "STT_OBJECT":
                         # TODO: Set as data of given s["st_size"]
                         pass
+
+                    aspace.make_unique_label(addr, str(s.name, "utf-8"))
 
             rel = relsz = relent = None
             pltrel = pltrelsz = pltenttype = None
@@ -234,7 +235,7 @@ def load_sections(aspace, elffile):
     log.info("Processing ELF sections")
     wordsz = elffile.elfclass // 8
     is_exe = elffile["e_type"] == "ET_EXEC"
-    code_addr_mask = get_code_addr_mask(elffile)
+    thumb_mask = get_thumb_mask(elffile)
     # Use pretty weird address to help distinuish addresses from literal numbers
     addr_cnt = 0x55ab0000
     sec_map = {}
@@ -281,10 +282,12 @@ def load_sections(aspace, elffile):
                     sec, sec_start = sec_map[sym["st_shndx"]]
 
                 symname = str(sym.name, "utf-8")
-                addr = (sym["st_value"] + sec_start) & code_addr_mask
-                aspace.make_unique_label(addr, symname)
+                addr = sym["st_value"] + sec_start
 
                 if sym["st_info"]["type"] == "STT_FUNC":
+                    if addr & thumb_mask:
+                        addr &= ~1
+                        aspace.make_alt_code(addr)
                     aspace.analisys_stack_push(addr, idaapi.fl_CALL)
                     if sym["st_size"]:
                         aspace.make_func(addr, addr + sym["st_size"])
@@ -292,6 +295,8 @@ def load_sections(aspace, elffile):
                         aspace.make_func(addr, None)
                 if sym["st_info"]["type"] == "STT_OBJECT":
                     aspace.make_data_array(addr, 1, sym["st_size"])
+
+                aspace.make_unique_label(addr, symname)
 
 
     # Process relocations - using relocations allows to tag various data types
