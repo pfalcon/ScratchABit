@@ -308,6 +308,14 @@ class AddressSpace:
         for i in range(sz - 1):
             flags[off + i] = rest_fl
 
+    def update_flags(self, addr, and_mask, or_mask):
+        off, area = self.addr2area(addr)
+        if area is None:
+            raise InvalidAddrException(addr)
+        flags = area[FLAGS]
+        flags[off] = (flags[off] & and_mask) | or_mask
+        self.changed = True
+
     def make_undefined(self, addr, sz):
         self.set_flags(addr, sz, self.UNK, self.UNK)
 
