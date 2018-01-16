@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from capstone import *
 from idaapi import *
+from idc import *
 
 
 # Custom group to extend Capstone's
@@ -48,10 +49,13 @@ def parse_operands(s):
 
 class Processor(processor_t):
 
-    def __init__(self, md):
+    def __init__(self, md, thumb_md=None):
         super().__init__()
         md.detail = True
         self.md = md
+        if thumb_md:
+            thumb_md.detail = True
+        self.thumb_md = thumb_md
 
     # TODO: factor out
     def outop(self, op):
@@ -95,9 +99,14 @@ class Processor(processor_t):
     def ana(self):
         ea = self.cmd.ea
         #print("ana: %x" % ea)
+        md = self.md
+        if self.thumb_md:
+            if GetReg(ea, "T"):
+                md = self.thumb_md
+                ea &= ~1
         while True:
             data = get_bytes(ea, 16)
-            res = list(self.md.disasm(bytes(data), ea, count=1))
+            res = list(md.disasm(bytes(data), ea, count=1))
             if res:
                 break
             #assert False, "Cannot disasm @0x%x" % ea
@@ -142,6 +151,8 @@ class Processor(processor_t):
         return self.cmd.size
 
     def emu(self):
+        ea = self.cmd.ea
+        is_thumb = GetReg(ea, "T")
         inst = self.cmd.inst
         is_jump = CS_GRP_JUMP in self.cmd.inst_groups
         is_jump_uncond = CS_GRP_JUMP_UNCOND in self.cmd.inst_groups
@@ -154,12 +165,28 @@ class Processor(processor_t):
                 break
             elif op.type == o_near:
                 if is_call:
-                    ua_add_cref(0, op.addr, fl_CN)
+                    if inst.mnemonic == "blx" and self.thumb_md:
+                        if is_thumb:
+                            # Calling into ARM
+                            assert GetReg(op.addr, "T") == 0
+                        else:
+                            # Calling into Thumb
+                            SetReg(op.addr, "T", 1)
+                        ua_add_cref(0, op.addr, fl_CN)
+                    else:
+                        if is_thumb:
+                            SetReg(op.addr, "T", 1)
+                        ua_add_cref(0, op.addr, fl_CN)
                 else:
+                    if is_thumb:
+                        SetReg(op.addr, "T", 1)
                     ua_add_cref(0, op.addr, fl_JN)
 
         if not is_jump_uncond and not is_ret:
-            ua_add_cref(0, self.cmd.ea + self.cmd.size, fl_F)
+            next_addr = ea + self.cmd.size
+            if is_thumb:
+                SetReg(next_addr, "T", 1)
+            ua_add_cref(0, next_addr, fl_F)
 
         return True
 
