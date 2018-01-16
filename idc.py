@@ -14,11 +14,20 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import logging as log
+
 from scratchabit import engine
 import idaapi
 
 
 SEGATTR_PERM = 1
+
+
+def GetReg(ea, reg):
+    assert reg == "T"
+    if engine.ADDRESS_SPACE.get_flags(ea, engine.AddressSpace.ALT_CODE):
+        return 1
+    return 0
 
 
 def GetSegmentAttr(ea, attr):
@@ -37,3 +46,14 @@ def GetSegmentAttr(ea, attr):
 # Make filler
 def MakeAlign(ea, cnt, align):
     engine.ADDRESS_SPACE.make_filler(ea, cnt)
+
+
+def SetReg(ea, reg, val):
+    assert reg == "T"
+    try:
+        if val:
+            engine.ADDRESS_SPACE.update_flags(ea, 0xff, engine.AddressSpace.ALT_CODE)
+        else:
+            engine.ADDRESS_SPACE.update_flags(ea, ~engine.AddressSpace.ALT_CODE, 0)
+    except engine.InvalidAddrException:
+        log.exception("")
