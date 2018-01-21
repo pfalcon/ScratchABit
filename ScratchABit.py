@@ -1029,6 +1029,8 @@ if __name__ == "__main__":
     else:
         if ENTRYPOINTS:
             show_addr = ENTRYPOINTS[0][1]
+            if engine.arch_id == "arm_32":
+                 show_addr &= ~1
         else:
             show_addr = engine.ADDRESS_SPACE.min_addr()
 
