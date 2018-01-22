@@ -1401,7 +1401,9 @@ def flag2char(f):
         return "."
     elif f == AddressSpace.CODE:
         return "C"
-    elif f == AddressSpace.CODE | AddressSpace.FUNC:
+    elif f == AddressSpace.CODE | AddressSpace.ALT_CODE:
+        return "T"
+    elif f & ~AddressSpace.ALT_CODE == AddressSpace.CODE | AddressSpace.FUNC:
         return "F"
     elif f == AddressSpace.CODE_CONT:
         return "c"
