@@ -405,6 +405,14 @@ class DisasmViewer(editor.EditorExt):
             engine.analyze(self.analyze_status)
             self.update_model()
 
+        elif key == b"C":
+            addr = self.cur_addr()
+            self.show_status("Analyzing at %x" % addr)
+            self.model.AS.make_alt_code(addr)
+            engine.add_entrypoint(addr, False)
+            engine.analyze(self.analyze_status)
+            self.update_model()
+
         elif key == b"F":
             addr = self.cur_addr()
             fl = self.model.AS.get_flags(addr, 0xff)
@@ -877,7 +885,10 @@ class MainScreen:
             ("Next non-function code (Ctrl+f)", b"\x06"),
         ])
         menu_edit = WMenuBox([
-            ("Undefined (u)", b"u"), ("Code (c)", b"c"), ("Data (d)", b"d"),
+            ("Undefined (u)", b"u"),
+            ("Code (c)", b"c"),
+            ("Alt code (Shift+c)", b"C"),
+            ("Data (d)", b"d"),
             ("ASCII String (a)", b"a"), ("Filler (f)", b"f"), ("Make label (n)", b"n"),
             ("Mark function start (F)", b"F"), ("Add code to function", MENU_ADD_TO_FUNC),
             ("Number/Address (o)", b"o"), ("Hex/dec (h)", b"h"),
