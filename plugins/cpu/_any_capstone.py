@@ -14,6 +14,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+"""Capstone plugin meta-module for ScratchABit."""
+# Note that this module itself is not a plugin. Use files without
+# leading underscore instead.
+
 from capstone import *
 from idaapi import *
 from idc import *
