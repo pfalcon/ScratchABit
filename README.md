@@ -50,13 +50,13 @@ Clone the code using:
     git clone --recursive https://github.com/pfalcon/ScratchABit
 
 If you cloned code without `--recursive`, run `git submodule update --init`
-in ScratchABit directory.
+in the ScratchABit directory.
 
 ScratchABit now ships with [Capstone Engine](http://www.capstone-engine.org/)
-based CPU plugin(s), which allows access to a number of CPU architectures.
-To use it, a recent Python bindings for Capstone should be installed
+based CPU plugin(s), which allow access to a number of CPU architectures.
+To use it, recent Python bindings module for Capstone should be installed
 (in the preference to packages shipped by OS distributions, which are often
-outdated). The easiest way to install it into the Python user packages
+outdated). The easiest way to install it is into the Python user packages
 directory:
 
     pip3 install --no-cache-dir --user capstone
@@ -71,8 +71,10 @@ the ScratchABit directory:
 
 Whenever you open a new terminal session to work with ScratchABit,
 run `source .venv/bin/activate` command again to activate the virtual
-environment. An alternative to using venv and activating it every time
-is to install the capstone package system-wide:
+environment.
+
+If nothing of the above works, you can try to install the capstone
+package system-wide (not recommended):
 
     sudo pip3 install --system capstone
 
@@ -92,26 +94,26 @@ to create a .def (definition) file, to specify what memory areas are
 defined for the code, at which address to load binary file, etc. (Note:
 a .def file may be useful for .elf and similar files too.) The repository
 includes a simple x86_64 raw binary code, and the corresponding
-[example-x86_64.def](example-x86_64.def) file (looks inside for
+[example-x86_64.def](example-x86_64.def) file (look inside for
 description of available options):
 
     python3 ScratchABit.py example-x86_64.def
 
 Press F9 to access menus (mouse works too in XTerm-compatible terminals).
 Press F1 to get help about key bindings (most actions are also accessible
-via menu). The workflow of the ScratchABit is similar to other interactive
-dissamblers; some previous experience or background reading may be helpful).
+via menu). The workflow of ScratchABit is similar to other interactive
+dissamblers (some previous experience or background reading may be helpful).
 
 Using Plugins
 -------------
 
 IDAPython processor plugins can be loaded from anywhere on the Python
-module path. Alternatively, you can symlink the plugin `.py` file into
-the `plugins/cpu/` subdirectory.
+module path. Alternatively, you can symlink/copy the plugin `.py` file(s)
+into the [`plugins/cpu/`](plugins/cpu/) subdirectory.
 
 After the plugin is made available, create a new definition file based
-on `example-x86_64.def` that sets the plugin module name in the `cpu xxx`
-line.
+on [`example-x86_64.def`](example-x86_64.def#L4) that sets the plugin module
+name (without `.py` extenstion) in the `cpu xxx` line.
 
 For a very simple example that uses an external plugin, see this
 [esp8266.def file](https://gist.github.com/projectgus/f898d5798e3e44240796)
@@ -149,14 +151,17 @@ FAQ
 A: ScratchABit doesn't support any processor architectures on its own,
 it is fully retargettable using IDAPython API plugins. Many plugins are
 available, writing a new plugin is easy. To let users test-drive
-ScratchABit, a simple X86 processor plugin is included in the
+ScratchABit, a simple x86 processor plugin is included in the
 distribution, using [Pymsasid](https://github.com/pfalcon/pymsasid3)
 disassembler under the hood.
 
-From version 1.9, [Capstone](http://www.capstone-engine.org/) plugin
+From version 2.0, [Capstone](http://www.capstone-engine.org/) plugin
 is also included, allowing access to a number of architectures,
 including x86, ARM, MIPS, PowerPC, SPARC, etc. (architecture support
 is enabled gradually based on user testing).
+
+You can read about the plugins shipped together with ScratchABit in
+the [README for `plugins/cpu/` dir](plugins/cpu/).
 
 > Q: Debugger?
 
