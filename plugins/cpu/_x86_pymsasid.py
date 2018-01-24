@@ -1,6 +1,6 @@
 # ScratchABit - interactive disassembler
 #
-# Copyright (c) 2015 Paul Sokolovsky
+# Copyright (c) 2015-2018 Paul Sokolovsky
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +14,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+"""Pymsasid3 plugin meta-module for ScratchABit."""
+# Note that this module itself is not a plugin. Use files without
+# leading underscore instead.
+
 from idaapi import *
 from pymsasid3 import pymsasid
 

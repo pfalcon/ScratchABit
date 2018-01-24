@@ -1,6 +1,6 @@
 # ScratchABit - interactive disassembler
 #
-# Copyright (c) 2015 Paul Sokolovsky
+# Copyright (c) 2015-2018 Paul Sokolovsky
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import x86_pymsasid
+import _x86_pymsasid
 
 def PROCESSOR_ENTRY():
-    return x86_pymsasid.X86Processor(bitness=64)
+    return _x86_pymsasid.X86Processor(bitness=64)
