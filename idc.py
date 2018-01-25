@@ -57,3 +57,28 @@ def SetReg(ea, reg, val):
             engine.ADDRESS_SPACE.update_flags(ea, ~engine.AddressSpace.ALT_CODE, 0)
     except engine.InvalidAddrException:
         log.exception("")
+
+
+def SetRegEx(ea, reg, val, tag):
+    # tag is ignored
+    SetReg(ea, reg, val)
+
+
+def MakeComm(ea, comment):
+    engine.ADDRESS_SPACE.set_comment(ea, comment)
+
+
+def MakeFunction(ea, end=idaapi.BADADDR):
+    # Exported *.idc have 0xffffffff as apparent BADADDR
+    if end == 0xffffffff:
+        end = idaapi.BADADDR
+    engine.add_entrypoint(ea, True)
+    if end != idaapi.BADADDR:
+        # TODO: Actually handle function bounds ea-end
+        assert False
+
+
+def MakeNameEx(ea, name, flags):
+    # TODO: use the flags
+    # TODO: name "" deletes label
+    engine.ADDRESS_SPACE.set_label(ea, name)
