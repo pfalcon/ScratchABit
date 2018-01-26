@@ -20,6 +20,7 @@
 # leading underscore instead.
 
 from capstone import *
+from capstone import arm
 from idaapi import *
 from idc import *
 
@@ -88,6 +89,9 @@ class Processor(processor_t):
         # https://github.com/aquynh/capstone/issues/1072
         groups = set(inst.groups)
         if 1: #ARM
+            dest = None
+            if len(inst.operands) > 0:
+                dest = inst.operands[0]
             if inst.mnemonic in ("bl", "blx"):
                 groups.add(CS_GRP_CALL)
             elif inst.mnemonic in ("b", "bx"):
@@ -95,6 +99,9 @@ class Processor(processor_t):
             elif inst.mnemonic.startswith(("ldmia", "pop")) and "pc" in inst.op_str:
                 # LDMIA aka POP on ARM can be used for return
                 groups.add(CS_GRP_RET)
+            elif dest and dest.type == CS_OP_REG and dest.value.reg == arm.ARM_REG_PC:
+                #print(hex(inst.address), inst.mnemonic, inst.op_str, dest.value.reg, inst.reg_name(dest.value.reg))
+                groups.add(CS_GRP_JUMP_UNCOND)
         if 2: # x86
             if inst.mnemonic == "jmp":
                 groups.add(CS_GRP_JUMP_UNCOND)
