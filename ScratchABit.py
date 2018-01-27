@@ -1028,9 +1028,10 @@ if __name__ == "__main__":
     if args.script:
         for script in args.script:
             call_script(script)
-        if args.save:
-            saveload.save_state(project_dir)
-            sys.exit()
+
+    if args.save:
+        saveload.save_state(project_dir)
+        sys.exit()
 
     addr_stack = []
     if os.path.exists(project_dir + "/session.addr_stack"):
