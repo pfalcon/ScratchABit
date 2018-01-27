@@ -945,11 +945,14 @@ class MainScreen:
                     return res
 
 
-def call_script(script):
+def call_script(script, progress_func=None):
     mod = __import__(script)
     main_f = getattr(mod, "main", None)
     if main_f:
         main_f(APP)
+    # A script might have queues some entrypoints, etc.
+    # Analyze them now.
+    engine.analyze(progress_func)
 
 
 if __name__ == "__main__":
@@ -1026,8 +1029,10 @@ if __name__ == "__main__":
     #engine.print_address_map()
 
     if args.script:
+        def _progress(cnt):
+            sys.stdout.write("Performing analysis after running script(s)... %d\r" % cnt)
         for script in args.script:
-            call_script(script)
+            call_script(script, _progress)
 
     if args.save:
         saveload.save_state(project_dir)
