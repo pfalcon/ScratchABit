@@ -682,7 +682,7 @@ class AddressSpace:
                 area_i += 1
                 while addr > areas[area_i][END]:
                     area_i += 1
-                assert addr >= areas[area_i][START]
+                assert addr >= areas[area_i][START], "%x vs %x" % (addr, areas[area_i][START])
                 stream = open(prefix + ".%08x" % areas[area_i][START], "w")
                 #stream.write("addr=%x area_end=%x\n" % (addr, area_end))
                 area_end = areas[area_i][END]
