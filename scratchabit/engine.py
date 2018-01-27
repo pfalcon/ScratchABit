@@ -680,8 +680,13 @@ class AddressSpace:
             if addr > area_end:
                 stream.close()
                 area_i += 1
-                while addr > areas[area_i][END]:
-                    area_i += 1
+                try:
+                    while addr < areas[area_i][START]:
+                        area_i += 1
+                    while addr > areas[area_i][END]:
+                        area_i += 1
+                except IndexError:
+                    return
                 assert addr >= areas[area_i][START], "%x vs %x" % (addr, areas[area_i][START])
                 stream = open(prefix + ".%08x" % areas[area_i][START], "w")
                 #stream.write("addr=%x area_end=%x\n" % (addr, area_end))
