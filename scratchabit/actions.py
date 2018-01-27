@@ -23,7 +23,7 @@ class TextSaveModel:
                 return
         line = ("%08x " % addr) + line.indent + txt + "\n"
         self.f.write(line)
-        if self.ctrl and self.cnt % 256 == 0:
+        if self.ctrl and self.cnt % 4096 == 0:
             self.ctrl.show_status("Writing: 0x%x" % addr)
         self.cnt += 1
 
