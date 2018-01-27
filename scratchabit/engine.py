@@ -884,8 +884,12 @@ def finish_func(f):
         if end is not None:
             ADDRESS_SPACE.set_func_end(f, end)
 
-def analyze(callback=lambda cnt:None):
+def analyze(callback=None):
     global analysis_current_func
+
+    if callback is None:
+        callback = lambda cnt: None
+
     cnt = 0
     limit = 1000000
     analysis_current_func = None
