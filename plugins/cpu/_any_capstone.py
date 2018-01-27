@@ -55,13 +55,14 @@ def parse_operands(s):
 
 class Processor(processor_t):
 
-    def __init__(self, md, thumb_md=None):
+    def __init__(self, md, thumb_md=None, bitness=32):
         super().__init__()
         md.detail = True
         self.md = md
         if thumb_md:
             thumb_md.detail = True
         self.thumb_md = thumb_md
+        self.addr_mask = (1 << bitness) - 1
 
     # TODO: factor out
     def outop(self, op):
@@ -146,7 +147,9 @@ class Processor(processor_t):
             elif op.type == CS_OP_IMM:
                 if is_jumpcall:
                     self.cmd[i].type = o_near
-                    self.cmd[i].addr = op.value.imm
+                    # Capstone returns addresses with high bit set as negative,
+                    # https://github.com/aquynh/capstone/issues/1081
+                    self.cmd[i].addr = op.value.imm & self.addr_mask
                 else:
                     self.cmd[i].type = o_imm
                     self.cmd[i].value = op.value.imm
