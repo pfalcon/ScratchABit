@@ -60,8 +60,12 @@ def SetReg(ea, reg, val):
 
 
 def SetRegEx(ea, reg, val, tag):
-    # tag is ignored
     SetReg(ea, reg, val)
+
+    # tag == 2 seems to be set in IDC exports. Abuse that to have
+    # more code entrypoints.
+    if tag == 2:
+        engine.add_entrypoint(ea, False)
 
 
 def MakeComm(ea, comment):
