@@ -95,7 +95,7 @@ class Processor(processor_t):
                 dest = inst.operands[0]
             if inst.mnemonic in ("bl", "blx"):
                 groups.add(CS_GRP_CALL)
-            elif inst.mnemonic in ("b", "bx"):
+            elif inst.mnemonic in ("b", "b.w", "bx"):
                 groups.add(CS_GRP_JUMP_UNCOND)
             elif inst.mnemonic.startswith(("ldmia", "pop")) and "pc" in inst.op_str:
                 # LDMIA aka POP on ARM can be used for return
