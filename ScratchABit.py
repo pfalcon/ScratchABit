@@ -545,9 +545,12 @@ class DisasmViewer(editor.EditorExt):
             self.redraw()
         elif key == b"S":
             self.show_status("Saving...")
+            timer = time.time()
             saveload.save_state(project_dir)
+            timer = time.time() - timer
+            log.info("Saved database in %fs", timer)
             self.model.AS.changed = False
-            self.show_status("Saved.")
+            self.show_status("Saved in %fs" % timer)
         elif key == b"\x11":  # ^Q
             class IssueList(WListBox):
                 def render_line(self, l):
