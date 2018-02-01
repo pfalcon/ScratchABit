@@ -785,7 +785,7 @@ def parse_entrypoints(f):
             load_symbols(m.group(1))
         else:
             label, addr = [v.strip() for v in l.split("=")]
-            ENTRYPOINTS.append((label, int(addr, 0)))
+            ENTRYPOINTS.append((label, str2int(addr)))
     return ""
 
 def parse_subareas(f):
@@ -842,7 +842,7 @@ def parse_disasm_def(fname):
             if l.startswith("load"):
                 args = l.split()
                 if args[2][0] in string.digits:
-                    addr = int(args[2], 0)
+                    addr = str2int(args[2])
                     print("Loading %s @0x%x" % (args[1], addr))
                     engine.ADDRESS_SPACE.load_content(open(args[1], "rb"), addr)
                 else:
