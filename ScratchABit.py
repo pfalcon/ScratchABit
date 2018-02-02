@@ -898,6 +898,7 @@ class MainScreen:
         ])
         menu_analysis = WMenuBox([
             ("Info (whereami) (i)", b"i"), ("Memory map (Shift+i)", b"I"),
+            ("Issue list (Ctrl+q)", b"\x11"),
             ("Run plugin...", MENU_PLUGIN),
             ("Preferences...", MENU_PREFS),
         ])
