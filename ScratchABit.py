@@ -964,7 +964,7 @@ if __name__ == "__main__":
     argp = argparse.ArgumentParser(description="ScratchABit interactive disassembler")
     argp.add_argument("file", help="Input file (binary or disassembly .def)")
     argp.add_argument("--script", action="append", help="Run script from file after loading environment")
-    argp.add_argument("--save", action="store_true", help="Save after --script and quit; don't show UI")
+    argp.add_argument("--save", action="store_true", help="Save DB after --script and quit; don't show UI")
     args = argp.parse_args()
 
     # Plugin dirs are relative to the dir where scratchabit.py resides.
