@@ -24,4 +24,4 @@ dis_arm = capstone.Cs(capstone.CS_ARCH_ARM, capstone.CS_MODE_ARM)
 dis_thumb = capstone.Cs(capstone.CS_ARCH_ARM, capstone.CS_MODE_THUMB)
 
 def PROCESSOR_ENTRY():
-    return _any_capstone.Processor(dis_arm, dis_thumb)
+    return _any_capstone.Processor("arm_32", dis_arm, dis_thumb)

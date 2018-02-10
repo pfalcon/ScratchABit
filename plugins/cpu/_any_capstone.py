@@ -55,8 +55,9 @@ def parse_operands(s):
 
 class Processor(processor_t):
 
-    def __init__(self, md, thumb_md=None, bitness=32):
+    def __init__(self, arch_id, md, thumb_md=None, bitness=32):
         super().__init__()
+        self.arch_id = arch_id
         md.detail = True
         self.md = md
         if thumb_md:
@@ -84,12 +85,11 @@ class Processor(processor_t):
         return True
 
 
-    @staticmethod
-    def patch_capstone_groups(inst):
+    def patch_capstone_groups(self, inst):
         # Workarounds for Capstone under-classifying instructions:
         # https://github.com/aquynh/capstone/issues/1072
         groups = set(inst.groups)
-        if 1: #ARM
+        if self.arch_id == "arm_32":
             dest = None
             if len(inst.operands) > 0:
                 dest = inst.operands[0]
@@ -103,7 +103,7 @@ class Processor(processor_t):
             elif dest and dest.type == CS_OP_REG and dest.value.reg == arm.ARM_REG_PC:
                 #print(hex(inst.address), inst.mnemonic, inst.op_str, dest.value.reg, inst.reg_name(dest.value.reg))
                 groups.add(CS_GRP_JUMP_UNCOND)
-        if 2: # x86
+        elif self.arch_id.startswith("x86_"):
             if inst.mnemonic == "jmp":
                 groups.add(CS_GRP_JUMP_UNCOND)
         return groups

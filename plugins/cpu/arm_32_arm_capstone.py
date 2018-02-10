@@ -21,4 +21,4 @@ import _any_capstone
 dis = capstone.Cs(capstone.CS_ARCH_ARM, capstone.CS_MODE_ARM)
 
 def PROCESSOR_ENTRY():
-    return _any_capstone.Processor(dis)
+    return _any_capstone.Processor("arm_32", dis)
