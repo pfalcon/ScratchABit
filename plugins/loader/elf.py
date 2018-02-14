@@ -21,6 +21,7 @@ MACH_MAP = {
     "EM_X86_64": "x86",
     "EM_XTENSA": "xtensa",
     "EM_ARM": "arm",
+    "EM_PPC": "ppc"
 }
 
 RELOC_TYPES = {}
@@ -54,6 +55,10 @@ def detect(fname):
         variant = 64
     else:
         assert 0, "Unknown ELF bitness: %s" % elffile["e_ident"]["EI_CLASS"]
+
+    if elffile["e_machine"] == "EM_PPC":
+        endian = "le" if elffile.little_endian else "be"
+        return "%s_%s_%s" % (MACH_MAP[elffile["e_machine"]], variant, endian)
 
     return "%s_%s" % (MACH_MAP[elffile["e_machine"]], variant)
 

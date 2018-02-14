@@ -103,6 +103,15 @@ class Processor(processor_t):
             elif dest and dest.type == CS_OP_REG and dest.value.reg == arm.ARM_REG_PC:
                 #print(hex(inst.address), inst.mnemonic, inst.op_str, dest.value.reg, inst.reg_name(dest.value.reg))
                 groups.add(CS_GRP_JUMP_UNCOND)
+        elif self.arch_id.startswith("ppc"):
+            if inst.mnemonic == "b":
+                groups.add(CS_GRP_JUMP_UNCOND)
+            elif inst.mnemonic == "bl":
+                groups.add(CS_GRP_CALL)
+            elif inst.mnemonic == "blr":
+                groups.add(CS_GRP_RET)
+            elif inst.mnemonic.startswith("b"): # b[cond], bctr, bdnz etc.
+                groups.add(CS_GRP_JUMP)
         elif self.arch_id.startswith("x86_"):
             if inst.mnemonic == "jmp":
                 groups.add(CS_GRP_JUMP_UNCOND)
