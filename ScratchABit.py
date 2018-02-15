@@ -254,9 +254,9 @@ class DisasmViewer(editor.EditorExt):
 
     def show_exception(self, e):
         log.exception("Exception processing user command")
-        L = 5
+        L = 3
         T = 2
-        W = 70
+        W = 74
         H = 20
         self.dialog_box(L, T, W, H)
         v = Viewer(L + 1, T + 1, W - 2, H - 2)
