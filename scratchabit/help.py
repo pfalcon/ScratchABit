@@ -31,6 +31,7 @@ Current address commands:
 
 u - Undefine
 c - Make code
+Shift+c - Make alt code (e.g. Thumb mode for ARM)
 d - Make/Cycle data
 a - Make ASCII string
 f - Make filler (ignored bytes, to avoid leaving them undefined)
