@@ -974,7 +974,7 @@ if __name__ == "__main__":
     for d in plugin_dirs:
         sys.path.append(os.path.join(sys.path[0], d))
     log.basicConfig(filename="scratchabit.log", format='%(asctime)s %(message)s', level=log.DEBUG)
-    log.info("Started")
+    log.info("=" * 30 + " Started " + "=" * 30)
 
     if args.file.endswith(".def"):
         parse_disasm_def(args.file)
