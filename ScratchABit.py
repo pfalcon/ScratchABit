@@ -1055,6 +1055,8 @@ if __name__ == "__main__":
         else:
             show_addr = engine.ADDRESS_SPACE.min_addr()
 
+    log.info("Starting UI")
+
     t = time.time()
     #_model = engine.render()
     _model = engine.render_partial_around(show_addr, 0, HEIGHT * 2)
