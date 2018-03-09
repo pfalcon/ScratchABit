@@ -806,8 +806,10 @@ def parse_subareas(f):
 
 
 def load_target_file(loader, fname):
+    print("Loading %s..." % fname)
+    timer = time.time()
     entry = loader.load(engine.ADDRESS_SPACE, fname)
-    log.info("Loaded %s, entrypoint: %s", fname, hex(entry) if entry is not None else None)
+    log.info("Loaded %s in %fs, entrypoint: %s", fname, time.time() - timer, hex(entry) if entry is not None else None)
     if entry is not None:
         ENTRYPOINTS.append(("_ENTRY_", entry))
 
