@@ -1018,8 +1018,11 @@ if __name__ == "__main__":
     project_dir = project_name + ".scratchabit"
 
     if saveload.save_exists(project_dir):
+        timer = time.time()
         saveload.load_state(project_dir)
+        log.info("Loaded database in %fs", time.time() - timer)
     else:
+        timer = time.time()
         for label, addr in ENTRYPOINTS:
             if engine.arch_id == "arm_32" and addr & 1:
                 addr &= ~1
@@ -1030,6 +1033,7 @@ if __name__ == "__main__":
         def _progress(cnt):
             sys.stdout.write("Performing initial analysis... %d\r" % cnt)
         engine.analyze(_progress)
+        log.info("Performed initial analysis in %fs", time.time() - timer)
         print()
 
     #engine.print_address_map()
