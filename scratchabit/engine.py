@@ -129,7 +129,7 @@ class AddressSpace:
     # Memory Area API
 
     def add_area(self, start, end, props):
-        log.debug("add_area(%x, %x, %s)", start, end, props)
+        log.debug("add_area(%08x, %08x, %s)", start, end, props)
         sz = end - start + 1
         bytes = bytearray(sz)
         flags = bytearray(sz)
