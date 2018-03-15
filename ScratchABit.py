@@ -1049,11 +1049,13 @@ if __name__ == "__main__":
         sys.exit()
 
     addr_stack = []
+    show_addr = None
     if os.path.exists(project_dir + "/session.addr_stack"):
         addr_stack = saveload.load_addr_stack(project_dir)
-        print(addr_stack)
-        show_addr = addr_stack.pop()
-    else:
+        if addr_stack:
+            show_addr = addr_stack.pop()
+            log.info("Loaded saved address stack, last address: 0x%x", show_addr)
+    if show_addr is None:
         if ENTRYPOINTS:
             show_addr = ENTRYPOINTS[0][1]
             if engine.arch_id == "arm_32":
