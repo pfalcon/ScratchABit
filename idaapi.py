@@ -38,7 +38,7 @@ o_void = "-"
 o_imm = "o_imm"
 o_reg = "o_reg"
 # Location in memory. Should be used only if instruction guaranteedly
-# access memory at the given address of the given size (direct addressing
+# accesses memory at the given address of the given size (direct addressing
 # mode). Should not be mixed up with o_imm of offset subtype.
 o_mem = "o_mem"
 o_near = "o_near"
