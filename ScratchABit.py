@@ -587,8 +587,7 @@ class DisasmViewer(editor.EditorExt):
             self.redraw()
         elif key == b"W":
             out_fname = "out.lst"
-            with open(out_fname, "w") as f:
-                engine.render_partial(actions.TextSaveModel(f, self), 0, 0, 10000000)
+            actions.write_disasm_all(APP, out_fname, feedback_obj=self)
             self.show_status("Disassembly listing written: " + out_fname)
         elif key == MENU_WRITE_ALL_HTML:
             out_fname = "out.html"

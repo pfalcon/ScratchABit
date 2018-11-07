@@ -101,6 +101,12 @@ def write_func_by_addr(APP, addr, prefix="", feedback_obj=None):
         return outfile
 
 
+def write_disasm_all(APP, filename, feedback_obj=None):
+    "Save entire disassembly listing to a file."
+    with open(filename, "w") as f:
+        engine.render_partial(TextSaveModel(f, feedback_obj), 0, 0, 10000000)
+
+
 def add_code_to_func(APP, addr):
     AS = APP.aspace
     fl = AS.get_flags(addr, 0xff)
