@@ -16,6 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
+if sys.version_info < (3, 0):
+    sys.stderr.write("""\
+ERROR: ScratchABit requires Python 3.3 or higher. You are running it with
+following Python version:
+---
+%s
+---
+Try running it as 'python3 %s' and/or install suitable version.
+
+""" % (sys.version, sys.argv[0]))
+    sys.exit(1)
+
 import os
 import os.path
 import time
