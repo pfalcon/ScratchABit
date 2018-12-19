@@ -1,6 +1,6 @@
 # ScratchABit - interactive disassembler
 #
-# Copyright (c) 2015 Paul Sokolovsky
+# Copyright (c) 2015-2018 Paul Sokolovsky
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
