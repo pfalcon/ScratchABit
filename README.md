@@ -41,9 +41,10 @@ systems.
 Installation
 ------------
 
-To use ScratchABit, you need Python3 installed and VT100 (minimum) or
-XTerm (recommended) terminal or terminal emulator (any Unix system
-should be compliant, like Linux/BSD/etc., see FAQ below for more).
+To use ScratchABit, you need [Python3](https://www.python.org/) installed
+(tested with Python 3.3 thru 3.7) and VT100 (minimum) or XTerm (recommended)
+terminal or terminal emulator (any Unix system should be compliant, like
+Linux/BSD/etc., see FAQ below for more).
 
 Clone the code using:
 
