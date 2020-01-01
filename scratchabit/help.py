@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 HELP = """\
+
+      Welcome to ScratchABit interactive disassembler!
+
 Global commands ("letter" commands are case-sensitive, e.g. Shift+a
 is actually "capital A", so make sure Caps Lock is right):
 
