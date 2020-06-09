@@ -19,7 +19,7 @@ HELP = """\
       Welcome to ScratchABit interactive disassembler!
 
 Global commands ("letter" commands are case-sensitive, e.g. Shift+a
-is actually "capital A", so make sure Caps Lock is right):
+is actually "capital A", so make sure Caps Lock is not pressed):
 
 g - Goto address
 Esc - Return to address from previous Enter cmd (as stack)
