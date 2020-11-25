@@ -2,7 +2,7 @@ import bisect
 
 from picotui.editorext import EditorExt, CharColorViewer
 # Keys and colors
-from picotui.screen import *
+from picotui.defs import *
 from . import engine
 
 
