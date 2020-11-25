@@ -329,7 +329,7 @@ class DisasmViewer(editor.EditorExt):
         self.redraw()
 
         if res == ACTION_OK:
-            value = entry.get_text()
+            value = entry.get()
             if '0' <= value[0] <= '9':
                 addr = int(value, 0)
             else:
